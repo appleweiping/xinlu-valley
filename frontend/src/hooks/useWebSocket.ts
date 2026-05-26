@@ -25,7 +25,9 @@ export function useWebSocket() {
           if (data.type === 'init' || data.type === 'tick') {
             setState(data.state as TownState);
           }
-        } catch {}
+        } catch (e) {
+          console.warn('[ws] parse error:', e);
+        }
       };
 
       ws.onclose = () => {

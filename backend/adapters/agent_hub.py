@@ -23,8 +23,8 @@ class AgentHubAdapter:
                 resp = await client.get(f"{AGENT_HUB_URL}/context")
                 if resp.status_code == 200:
                     self._cache["context"] = resp.json()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[agent_hub] refresh error: {e}")
 
     def get_agent_status(self) -> dict[str, str]:
         status = self._cache.get("status", {})

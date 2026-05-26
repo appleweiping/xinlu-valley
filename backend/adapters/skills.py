@@ -38,8 +38,8 @@ class SkillAdapter:
 
             self._cache["categories"] = categories
             self._cache["total_count"] = skill_count
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[skills] refresh error: {e}")
 
     def get_categories(self) -> list[dict]:
         return self._cache.get("categories", [])

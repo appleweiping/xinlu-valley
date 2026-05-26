@@ -6,7 +6,7 @@ import type { TownAgent, TownBuilding } from '../../types';
 export class TownScene extends Phaser.Scene {
   private agentSprites: Map<string, Phaser.GameObjects.Container> = new Map();
   private zoneGraphics: Map<string, Phaser.GameObjects.Rectangle> = new Map();
-  private lastState: any = null;
+  private syncTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
     super({ key: 'TownScene' });
@@ -18,11 +18,17 @@ export class TownScene extends Phaser.Scene {
     this.setupCamera();
     this.setupInput();
 
-    this.time.addEvent({
+    this.syncTimer = this.time.addEvent({
       delay: 200,
       loop: true,
       callback: () => this.syncState(),
     });
+  }
+
+  shutdown() {
+    this.syncTimer?.destroy();
+    this.agentSprites.clear();
+    this.zoneGraphics.clear();
   }
 
   private drawMap() {

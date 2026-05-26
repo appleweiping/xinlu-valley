@@ -33,8 +33,8 @@ class KnowledgeAdapter:
             if memory_dir.exists():
                 memory_files = list(memory_dir.rglob("*.md"))
                 self._cache["memory_count"] = len(memory_files)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[knowledge] refresh error: {e}")
 
     def get_overview(self) -> dict:
         return {

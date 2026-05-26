@@ -45,8 +45,8 @@ class AgentMemoryAdapter:
                         "SELECT * FROM lessons ORDER BY rowid DESC LIMIT 10"
                     )
                     self._cache["lessons"] = [dict(row) for row in await cursor.fetchall()]
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[agentmemory] refresh error: {e}")
 
     def get_recent_sessions(self) -> list[dict]:
         return self._cache.get("sessions", [])

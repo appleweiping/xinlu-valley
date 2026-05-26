@@ -28,8 +28,8 @@ class SharedMemoryAdapter:
             index_path = SHARED_MEMORY_DIR / "INDEX.md"
             if index_path.exists():
                 self._cache["index"] = index_path.read_text(encoding="utf-8")[:2000]
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[shared_memory] refresh error: {e}")
 
     def _read_dir(self, subdir: str) -> list[dict]:
         dir_path = SHARED_MEMORY_DIR / subdir
