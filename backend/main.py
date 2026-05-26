@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent / ".env")
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -73,9 +73,15 @@ async def lifespan(app: FastAPI):
     await init_db()
     task = asyncio.create_task(tick_loop())
     print(f"[AI Town] Engine started, tick every {TICK_INTERVAL_SECONDS}s")
-    yield
-    task.cancel()
-    print("[AI Town] Engine stopped")
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        print("[AI Town] Engine stopped")
 
 
 app = FastAPI(
@@ -124,7 +130,7 @@ async def get_agents():
 async def get_agent(agent_id: str):
     agent = engine.agents.get(agent_id)
     if not agent:
-        return {"error": "not found"}
+        raise HTTPException(status_code=404, detail="agent not found")
     return agent.model_dump()
 
 
@@ -135,7 +141,10 @@ async def get_buildings():
 
 @app.get("/api/town/events")
 async def get_events(limit: int = 30):
-    return [e.model_dump() for e in engine.events[:limit]]
+    safe_limit = max(1, min(limit, 100))
+    if engine.events:
+        return [e.model_dump() for e in engine.events[:safe_limit]]
+    return await get_recent_events(safe_limit)
 
 
 @app.get("/api/town/memory")
@@ -170,7 +179,12 @@ class MoveRequest(BaseModel):
 @app.post("/api/town/player/move")
 async def move_player(req: MoveRequest):
     engine.move_player(req.x, req.y)
-    return {"ok": True}
+    if ws_manager.client_count > 0:
+        await ws_manager.broadcast({
+            "type": "tick",
+            "state": engine.get_state(),
+        })
+    return {"ok": True, "state": engine.get_state()}
 
 
 @app.post("/api/town/tick")

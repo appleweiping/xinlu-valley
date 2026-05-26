@@ -4,25 +4,59 @@
 
 * {
   box-sizing: border-box;
+}
+
+canvas,
+img {
   image-rendering: pixelated;
 }
 
+html,
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  background: #1a1a2e;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(233, 69, 96, 0.14), transparent 28rem),
+    radial-gradient(circle at 80% 100%, rgba(168, 230, 207, 0.12), transparent 30rem),
+    #1a1a2e;
   color: #f8e8d4;
+  overscroll-behavior: none;
 }
 
 .font-pixel {
   font-family: 'Press Start 2P', monospace;
 }
 
+.town-shell {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(168, 230, 207, 0.16), transparent 24rem),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.town-shell canvas {
+  border-radius: 6px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+}
+
 .panel {
-  @apply bg-[#16213e]/90 backdrop-blur-sm border border-[#e94560]/30 rounded-lg p-4;
+  @apply bg-[#16213e]/90 backdrop-blur-sm border border-[#e94560]/30 rounded-lg p-4 shadow-[0_14px_42px_rgba(0,0,0,0.24)];
 }
 
 .panel-title {
-  @apply font-pixel text-xs text-[#e94560] mb-2;
+  @apply font-pixel text-xs text-[#ffd6df] mb-2;
+}
+
+.status-pill {
+  @apply rounded-full border px-2 py-1 text-[11px] font-semibold;
+}
+
+.status-pill-online {
+  @apply border-green-300/30 bg-green-400/10 text-green-300;
+}
+
+.status-pill-offline {
+  @apply border-red-300/30 bg-red-400/10 text-red-300;
 }
 
 ::-webkit-scrollbar {
@@ -34,4 +68,47 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #e94560;
   border-radius: 3px;
+}
+
+@media (max-width: 900px) {
+  .town-header {
+    align-items: flex-start;
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 0.7rem;
+    padding-top: 0.7rem;
+  }
+
+  .town-header-stats {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.8rem;
+  }
+
+  .town-side-panel {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    top: auto;
+    width: min(100%, 22rem);
+    max-height: 62%;
+    border-left: 1px solid rgba(233, 69, 96, 0.2);
+    border-top: 1px solid rgba(233, 69, 96, 0.25);
+    z-index: 20;
+  }
+
+  .town-event-anchor {
+    bottom: 0.75rem;
+    left: 0.75rem;
+    width: min(19rem, calc(100vw - 1.5rem));
+  }
+
+  .town-help {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .town-event-anchor {
+    display: none;
+  }
 }

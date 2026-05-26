@@ -8,17 +8,20 @@ export function TownHeader() {
   const agentCount = state?.agents.length ?? 0;
 
   return (
-    <header className="h-10 flex items-center justify-between px-4 bg-[#0f3460] border-b border-[#e94560]/30">
+    <header className="town-header min-h-12 flex items-center justify-between gap-3 px-4 bg-[#0f3460]/95 border-b border-[#e94560]/30 shadow-[0_8px_28px_rgba(15,52,96,0.28)]">
       <div className="flex items-center gap-3">
-        <span className="font-pixel text-[10px] text-[#e94560]">PIXEL AI TOWN</span>
-        <span className="text-xs text-town-soft/60">v1.0</span>
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded border border-[#e94560]/40 bg-[#1a1a2e]/70 text-sm shadow-inner">🏘️</span>
+        <div>
+          <div className="font-pixel text-[10px] text-[#ffd6df]">PIXEL AI TOWN</div>
+          <div className="text-[10px] text-town-soft/45">live multi-agent simulation</div>
+        </div>
       </div>
-      <div className="flex items-center gap-4 text-xs text-town-soft/80">
+      <div className="town-header-stats flex items-center gap-4 text-xs text-town-soft/80">
         <span>🕐 {timeLabel}</span>
-        <span>👥 {agentCount} agents</span>
+        <span>👥 {agentCount} residents</span>
         <span>⏱ tick #{state?.tick_count ?? 0}</span>
-        <span className={connected ? 'text-green-400' : 'text-red-400'}>
-          {connected ? '● 连接中' : '○ 断开'}
+        <span className={connected ? 'status-pill status-pill-online' : 'status-pill status-pill-offline'}>
+          {connected ? '● live' : '○ offline'}
         </span>
       </div>
     </header>

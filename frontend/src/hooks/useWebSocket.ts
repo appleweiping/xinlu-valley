@@ -8,14 +8,18 @@ export function useWebSocket() {
   const setConnected = useTownStore((s) => s.setConnected);
 
   useEffect(() => {
-    let reconnectTimer: number;
+    let reconnectTimer: number | undefined;
+    let cancelled = false;
 
     function connect() {
+      if (cancelled) return;
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+      const wsUrl = import.meta.env.VITE_WS_URL ?? `${protocol}//${window.location.host}/ws`;
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (cancelled) return;
         setConnected(true);
       };
 
@@ -31,6 +35,7 @@ export function useWebSocket() {
       };
 
       ws.onclose = () => {
+        if (cancelled) return;
         setConnected(false);
         reconnectTimer = window.setTimeout(connect, 3000);
       };
@@ -49,9 +54,11 @@ export function useWebSocket() {
     }, 30000);
 
     return () => {
+      cancelled = true;
       clearInterval(pingInterval);
-      clearTimeout(reconnectTimer);
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       wsRef.current?.close();
+      wsRef.current = null;
     };
   }, [setState, setConnected]);
 }

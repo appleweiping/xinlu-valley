@@ -24,8 +24,6 @@ class TownEngine:
         self.time_of_day = (self.time_of_day + 0.002) % 1.0
 
         for agent in self.agents.values():
-            if agent.id == "player":
-                continue
             events = self._update_agent(agent)
             new_events.extend(events)
 
@@ -42,10 +40,17 @@ class TownEngine:
             if not agent.path:
                 agent.current_activity = ActivityState.IDLE
                 agent.zone = self._get_zone_at(next_pos)
+                agent.target_position = None
                 events.append(self._make_event(
                     agent, "arrived",
                     f"{agent.name} 到达了 {self._zone_name_cn(agent.zone)}"
                 ))
+            return events
+
+        if agent.target_position == agent.position:
+            agent.target_position = None
+
+        if agent.id == "player":
             return events
 
         if random.random() < 0.15:
@@ -78,6 +83,8 @@ class TownEngine:
                 ))
                 agent.current_activity = ActivityState.CHATTING
                 agent.interaction_target = partner.id
+        elif agent.current_activity != ActivityState.CHATTING:
+            agent.interaction_target = None
 
         if random.random() < 0.1:
             agent.mood = random.choice(list(Mood))
@@ -138,15 +145,22 @@ class TownEngine:
         steps = max(abs(tx - x), abs(ty - y))
         if steps == 0:
             return []
-        for i in range(1, min(steps + 1, 12)):
+        for i in range(1, steps + 1):
             nx = x + round((tx - x) * i / steps)
             ny = y + round((ty - y) * i / steps)
             nx = max(0, min(MAP_WIDTH - 1, nx))
             ny = max(0, min(MAP_HEIGHT - 1, ny))
-            path.append((nx, ny))
+            if not path or path[-1] != (nx, ny):
+                path.append((nx, ny))
         return path
 
     def _get_zone_at(self, pos: tuple[int, int]) -> str:
+        for building in self.buildings:
+            bx, by = building.position
+            bw, bh = building.size
+            if bx <= pos[0] < bx + bw and by <= pos[1] < by + bh:
+                return building.zone
+
         best_zone = "plaza"
         best_dist = float("inf")
         for zone, center in ZONE_CENTERS.items():
@@ -208,4 +222,7 @@ class TownEngine:
         if player:
             target = (max(0, min(MAP_WIDTH - 1, x)), max(0, min(MAP_HEIGHT - 1, y)))
             player.path = self._simple_path(player.position, target)
-            player.target_position = target
+            player.target_position = target if player.path else None
+            player.current_activity = ActivityState.WALKING if player.path else ActivityState.IDLE
+            if not player.path:
+                player.zone = self._get_zone_at(player.position)

@@ -9,18 +9,22 @@ export function BuildingPanel() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-pixel text-xs text-[#e94560]">
+        <h2 className="font-pixel text-xs text-[#ffd6df] leading-relaxed">
           {building.icon} {building.name_cn}
         </h2>
         <button
           onClick={() => setShowPanel(null)}
-          className="text-town-soft/50 hover:text-town-soft text-lg"
+          className="rounded px-2 text-town-soft/50 hover:bg-white/10 hover:text-town-soft text-lg"
+          aria-label="关闭建筑面板"
         >
           ×
         </button>
       </div>
 
-      <div className="text-sm text-town-soft/60">{building.name}</div>
+      <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+        <div className="text-sm font-semibold text-town-soft/90">{building.name}</div>
+        <div className="mt-1 text-[11px] text-town-soft/45">town zone</div>
+      </div>
 
       <p className="text-xs text-town-soft/80 leading-relaxed">{building.description}</p>
 
@@ -35,9 +39,9 @@ export function BuildingPanel() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between text-xs">
+    <div className="flex justify-between gap-4 text-xs">
       <span className="text-town-soft/50">{label}</span>
-      <span className="text-town-soft/90">{value}</span>
+      <span className="text-right text-town-soft/90">{value}</span>
     </div>
   );
 }

@@ -1,5 +1,17 @@
 import { useTownStore } from '../../store/townStore';
 
+const ZONE_LABELS: Record<string, string> = {
+  town_hall: '镇政厅',
+  memory_library: '记忆图书馆',
+  skill_workshop: '技能工坊',
+  dream_garden: '梦境花园',
+  devtools_lab: '开发实验室',
+  resource_market: '资源市场',
+  knowledge_tower: '知识塔',
+  agent_homes: '居民住宅',
+  plaza: '中央广场',
+};
+
 const ACTIVITY_LABELS: Record<string, string> = {
   idle: '发呆中',
   walking: '散步中',
@@ -30,21 +42,25 @@ export function AgentPanel() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-pixel text-xs text-[#e94560]">{agent.name}</h2>
+        <h2 className="font-pixel text-xs text-[#ffd6df] leading-relaxed">{agent.name}</h2>
         <button
           onClick={() => setShowPanel(null)}
-          className="text-town-soft/50 hover:text-town-soft text-lg"
+          className="rounded px-2 text-town-soft/50 hover:bg-white/10 hover:text-town-soft text-lg"
+          aria-label="关闭角色面板"
         >
           ×
         </button>
       </div>
 
-      <div className="text-sm text-town-soft/80">{agent.role}</div>
+      <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+        <div className="text-sm font-semibold text-town-soft/90">{agent.role}</div>
+        <div className="mt-1 text-[11px] text-town-soft/45">resident profile</div>
+      </div>
 
       <div className="space-y-2">
         <InfoRow label="状态" value={ACTIVITY_LABELS[agent.current_activity] || agent.current_activity} />
         <InfoRow label="心情" value={MOOD_LABELS[agent.mood] || agent.mood} />
-        <InfoRow label="位置" value={`${agent.zone} (${agent.position[0]}, ${agent.position[1]})`} />
+        <InfoRow label="位置" value={`${ZONE_LABELS[agent.zone] || agent.zone} (${agent.position[0]}, ${agent.position[1]})`} />
         {agent.real_status && <InfoRow label="真实状态" value={agent.real_status} />}
       </div>
 
@@ -58,7 +74,7 @@ export function AgentPanel() {
         <div className="flex flex-wrap gap-1">
           {agent.preferred_zones.map((z) => (
             <span key={z} className="text-[10px] px-2 py-0.5 bg-[#e94560]/20 rounded text-town-soft/80">
-              {z}
+              {ZONE_LABELS[z] || z}
             </span>
           ))}
         </div>
@@ -69,9 +85,9 @@ export function AgentPanel() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between text-xs">
+    <div className="flex justify-between gap-4 text-xs">
       <span className="text-town-soft/50">{label}</span>
-      <span className="text-town-soft/90">{value}</span>
+      <span className="text-right text-town-soft/90">{value}</span>
     </div>
   );
 }

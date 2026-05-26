@@ -58,6 +58,22 @@ npm run dev
 
 Visit http://localhost:5173
 
+### Configuration
+
+The backend reads local infrastructure in read-only mode. Defaults are tuned for this workstation, but every path can be overridden:
+
+| Variable | Purpose |
+|----------|---------|
+| `PORT` | Backend port, default `8000` |
+| `TICK_INTERVAL` | Simulation tick interval in seconds, default `5` |
+| `AGENT_HUB_URL` | Agent Hub status API, default `http://127.0.0.1:9800` |
+| `SHARED_MEMORY_DIR` | Shared memory directory |
+| `SKILL_INDEX_PATH` | Agent resources skill index |
+| `KNOWLEDGE_BASE_DIR` | Knowledgebase root |
+| `VITE_API_PROXY_TARGET` | Dev-server API proxy target, default `http://localhost:8000` |
+| `VITE_WS_PROXY_TARGET` | Dev-server WebSocket proxy target, default `ws://localhost:8000` |
+| `VITE_WS_URL` | Optional browser WebSocket URL override |
+
 ## Project Structure
 
 ```
@@ -91,6 +107,20 @@ Visit http://localhost:5173
 | GET | /api/town/skills | Skill index data |
 | POST | /api/town/player/move | Move player character |
 | WS | /ws | Real-time state stream |
+
+## Verification
+
+```bash
+# Backend regression tests
+python -m unittest discover -s backend/tests -q
+
+# Backend syntax/import check
+python -m compileall backend
+
+# Frontend typecheck + production build
+cd frontend
+npm run build
+```
 
 ## Agents
 

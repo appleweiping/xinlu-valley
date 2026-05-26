@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic import Field
 from typing import Optional
 from enum import Enum
 
@@ -37,8 +38,8 @@ class TownAgent(BaseModel):
     sprite_key: str = ""
     real_status: Optional[str] = None
     home_zone: str = "agent_homes"
-    preferred_zones: list[str] = []
-    path: list[tuple[int, int]] = []
+    preferred_zones: list[str] = Field(default_factory=list)
+    path: list[tuple[int, int]] = Field(default_factory=list)
     interaction_target: Optional[str] = None
 
 
