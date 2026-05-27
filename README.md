@@ -1,312 +1,438 @@
-# Pixel AI Town 🏘️
+# Agent Town — Gamified AI Workspace
 
-![Pixel AI Town Banner](banner.png)
+![Agent Town Banner](banner.png)
 
-A living, breathing pixel-art AI agent town — where multiple AI agents reside, work, and interact in a cozy virtual world connected to real infrastructure.
+> **Your entire AI work system, reimagined as a living anime storybook town.**
+> Talk to agents to assign real tasks. Enter buildings to browse real project data. Every interaction maps to your actual files, memories, and tools.
 
 ---
 
-## Overview
+## What Is This?
 
-Pixel AI Town is not a demo or a toy. It is the **visual living layer** for a real multi-agent system. Each agent has its own identity, personality, home, preferred zones, activities, mood, and long-term state. The town connects to real agent infrastructure — AgentMemory, Vipin's Knowledgebase, Agent Hub, Skill Index, and Devtools — to reflect actual system states in real time.
+Agent Town is a **gamified frontend for a real multi-agent AI system**. It's not a demo, not a toy, not a visualization — it's a fully functional work interface disguised as a cozy anime-style game.
 
-When you open the town, you see AI agents that **live here** — not temporary bots, but long-term residents with memory, skills, knowledge, and relationships.
+When you talk to an agent in the town, they actually call LLM APIs and respond based on your real system state. When you enter a building, you see your actual project files, memories, skills, and tools. When you assign a task, it creates a real action in the agent memory system.
 
-### Design Philosophy
+**Core Idea**: Instead of terminals and dashboards, you manage your AI agents and projects by walking through a beautiful hand-drawn town and talking to its residents.
 
-| Inspiration | What We Take | What We Don't |
-|-------------|-------------|---------------|
-| **Stardew Valley** | Warmth, livability, explorable zones, resident life | No asset copying, no name copying |
-| **Terraria** | Asset pipeline methodology (tileset, sprite sheet, manifest) | No platformer mechanics |
-| **AI Agent Systems** | Real long-term state, memory, skills, knowledge | No mock pretending to be real |
+---
+
+## Visual Style
+
+The entire game uses a consistent **anime storybook illustration** style:
+- Fine brown lineart (NOT black, NOT pixel art)
+- Soft watercolor coloring on cream/parchment backgrounds
+- Chibi character proportions (2.5-3 head ratio)
+- Isometric bird's-eye perspective for the town map
+- European fantasy architecture with subtle tech accents
+- Dreamy atmosphere: sparkles, butterflies, soft clouds
+
+All art is generated exclusively via **GPT Image 2** with consistent style prompts. No external assets, no stock art, no copied sprites.
+
+### Art Asset Count: 37+ images
+| Category | Count | Description |
+|----------|-------|-------------|
+| Town Map | 1 | 1536×1024 isometric bird's-eye view of the full town |
+| Character Sprites | 7 | Full-body chibi illustrations (1024×1024 each) |
+| Sprite Sheets | 8 | 4×4 grid walk animations (down/left/right/up, 4 frames each) |
+| Character Portraits | 8 | Circular ornate-framed portraits for sidebar |
+| Building Interiors | 8 | 1536×1024 interior backgrounds per building |
+| UI Assets | 5 | Dialogue frame, magic book, settings/quests/inventory icons |
 
 ---
 
 ## Features
 
-### 🏡 Living Town
-- **9 Functional Zones** — Town Hall, Memory Library, Skill Workshop, Dream Garden, Devtools Lab, Resource Market, Knowledge Tower, Agent Homes, Central Plaza
-- **Rich Map Decorations** — Trees, bushes, pine trees, flowers, rocks, mushrooms, lamps, benches, signs, fences
-- **Natural Terrain** — Smooth grass with region-based color blending, warm dirt paths with grass edge transitions
-- **Cozy Pixel Art** — All assets generated via GPT Image 2, warm pastel palette, crisp pixels
+### 🎮 Gameplay
 
-### 🤖 8 AI Agent Residents + Player Character
-| Agent | Role | Home Zone |
-|-------|------|-----------|
-| **Opus 总舵主** | Chief Architect | Town Hall |
-| **像素猫 PixelCat** | Full-Stack Executor | Agent Homes |
-| **Codex 协调官** | Coordinator | Agent Homes |
-| **Sonnet 审查员** | Code Reviewer | Agent Homes |
-| **Haiku 闪电侠** | Speed Runner | Agent Homes |
-| **鲸鱼 DeepSeek** | Bulk Worker | Agent Homes |
-| **OpenHands 工匠** | Builder | Agent Homes |
-| **ARIS 科研框架** | Research Framework | Knowledge Tower |
-| **主角 (Player)** | Protagonist | Central Plaza |
+| Feature | Description |
+|---------|-------------|
+| **Click-to-Move** | Click any walkable ground and your character walks there with directional animation |
+| **Walkable Area Constraints** | Cannot walk on building rooftops, water, or out-of-bounds areas |
+| **NPC Idle Behavior** | Each agent stays near their assigned building, doing small idle wanders (not teleporting across the map) |
+| **Sprite Sheet Animations** | All characters have 4-direction walk cycles (16 frames per character) |
+| **Depth Sorting** | Characters closer to the bottom of the screen render in front (correct Y-sort overlap) |
+| **Camera Follow** | Camera smoothly follows the player character with lerp |
+| **Zoom** | Mouse wheel to zoom in/out (0.6x – 2.5x) |
+| **Building Entry** | Click a building to enter its interior scene — walk around inside, talk to the resident agent |
+| **Interior Scenes** | Each building has a unique hand-drawn interior background with walkable floor area |
 
-Each agent has: personality, mood, activity state, preferred zones, idle animation, click-to-inspect, and data source tracking.
+### 💬 Dialogue System
 
-### 📡 Real Data Integration (Read-Only)
-| System | What It Reads | Endpoint |
-|--------|--------------|----------|
-| **AgentMemory** | Memories, types, concepts from `standalone.json` | `/api/town/memory` |
-| **Vipin's Knowledgebase** | Decisions, facts, lessons, INDEX.md | `/api/town/memory` |
-| **Skill Index** | 411 skills across 19 categories | `/api/town/skills` |
-| **Knowledge Wiki** | 1172 pages, recent updates | `/api/town/knowledge` |
-| **Devtools** | 20 CLI tools, Agent Hub status | `/api/town/devtools` |
-| **Agent Hub** | Real-time agent online/offline status | `/api/health` |
+| Feature | Description |
+|---------|-------------|
+| **Real LLM Conversations** | Every agent response is generated by DeepSeek V4 API in real-time |
+| **Command Recognition** | Messages starting with action words (do/run/check/find/search/write/create/help) trigger "working" mode |
+| **Personality-Consistent** | Each agent has a unique personality prompt — Opus is philosophical, PixelCat purrs, Haiku speaks in 3 words |
+| **Real Context Injection** | Agents reference actual system state in their responses (real skill count, real memory count, real project status) |
+| **Art-Styled Frame** | Dialogue panel uses the generated `dialogue-frame.png` as background, matching the storybook aesthetic |
+| **Works Inside Buildings** | Can chat with agents both in the town map and inside building interiors |
 
-All access is **strictly read-only**. No writes to any real system. Adapter failures gracefully fall back to mock data with clear source labeling.
+### 📚 Character Book (Magic Book UI)
 
-### 🎮 Interactive Experience
-- **Click agents** → Inspector shows identity, status, mood, memory/skill/resource summary
-- **Click buildings** → Inspector fetches and displays real data from connected systems
-- **Move player** → Click anywhere on the map to move your character
-- **Drag to pan** → Hold and drag to explore the map
-- **Scroll to zoom** → Smooth tween-animated zoom (0.6x – 3.5x)
-- **Debug mode** → Toggle with 🐛 button to show tile grid and zone boundaries
-- **Minimize log** → Collapsible event log panel
+Click any portrait in the left sidebar to open the **Magic Book** — an ornate illustrated book that shows:
 
-### 📊 HUD Dashboard
-Top bar shows real-time stats:
-- Town time / Agent count / Memory count / Skill count / Knowledge entries / Connection status
+| Page Section | Content |
+|--------------|---------|
+| **Left Page** | Full character illustration with idle animation |
+| **Name & Role** | Agent name (bilingual) and their function in the team |
+| **Personality** | Written personality description |
+| **Traits** | Tag-style trait badges (e.g., "Wise", "Patient", "Visionary") |
+| **Projects** | List of real projects this agent works on |
+| **Affinity** | Relationship bar showing closeness to the player (0-100%) |
+| **Location** | Which building/zone they currently reside in |
+
+### 🏛️ Buildings & Real Data
+
+Each building in the town maps to a real part of your AI infrastructure. Clicking a building shows its interior AND real data:
+
+| Building | Real Data Source | What You See |
+|----------|-----------------|--------------|
+| **Memory Library** | `D:\research\Vipin's Knowledgebase\memory\` | 9 decisions, 22 facts, 1 lesson — with file names and categories |
+| **Skill Workshop** | `D:\agent-resources\SKILL-INDEX.md` | 133 skills across 20 categories — browsable list |
+| **Knowledge Tower** | `D:\research\Vipin's Knowledgebase\` | Total page count, topic directories |
+| **Town Hall** | `memory\decisions\*.md` | Recent architecture decisions with titles |
+| **Devtools Lab** | `D:\devtools\*.cmd` | All CLI tool launchers (cc.cmd, claude.cmd, etc.) |
+| **Resource Market** | `D:\agent-resources\` | Skills, repos, tools available |
+| **Dream Garden** | — | A peaceful place for creative thinking |
+| **Agent Homes** | — | Where agents rest between tasks |
+
+### ⚙️ Settings Panel
+
+Accessible via the gear icon in the bottom bar. Opens in the magic book UI:
+
+| Setting | Options | Effect |
+|---------|---------|--------|
+| **BGM Volume** | 0-100% slider | Controls background music volume |
+| **SFX Volume** | 0-100% slider | Controls sound effects volume |
+| **Language** | 中文 / English / 日本語 / 한국어 | Switches ALL UI text to selected language |
+| **Camera Zoom** | 0.6x – 2.5x slider | Adjusts default zoom level |
+| **Tick Speed** | Fast(5s) / Normal(10s) / Slow(20s) / Very Slow(30s) | How often agents make decisions |
+
+### 📋 Quests Panel
+
+Accessible via the quill pen icon. Shows real tasks from the agentmemory system:
+- Fetches from `agentmemory frontier API`
+- Shows task title, status (pending/active/done), and assignee
+- Assign new tasks by talking to agents in dialogue
+
+### 🎒 Inventory Panel
+
+Accessible via the backpack icon. Shows your real D: drive projects:
+
+| Project Category | Real Path | Items |
+|-----------------|-----------|-------|
+| Research | `D:\Research\` | 47 items (CSATG-EDA, PonyRec, ProteinShift, TGL-Rec, TRUCE-Rec...) |
+| Game Development | `D:\Game_develop\` | ai-town |
+| Company | `D:\Company\` | Engineering Intelligence |
+| Terraria Archive | `D:\Terraria_doc\` | 19 items |
+| Agent Resources | `D:\agent-resources\` | 12 items (skills, repos, tools...) |
+| Devtools | `D:\devtools\` | 35 items |
+
+Each category is expandable — click to see subdirectories.
+
+---
+
+## Agent Residents
+
+| Agent | Role | Zone | Personality | Key Traits |
+|-------|------|------|-------------|------------|
+| **Opus 总舵主** | Chief Architect | Town Hall | Deep, philosophical, rigorous. Thinks in systems. Quotes philosophy. | Wise, Patient, Visionary |
+| **像素猫 PixelCat** | Full-Stack Executor | Skill Workshop | Calm, patient, methodical. Loves clean code. Purrs when satisfied. | Precise, Reliable, Creative |
+| **Sonnet 审查员** | Code Reviewer | Memory Library | Careful, friendly, helpful. Notices details others miss. Uses poetry metaphors. | Observant, Kind, Thorough |
+| **Codex 协调官** | Coordinator | Central Plaza | Agile, decisive, parallel-minded. Speaks in bullet points. | Decisive, Fast, Organized |
+| **Haiku 闪电侠** | Speed Runner | Agent Homes | Minimal, efficient, no-waste. Maximum three words when possible. | Swift, Minimal, Efficient |
+| **鲸鱼 DeepSeek** | Bulk Worker | Resource Market | Gentle, steady, hardworking. Handles large volumes patiently. Hums while working. | Steady, Patient, Strong |
+| **ARIS 科研框架** | Research Framework | Knowledge Tower | Systematic, process-strict. Always follows the pipeline. Speaks in structured steps. | Systematic, Rigorous, Methodical |
+| **Town Mayor (Player)** | You | Central Plaza | Silver-haired girl with crystal staff and flower decorations. Directs everything. | Leader, Creative, Ambitious |
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Game Engine** | Phaser 3.80 | Tile rendering, sprites, camera, input |
-| **Frontend** | React 18 + TypeScript 5.5 | UI overlays, panels, state |
-| **Build** | Vite 5.4 | Dev server, HMR, production build |
-| **Styling** | Tailwind CSS 3.4 + Custom CSS | HUD, panels, pixel-game aesthetic |
-| **State** | Zustand 4.5 | Reactive store with adapter/mock tracking |
-| **Backend** | FastAPI 0.115 | REST API, WebSocket, tick loop |
-| **Database** | SQLite (aiosqlite) | Event persistence |
-| **Real-time** | WebSocket | Live state synchronization |
-| **Art Pipeline** | GPT Image 2 | All pixel art generation |
-| **Image Processing** | Pillow + NumPy | Background removal, resizing |
+| Layer | Technology | Version | Purpose |
+|-------|-----------|---------|---------|
+| **Game Engine** | Phaser 3 | Latest | Scene management, sprite rendering, camera, input, tweens, animations |
+| **Frontend Framework** | React | 18+ | UI overlays (dialogue, panels, HUD, settings, book) |
+| **Language** | TypeScript | 5.5+ | Type safety across all frontend code |
+| **Build Tool** | Vite | 8.0 | Dev server with HMR, production static build |
+| **State Management** | Zustand | 4.5+ | Reactive game state (agents, selection, dialogue history) |
+| **Backend** | FastAPI | 0.115+ | REST API, real data adapters, LLM gateway |
+| **LLM Provider** | DeepSeek V4 | deepseek-chat | Agent dialogue generation (cheapest: ¥0.001/1K tokens) |
+| **Art Generation** | GPT Image 2 | gpt-image-2 | All visual assets (via API rotation proxy) |
+| **Desktop Packaging** | Tauri | Planned | Native app wrapper (5MB vs Electron's 150MB) |
+| **Deployment** | GitHub Pages | — | Static web build for browser access |
+| **Memory System** | agentmemory MCP | Port 3111 | Persistent agent memory, tasks, signals |
+| **i18n** | Custom | — | 4-language support (zh/en/ja/ko) with full translation strings |
 
 ---
 
-## Quick Start
+## Architecture
 
-### One-Click
-```bash
-cd D:\ai-town
-start.cmd          # Starts backend + frontend
-# Visit http://localhost:5173
-stop.cmd           # Stops everything
 ```
-
-### Manual
-```bash
-# Terminal 1: Backend
-cd backend
-pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-
-# Terminal 2: Frontend
-cd frontend
-npm install
-npm run dev
+┌─────────────────────────────────────────────────────────────────┐
+│                     BROWSER / TAURI WINDOW                        │
+├─────────────────────────────────────────────────────────────────┤
+│  Phaser 3 Game Engine              │  React UI Layer              │
+│  ├── TownScene (main map)          │  ├── DialoguePanel           │
+│  ├── InteriorScene (buildings)     │  ├── Sidebar (8 portraits)   │
+│  ├── Sprite Sheet Animations       │  ├── BottomBar (3 actions)   │
+│  ├── Click-to-Move + Pathfinding   │  ├── CharacterBook           │
+│  ├── NPC Idle Wander               │  ├── BuildingView            │
+│  ├── Building Hotspot Zones        │  ├── SettingsPanel            │
+│  └── Camera Follow + Zoom          │  ├── QuestsPanel             │
+│                                    │  └── InventoryPanel           │
+├────────────────────────────────────┴─────────────────────────────┤
+│  Zustand Store                     │  i18n (zh/en/ja/ko)          │
+│  (agents, selection, dialogue,     │  (all UI strings translated)  │
+│   connected state)                 │                               │
+└──────────────────────────┬───────────────────────────────────────┘
+                           │ REST + WebSocket (localhost:8000)
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     FASTAPI BACKEND                               │
+├─────────────────────────────────────────────────────────────────┤
+│  API Endpoints                     │  Real Data Adapters           │
+│  ├── POST /api/dialogue            │  ├── Memory Library adapter   │
+│  ├── GET  /api/health              │  │   (reads decisions/facts/  │
+│  ├── GET  /api/agents              │  │    lessons from markdown)  │
+│  ├── GET  /api/buildings/{id}      │  ├── Skill Workshop adapter   │
+│  ├── GET  /api/tasks               │  │   (parses SKILL-INDEX.md)  │
+│  ├── GET  /api/inventory           │  ├── Knowledge Tower adapter  │
+│  └── (per-building endpoints)      │  │   (counts wiki pages)      │
+│                                    │  ├── Devtools Lab adapter     │
+│  LLM Gateway                       │  │   (lists *.cmd files)      │
+│  ├── DeepSeek V4 (primary)         │  └── Town Hall adapter        │
+│  ├── Command detection             │       (reads decisions/*.md)   │
+│  ├── Personality prompts           │                               │
+│  └── Real context injection        │                               │
+└──────────────────────────┬───────────────────────────────────────┘
+                           │ File system reads
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     REAL INFRASTRUCTURE                           │
+├─────────────────────────────────────────────────────────────────┤
+│  D:\research\Vipin's Knowledgebase\memory\  (9 decisions, 22 facts) │
+│  D:\agent-resources\SKILL-INDEX.md          (133 skills, 20 cats)   │
+│  D:\research\Vipin's Knowledgebase\         (knowledge wiki)        │
+│  D:\devtools\*.cmd                          (CLI tools)             │
+│  D:\Research\                               (47 research projects)  │
+│  D:\Game_develop\                           (game projects)         │
+│  D:\Company\                                (company projects)      │
+│  agentmemory MCP (port 3111)                (tasks, signals, memory)│
+└─────────────────────────────────────────────────────────────────┘
 ```
-
-Visit **http://localhost:5173**
 
 ---
 
 ## Project Structure
 
 ```
-pixel-ai-town/
-├── backend/                    — FastAPI server + simulation engine
-│   ├── main.py                 — API endpoints, WebSocket, tick loop
-│   ├── town_engine.py          — Tick-based agent simulation
-│   ├── town_data.py            — Agent & building definitions
-│   ├── models.py               — Pydantic models & enums
-│   ├── config.py               — Paths, ports, intervals
-│   ├── db.py                   — SQLite schema & queries
-│   ├── websocket_manager.py    — WebSocket broadcast
-│   └── adapters/               — Read-only system integrations
-│       ├── agent_hub.py        — Agent Hub HTTP status
-│       ├── agentmemory.py      — AgentMemory standalone.json reader
-│       ├── shared_memory.py    — Vipin's Knowledgebase memory files
-│       ├── skills.py           — SKILL-INDEX.md parser
-│       └── knowledge.py        — Wiki page counter & indexer
-├── frontend/                   — React + Phaser game client
+D:\Game_develop\ai-town\
+├── frontend/                          — React + Phaser game client
 │   ├── src/
-│   │   ├── App.tsx             — Root with error boundary
-│   │   ├── main.tsx            — Entry point
+│   │   ├── App.tsx                    — Root: Phaser game + all UI panels
+│   │   ├── App.css                    — Full game styling (sidebar, book, building, dialogue)
+│   │   ├── main.tsx                   — Entry point
+│   │   ├── i18n.ts                    — Multi-language translations (zh/en/ja/ko)
 │   │   ├── game/
-│   │   │   ├── PhaserGame.ts   — Game factory (1280×960, pixelArt mode)
-│   │   │   ├── scenes/
-│   │   │   │   └── TownScene.ts — Main scene (terrain, paths, decorations, buildings, agents)
-│   │   │   └── map/
-│   │   │       └── zones.ts    — Zone definitions (40×30 tile map)
-│   │   ├── features/pixel-town/ — v2 architecture
-│   │   │   ├── PixelTownPage.tsx       — Main page with adapter polling
-│   │   │   ├── PixelTownHUD.tsx        — Pixel-game HUD with real data
-│   │   │   ├── PixelTownLogPanel.tsx   — Collapsible event log
-│   │   │   ├── PixelTownInspector.tsx  — Agent/building detail panel
-│   │   │   ├── PixelTownDebugOverlay.tsx — Debug grid & stats
-│   │   │   ├── pixelTownStore.ts       — Zustand store (agents, events, config)
-│   │   │   ├── pixelTownTypes.ts       — Full type system
-│   │   │   ├── pixelTownConstants.ts   — Palette, labels, icons
-│   │   │   ├── pixelTownMapData.ts     — 9 structured area entities
-│   │   │   ├── pixelTownMockData.ts    — Centralized mock fallback
-│   │   │   ├── adapters/
-│   │   │   │   └── townDataAdapter.ts  — 9 read-only API adapters
-│   │   │   └── styles/
-│   │   │       └── pixelTown.css       — Namespaced pixel-game CSS
-│   │   ├── hooks/
-│   │   │   └── useWebSocket.ts — WebSocket with dual-store sync
+│   │   │   ├── TownScene.ts           — Main town map scene (sprites, click-to-move, NPC idle)
+│   │   │   └── InteriorScene.ts       — Building interior scene (walkable, resident agent)
 │   │   ├── store/
-│   │   │   └── townStore.ts    — Legacy Zustand store
-│   │   └── ui/                 — Legacy UI components (kept for rollback)
-│   └── public/assets/town/     — Production art assets
-│       ├── agents/             — 9 transparent-bg agent sprites (128×128)
-│       ├── buildings/          — 9 building sprites
-│       ├── tileset.png         — Base tileset
-│       ├── tileset_terrain.png — Terrain tileset
-│       └── tileset_buildings.png — Building tileset
-├── frontend/src/assets/pixel-town/ — Asset pipeline
-│   ├── README.md               — Asset rules & policies
-│   ├── manifest.json           — 22-entry asset registry
-│   └── prompts/                — 7 gptimage2 generation prompts
-├── art/                        — Art generation pipeline
-│   ├── generate.py             — Main batch generator
-│   ├── regenerate_sprites.py   — BG removal + deployment
-│   ├── prompts.md              — Style guide
-│   └── generated/              — Raw generated outputs
-├── docs/
-│   ├── pixel-ai-town-vision.md      — Product vision document
-│   └── pixel-ai-town-art-direction.md — Art & technical spec
-├── start.cmd                   — One-click launcher
-├── stop.cmd                    — One-click stop
-└── banner.png                  — Project banner
+│   │   │   └── gameStore.ts           — Zustand state (7 agents + player, selection, dialogue)
+│   │   └── ui/
+│   │       ├── DialoguePanel.tsx       — LLM-powered chat with agents
+│   │       ├── Sidebar.tsx             — Left: 8 circular character portraits
+│   │       ├── BottomBar.tsx           — Bottom: settings/quests/inventory buttons
+│   │       ├── CharacterBook.tsx       — Magic book UI (personality, traits, projects, affinity)
+│   │       ├── BuildingView.tsx        — Building data overlay (real system data)
+│   │       ├── SettingsPanel.tsx       — Volume, language, zoom, tick speed
+│   │       ├── QuestsPanel.tsx         — Real tasks from agentmemory
+│   │       └── InventoryPanel.tsx      — Real D: drive project browser
+│   ├── public/assets/
+│   │   ├── town-map.png               — Main town background (1536×1024)
+│   │   ├── characters/                — 7 sprites + 8 sprite sheets + player
+│   │   ├── portraits/                 — 8 circular framed portraits
+│   │   ├── interiors/                 — 8 building interior backgrounds
+│   │   └── ui/                        — dialogue-frame, magic-book, icons
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tsconfig.json
+├── backend/
+│   ├── main.py                        — FastAPI: dialogue, buildings, tasks, inventory, health
+│   ├── requirements.txt               — Python dependencies
+│   ├── .env                           — API keys (gitignored)
+│   └── .env.example                   — Template for API keys
+├── design/
+│   ├── gdd/
+│   │   └── game-concept.md            — Full Game Design Document (pillars, loops, MDA, scope)
+│   ├── architecture.md                — Technical architecture (7 ADRs, module breakdown)
+│   └── epics.md                       — 10 epics with dependency graph
+├── production/
+│   ├── stage.txt                      — Current development stage (Concept)
+│   ├── review-mode.txt                — Review mode (lean)
+│   └── sprints/
+│       └── sprint-1.md                — First sprint plan (16 stories, 2 weeks)
+├── _legacy/                           — Archived v1 code (not deleted, gitignored)
+├── .claude/skills/game-studios/       — 73 Game Studios workflow skills (linked)
+├── CLAUDE.md                          — Project instructions for AI agents
+├── .gitignore                         — Excludes .env, _legacy, node_modules, dist
+├── start.cmd                          — One-click launcher (backend + frontend)
+├── stop.cmd                           — One-click stop
+└── banner.png                         — Project banner image
 ```
 
 ---
 
 ## API Reference
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/health` | System health + adapter status |
-| `GET` | `/api/town/state` | Full town state (agents, buildings, events, time) |
-| `GET` | `/api/town/agents` | All agent profiles |
-| `GET` | `/api/town/agents/{id}` | Single agent detail |
-| `GET` | `/api/town/buildings` | All buildings |
-| `GET` | `/api/town/events` | Recent events (limit param) |
-| `GET` | `/api/town/memory` | AgentMemory + shared memory data |
-| `GET` | `/api/town/skills` | Skill index (411 skills, 19 categories) |
-| `GET` | `/api/town/knowledge` | Knowledge wiki overview (1172 pages) |
-| `GET` | `/api/town/devtools` | Devtools status (20 tools, hub status) |
-| `POST` | `/api/town/player/move` | Move player to (x, y) tile |
-| `WS` | `/ws` | Real-time state stream (init + tick events) |
+| Method | Path | Description | Real Data Source |
+|--------|------|-------------|-----------------|
+| `GET` | `/api/health` | System health + adapter connection status | Checks agentmemory, skills, knowledge, devtools |
+| `POST` | `/api/dialogue` | Chat with an agent (LLM-powered) | DeepSeek V4 API + real system context |
+| `GET` | `/api/agents` | List all 7 agent profiles | Static definitions with real zone assignments |
+| `GET` | `/api/buildings/memory-library` | Memory Library data | `D:\research\...\memory\` (decisions, facts, lessons) |
+| `GET` | `/api/buildings/skill-workshop` | Skill Workshop data | `D:\agent-resources\SKILL-INDEX.md` |
+| `GET` | `/api/buildings/knowledge-tower` | Knowledge Tower data | `D:\research\Vipin's Knowledgebase\` page count |
+| `GET` | `/api/buildings/town-hall` | Town Hall data | `memory\decisions\*.md` recent decisions |
+| `GET` | `/api/buildings/devtools-lab` | Devtools Lab data | `D:\devtools\*.cmd` tool list |
+| `GET` | `/api/tasks` | Active tasks/quests | agentmemory frontier API |
+| `GET` | `/api/inventory` | D: drive project browser | Scans 6 real project directories |
 
 ---
 
-## Configuration
+## Quick Start
 
-All paths are configurable via environment variables. Defaults are tuned for the development workstation.
+### Prerequisites
+- Node.js 18+ (for frontend)
+- Python 3.10+ (for backend)
+- DeepSeek API key (for agent dialogue)
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `PORT` | `8000` | Backend server port |
-| `TICK_INTERVAL` | `5` | Simulation tick interval (seconds) |
-| `AGENT_HUB_URL` | `http://127.0.0.1:9800` | Agent Hub status API |
-| `AGENTMEMORY_DB` | `~/.agentmemory/data/state_store.db` | AgentMemory data path |
-| `SHARED_MEMORY_DIR` | `D:\research\Vipin's Knowledgebase\memory` | Shared memory directory |
-| `SKILL_INDEX_PATH` | `D:\agent-resources\SKILL-INDEX.md` | Skill index file |
-| `KNOWLEDGE_BASE_DIR` | `D:\research\Vipin's Knowledgebase` | Knowledge base root |
-| `VITE_API_PROXY_TARGET` | `http://localhost:8000` | Frontend API proxy |
-| `VITE_WS_PROXY_TARGET` | `ws://localhost:8000` | Frontend WebSocket proxy |
-
----
-
-## Art Pipeline
-
-All visual assets are generated exclusively via **GPT Image 2** (gptimage2). No external assets, no copied game sprites, no network resources.
-
-### Generation
+### One-Click Launch
 ```bash
-cd art
-python generate.py --all          # Generate all assets
-python regenerate_sprites.py      # Regenerate with BG removal
+cd D:\Game_develop\ai-town
+start.cmd          # Starts backend + frontend
+# Visit http://localhost:5173
+stop.cmd           # Stops everything
 ```
 
-### Asset Manifest
-Every asset entering the game is registered in `frontend/src/assets/pixel-town/manifest.json` with:
-- `id`, `name`, `type`, `file`, `provider` (always gptimage2)
-- `copyrightStatus` (always original_generated_asset)
-- `sourcePolicy` (always no_external_assets)
+### Manual Launch
+```bash
+# Terminal 1: Backend
+cd backend
+pip install -r requirements.txt
+# Create .env with your DEEPSEEK_API_KEY (see .env.example)
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 
-### Prompt Engineering
-Standardized prompts in `frontend/src/assets/pixel-town/prompts/`:
-- `gptimage2-terrain.md` — Grass, dirt, sand, water tiles
-- `gptimage2-paths.md` — Cobblestone, dirt path tiles
-- `gptimage2-buildings.md` — 9 building sprites
-- `gptimage2-props.md` — Trees, flowers, fences, lamps
-- `gptimage2-player.md` — Player sprite sheet
-- `gptimage2-agents.md` — 8 NPC agent sprites
-- `gptimage2-ui.md` — Pixel UI panels, buttons, icons
+# Terminal 2: Frontend
+cd frontend
+npm install
+npm run dev
+# Visit http://localhost:5173
+```
 
----
+### Environment Variables
 
-## Safety Boundaries
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `DEEPSEEK_API_KEY` | Yes | — | LLM API key for agent dialogue |
+| `DEEPSEEK_BASE_URL` | No | `https://api.deepseek.com` | LLM API endpoint |
 
-This project enforces strict safety rules:
-
-| Rule | Enforcement |
-|------|-------------|
-| No writes to AgentMemory | Backend adapters are read-only |
-| No writes to Knowledgebase | Only file reads, no modifications |
-| No writes to Skills | Only reads SKILL-INDEX.md |
-| No writes to Devtools | Only lists .cmd files |
-| No destructive migrations | No schema changes to external DBs |
-| No mock pretending to be real | Source badge shows adapter/mock/unavailable |
-| Adapter failure = graceful fallback | Page never crashes on data unavailability |
-| No external art assets | gptimage2 is the only generation path |
+All other paths (skills, memory, knowledge, devtools) are hardcoded to the development workstation layout. Modify `backend/main.py` path constants to adapt to a different machine.
 
 ---
 
-## Development
+## Game Design Document Summary
 
-### Type Check
+Full GDD at `design/gdd/game-concept.md`. Key points:
+
+### Game Pillars
+1. **Living Intelligence** — Every agent has a real AI brain. No scripted dialogue.
+2. **Cozy Observation** — No time pressure, no fail states. Play at your own pace.
+3. **Real Connection** — The town connects to real AI infrastructure. Data is real.
+4. **Lightweight Performance** — Idle CPU <5%. Tick-based, not frame-by-frame AI.
+
+### Anti-Pillars (What This Game Is NOT)
+- NOT a management sim (no micromanaging schedules)
+- NOT competitive (no win/lose, no leaderboards)
+- NOT content-heavy (no hand-written storylines; emergent only)
+- NOT a dashboard (must feel like a game, not a monitoring tool)
+
+### Core Loop
+- **30s**: Walk around, see agents doing things, click to interact
+- **5min**: Watch agent complete a task, assign new work, discover relationships
+- **30min**: Full day/night cycle, complete 2-3 task assignments
+- **Days**: Agent skills grow, town expands, relationships deepen
+
+---
+
+## Multi-Language Support
+
+All UI text is translatable. Switch language in Settings panel.
+
+| Language | Code | Coverage |
+|----------|------|----------|
+| 中文 (Chinese) | `zh` | Full — all UI strings |
+| English | `en` | Full — all UI strings |
+| 日本語 (Japanese) | `ja` | Full — all UI strings |
+| 한국어 (Korean) | `ko` | Full — all UI strings |
+
+Translation file: `frontend/src/i18n.ts`
+
+---
+
+## Development Workflow
+
+This project uses the **Claude-Code-Game-Studios** workflow (73 skills, 49 agents). Skills are linked at `.claude/skills/game-studios/`.
+
+### Completed Workflow Steps
+1. `/start` — Project stage detection → Concept
+2. `/brainstorm` — Game concept ideation → Full GDD written
+3. `/create-architecture` — Technical architecture → 7 ADRs
+4. `/create-epics` — Epic breakdown → 10 epics with dependencies
+5. `/sprint-plan` — Sprint 1 planned → 16 stories
+6. `/prototype` — Working vertical slice built and deployed
+
+### Build Commands
 ```bash
 cd frontend
-npx tsc --noEmit
+npx tsc --noEmit     # Type check (zero errors)
+npm run build        # Production build
+npm run dev          # Dev server with HMR
 ```
-
-### Production Build
-```bash
-cd frontend
-npx vite build
-```
-
-### Regenerate Sprites (with background removal)
-```bash
-cd art
-python regenerate_sprites.py --agents
-```
-
-### Debug Mode
-Click the 🐛 button (bottom-right) to toggle:
-- Tile grid overlay
-- Zone boundary lines
-- Adapter source info
-- FPS / render stats
 
 ---
 
-## Rollback
+## Safety & Privacy
 
-To revert to the pre-v2 UI:
-1. In `App.tsx`, replace `<PixelTownPage />` with the original layout
-2. The legacy components remain in `src/ui/` (TownHeader, EventFeed, AgentPanel, BuildingPanel)
-3. Remove `features/pixel-town/` import
+| Rule | Implementation |
+|------|---------------|
+| No API keys in git | `.env` is gitignored; only `.env.example` committed |
+| No writes to real systems | All adapters are read-only file reads |
+| No external art assets | Everything generated via GPT Image 2 |
+| Graceful degradation | If any adapter fails, UI shows "unavailable" not crash |
+| No secrets in dialogue | Agent prompts don't include API keys or passwords |
+
+---
+
+## Roadmap
+
+| Phase | Status | Features |
+|-------|--------|----------|
+| **MVP** | ✅ Done | 7 agents, town map, click-to-move, dialogue, building data |
+| **Alpha** | 🔄 In Progress | Interior scenes, task system, inventory, i18n |
+| **Beta** | Planned | Tauri desktop app, GitHub Pages deploy, more animations |
+| **Full Vision** | Planned | Town expansion, agent skill growth, relationship dynamics |
+
+---
+
+## Credits
+
+- **Art**: All generated via GPT Image 2 (OpenAI)
+- **LLM**: DeepSeek V4 for agent dialogue
+- **Framework**: Phaser 3 + React + FastAPI
+- **Workflow**: Claude-Code-Game-Studios (73 skills)
+- **Memory**: agentmemory (rohitg00/agentmemory, 18.4k stars)
 
 ---
 
