@@ -19,6 +19,14 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Legacy archive
+_legacy/
+
+# Secrets
+*.key
+*.pem
+.env.local
+
 # Art generation
 art/generated/
 art/processed/
