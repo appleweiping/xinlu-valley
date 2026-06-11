@@ -28,14 +28,22 @@ export async function detectMode(): Promise<Mode> {
     detected = true;
     return mode;
   }
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 1500);
-    const r = await fetch(`${LOCAL_BASE}/api/health`, { signal: ctrl.signal });
-    clearTimeout(t);
-    mode = r.ok ? "live" : "demo";
-  } catch {
-    mode = "demo";
+  // two attempts with a generous timeout — under heavy machine load the
+  // bridge can take a beat to answer, and a false "demo" sticks for the
+  // whole session
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+      const r = await fetch(`${LOCAL_BASE}/api/health`, { signal: ctrl.signal });
+      clearTimeout(t);
+      if (r.ok) {
+        mode = "live";
+        break;
+      }
+    } catch {
+      /* retry once */
+    }
   }
   detected = true;
   return mode;
@@ -50,6 +58,26 @@ async function fetchJson<T>(url: string, timeoutMs = 8000): Promise<T> {
     return (await r.json()) as T;
   } finally {
     clearTimeout(t);
+  }
+}
+
+/** POST to the live bridge (no demo fallback — callers handle demo mode). */
+export async function postData<T>(liveEndpoint: string, body: unknown): Promise<T | null> {
+  if (mode !== "live") return null;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(`${LOCAL_BASE}${liveEndpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    return (await r.json()) as T;
+  } catch {
+    return null;
   }
 }
 

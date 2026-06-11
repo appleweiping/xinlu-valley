@@ -23,6 +23,13 @@ Walk a cozy pixel valley where **work is the world**:
 | 农场 Farm | tasks as crops: plant = create, water = progress, harvest = done |
 | 8 NPC 居民 | real agents, each with its own species: Opus(sage), Codex(robot), Sonnet(songbird), Haiku(chick), DeepSeek(whale), ARIS(owl), PixelCat(cat), Fable(fox) |
 
+**v4 "Interiors & Living Data"**: walk *into* six buildings (library stacks,
+forge, status hall, your bedroom — the bed saves the game), plant crops that
+ARE your real tasks (water = progress, harvest = done, written back to the
+ledger), residents keep daily schedules (A* pathfinding; meet them at their
+desks), ask agents questions in dialogue (answers grounded in real local
+data), full CC0 audio, autosaves.
+
 Two data modes, automatically detected:
 
 - **联机 LIVE** — on the owner's machine the game talks to a local FastAPI

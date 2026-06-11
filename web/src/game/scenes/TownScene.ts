@@ -1,21 +1,73 @@
 import Phaser from "phaser";
 import { TILE, MAP_W, MAP_H, BUILDINGS, AGENTS, PLAZA, FARM, type AgentDef } from "@/data/town";
 import { generateTown, type TownLayout } from "@/game/world/mapgen";
+import { findPath } from "@/game/world/astar";
+import { INTERIOR_BY_BUILDING } from "@/data/interiors";
 import { bus } from "@/shared/bus";
+import { audio, AUDIO_FILES } from "@/game/audio";
+import { currentMode, getData, postData } from "@/shared/api";
+import { loadSave, writeSave, type DemoCrop } from "@/shared/save";
 
 const WATER_FRAMES = 4;
 const DAY_MINUTES = 24 * 60;
 /** one in-game day = 12 real minutes */
 const MINUTES_PER_SECOND = DAY_MINUTES / (12 * 60);
 
+/** lpc crop columns that read nicely at town scale */
+const CROP_VARIETIES = [0, 1, 2, 5, 6, 8, 9];
+/** growth stage -> lpc frame row base (sheet is 32 columns wide; growth
+ * stages live on visual rows 1/3/5/7 => frame rows 1,3,5,7 * 32) */
+const STAGE_ROW = [0, 32, 96, 160, 224];
+/** harvested product icons live on visual row 11 */
+const PRODUCT_ROW = 352;
+
+type Duty =
+  | { kind: "anchor" }
+  | { kind: "plaza" }
+  | { kind: "building"; id: string }
+  | { kind: "inn" };
+
+/** where each resident works (buildings with interiors hide them inside) */
+const WORKPLACE: Record<string, string> = {
+  opus: "town-hall",
+  codex: "town-hall",
+  sonnet: "memory-library",
+  aris: "research-hall",
+  pixelcat: "skill-workshop",
+  fable: "memory-library",
+};
+
+function dutyFor(agentId: string, hour: number): Duty {
+  if (hour >= 21 || hour < 6) return { kind: "inn" };
+  if (hour >= 12 && hour < 14) return { kind: "plaza" };
+  if ((hour >= 9 && hour < 12) || (hour >= 14 && hour < 18)) {
+    const work = WORKPLACE[agentId];
+    return work ? { kind: "building", id: work } : { kind: "anchor" };
+  }
+  return { kind: "anchor" };
+}
+
 interface Npc {
   def: AgentDef;
   sprite: Phaser.Physics.Arcade.Sprite;
   label: Phaser.GameObjects.Text;
   emote: Phaser.GameObjects.Sprite;
-  state: "idle" | "walk" | "talk";
+  state: "idle" | "walk" | "talk" | "path" | "inside";
   target: Phaser.Math.Vector2 | null;
   nextThink: number;
+  path: { x: number; y: number }[] | null;
+  pathIdx: number;
+  insideBuilding: string | null;
+  duty: Duty["kind"] | "";
+}
+
+interface Crop {
+  cell: number;
+  title: string;
+  progress: number; // 1..4
+  variety: number;
+  taskId?: string;
+  sprite?: Phaser.GameObjects.Image;
 }
 
 export class TownScene extends Phaser.Scene {
@@ -29,8 +81,9 @@ export class TownScene extends Phaser.Scene {
   private waterFrame = 0;
   private nightOverlay!: Phaser.GameObjects.Rectangle;
   private lampGlows: Phaser.GameObjects.Arc[] = [];
-  private clockMin = 8 * 60; // start 08:00
+  private clockMin = 8 * 60;
   private day = 1;
+  private harvested = 0;
   private moveTarget: Phaser.Math.Vector2 | null = null;
   private following = true;
   private dragging = false;
@@ -39,6 +92,9 @@ export class TownScene extends Phaser.Scene {
   private uiLock = false;
   private doorZones: { id: string; rect: Phaser.Geom.Rectangle }[] = [];
   private hintText!: Phaser.GameObjects.Text;
+  private crops = new Map<number, Crop>();
+  private demoCrops: DemoCrop[] = [];
+  private actionCooldown = 0;
 
   constructor() {
     super("town");
@@ -48,27 +104,51 @@ export class TownScene extends Phaser.Scene {
     this.layout = generateTown();
     this.collide = this.layout.collide.map((r) => [...r]);
 
+    const save = loadSave();
+    if (save) {
+      this.day = save.day;
+      this.clockMin = save.clockMin;
+      this.harvested = save.harvested;
+      this.demoCrops = save.demoCrops ?? [];
+    }
+
     this.buildGround();
     this.buildDecor();
     this.buildPlaza();
     this.buildBuildings();
-    this.buildPlayer();
+    this.buildPlayer(save?.px, save?.py);
     this.buildNpcs();
     this.buildAnimals();
     this.buildLighting();
     this.bindInput();
     this.bindBus();
+    void this.initFarm();
 
     this.cameras.main.fadeIn(750, 26, 20, 35);
-
     this.cameras.main.setBounds(0, 0, MAP_W * TILE, MAP_H * TILE);
     this.cameras.main.setZoom(3);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.time.addEvent({ delay: 260, loop: true, callback: () => this.cycleWater() });
     this.time.addEvent({ delay: 1000, loop: true, callback: () => this.tickClock() });
+    this.time.addEvent({ delay: 60000, loop: true, callback: () => this.autosave() });
 
-    // dev hook for camera control from the console / preview tooling
+    // audio loads in the background AFTER the world is playable — a stalled
+    // or missing sound file must never block entering the town
+    for (const a of AUDIO_FILES) this.load.audio(a.key, a.url);
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => audio.startBgm());
+    this.load.start();
+
+    this.events.on(Phaser.Scenes.Events.WAKE, (_sys: unknown, data?: { returnTx: number; returnTy: number }) => {
+      this.uiLock = false;
+      if (data) {
+        this.player.setPosition(data.returnTx * TILE + 8, (data.returnTy + 1) * TILE - 4);
+        this.player.setDepth(this.player.y);
+      }
+      this.cameras.main.fadeIn(300, 26, 20, 35);
+      this.autosave();
+    });
+
     (window as unknown as Record<string, unknown>).__town = this;
   }
 
@@ -104,7 +184,6 @@ export class TownScene extends Phaser.Scene {
         if (p != null) path.putTileAt(tsDirt.firstgid + p, x, y);
       }
     }
-    // farm soil beds stamped on the path layer (plain dirt fills)
     for (const c of this.layout.farmSoil) {
       path.putTileAt(tsDirt.firstgid + [0, 1, 2][(c.tx + c.ty) % 3], c.tx, c.ty);
     }
@@ -129,19 +208,9 @@ export class TownScene extends Phaser.Scene {
         : this.add.image(t.tx * TILE + 8, (t.ty + 1) * TILE, "decor-oak");
       img.setOrigin(0.5, 1).setDepth((t.ty + 1) * TILE);
     }
-    // a few crops in the farm beds (visual flavor; real task-crops come via panel)
-    const plantFrames = [0, 1, 2, 3, 4, 5];
-    let i = 0;
-    for (const c of this.layout.farmSoil) {
-      if ((c.tx + c.ty * 3) % 5 !== 0) continue;
-      this.add.image(c.tx * TILE + 8, c.ty * TILE + 6, "decor-plants", plantFrames[i++ % plantFrames.length])
-        .setDepth(c.ty * TILE + 6);
-    }
   }
 
   // ------------------------------------------------------------------- plaza
-  /** Dress the spawn plaza so the first thing players see matches the rest
-   * of the town: notice board, lamp posts, tulip beds, logs, a shade oak. */
   private buildPlaza(): void {
     const img = (tx: number, ty: number, key: string, frame?: number, solid = true) => {
       const o = frame === undefined
@@ -152,15 +221,13 @@ export class TownScene extends Phaser.Scene {
       return o;
     };
 
-    img(29, 18, "decor-sign");                       // notice board by spawn
+    img(29, 18, "decor-sign");
     for (const [lx, ly] of [[27, 17], [37, 17], [27, 21], [37, 21]] as const) {
       img(lx, ly, "decor-lamp");
-      // warm halo — only breathes after dusk (gated in tickClock)
       const glow = this.add.circle(lx * TILE + 8, ly * TILE - 24, 14, 0xffc966, 0)
         .setDepth(15000).setBlendMode(Phaser.BlendModes.ADD);
       this.lampGlows.push(glow);
     }
-    // tulip beds (outdoor decor sheet rows 8-9)
     const tulips = [56, 57, 58, 59, 63, 64];
     const beds: [number, number][] = [
       [28, 17], [29, 17], [35, 17], [36, 17],
@@ -171,7 +238,6 @@ export class TownScene extends Phaser.Scene {
       this.add.image(fx * TILE + 8, fy * TILE + 12, "decor-outdoor", tulips[i % tulips.length])
         .setOrigin(0.5, 1).setDepth(fy * TILE + 12);
     });
-    // log benches + a shade oak
     img(33, 21, "decor-outdoor", 49);
     img(34, 21, "decor-outdoor", 50);
     img(36, 19, "decor-oak-small", 1);
@@ -187,7 +253,6 @@ export class TownScene extends Phaser.Scene {
       const wTiles = Math.ceil(img.width / TILE);
       const hTiles = Math.ceil(img.height / TILE);
       const x0 = b.tx - Math.floor(wTiles / 2);
-      // block the building footprint except the door tile and the row below the eaves
       for (let dy = 1; dy < Math.min(hTiles, 5); dy++) {
         const y = b.ty - dy + 1;
         if (y < 0) continue;
@@ -202,24 +267,24 @@ export class TownScene extends Phaser.Scene {
         rect: new Phaser.Geom.Rectangle((b.tx - 1) * TILE, (b.ty - 1) * TILE, TILE * 3, TILE * 2.2),
       });
 
-      // door label
       this.add
         .text(px, py - img.height - 4, b.nameZh, {
           fontFamily: "'Microsoft YaHei', sans-serif",
-          fontSize: "8px",
-          color: "#fff7e6",
-          stroke: "#5a3b28",
-          strokeThickness: 3,
-          resolution: 4,
+          fontSize: "8px", color: "#fff7e6", stroke: "#5a3b28", strokeThickness: 3, resolution: 4,
         })
-        .setOrigin(0.5, 1)
-        .setDepth(10000);
+        .setOrigin(0.5, 1).setDepth(10000);
     }
   }
 
   // ------------------------------------------------------------------ player
-  private buildPlayer(): void {
-    this.player = this.physics.add.sprite(PLAZA.tx * TILE + 8, PLAZA.ty * TILE + 8, "char-player", 0);
+  private buildPlayer(px?: number, py?: number): void {
+    let x = PLAZA.tx * TILE + 8;
+    let y = PLAZA.ty * TILE + 8;
+    if (px !== undefined && py !== undefined && !this.isBlocked(px, py + 12)) {
+      x = px;
+      y = py;
+    }
+    this.player = this.physics.add.sprite(x, y, "char-player", 0);
     this.player.body!.setSize(12, 10);
     (this.player.body as Phaser.Physics.Arcade.Body).setOffset(18, 30);
     this.player.setDepth(this.player.y);
@@ -235,21 +300,24 @@ export class TownScene extends Phaser.Scene {
       const label = this.add
         .text(sprite.x, sprite.y - 26, def.nameZh, {
           fontFamily: "'Microsoft YaHei', sans-serif",
-          fontSize: "7px",
-          color: "#ffffff",
-          stroke: "#3d2b1f",
-          strokeThickness: 3,
-          resolution: 4,
+          fontSize: "7px", color: "#ffffff", stroke: "#3d2b1f", strokeThickness: 3, resolution: 4,
         })
-        .setOrigin(0.5, 1)
-        .setDepth(10000)
-        .setAlpha(0.92);
+        .setOrigin(0.5, 1).setDepth(10000).setAlpha(0.92);
       const emote = this.add.sprite(sprite.x, sprite.y - 34, "ui-emotes", 0).setVisible(false).setDepth(10001);
-      this.npcs.push({ def, sprite, label, emote, state: "idle", target: null, nextThink: 0 });
+      this.npcs.push({
+        def, sprite, label, emote,
+        state: "idle", target: null, nextThink: 0,
+        path: null, pathIdx: 0, insideBuilding: null, duty: "",
+      });
       sprite.on("pointerdown", (p: Phaser.Input.Pointer) => {
         if (p.getDistance() < 6) this.tryTalk(def.id);
       });
     }
+  }
+
+  /** residents currently working inside a given building */
+  residentsInside(buildingId: string): string[] {
+    return this.npcs.filter((n) => n.state === "inside" && n.insideBuilding === buildingId).map((n) => n.def.id);
   }
 
   private buildAnimals(): void {
@@ -266,21 +334,13 @@ export class TownScene extends Phaser.Scene {
     const cam = this.cameras.main;
     this.nightOverlay = this.add
       .rectangle(0, 0, cam.width, cam.height, 0x0b1030, 0)
-      .setOrigin(0)
-      .setScrollFactor(0)
-      .setDepth(20000);
+      .setOrigin(0).setScrollFactor(0).setDepth(20000);
     this.hintText = this.add
       .text(cam.width / 2, cam.height - 8, "", {
         fontFamily: "'Microsoft YaHei', sans-serif",
-        fontSize: "12px",
-        color: "#fff7e6",
-        stroke: "#5a3b28",
-        strokeThickness: 4,
-        resolution: 3,
+        fontSize: "12px", color: "#fff7e6", stroke: "#5a3b28", strokeThickness: 4, resolution: 3,
       })
-      .setOrigin(0.5, 1)
-      .setScrollFactor(0)
-      .setDepth(20001);
+      .setOrigin(0.5, 1).setScrollFactor(0).setDepth(20001);
   }
 
   private tickClock(): void {
@@ -294,7 +354,6 @@ export class TownScene extends Phaser.Scene {
     const season = ["春", "夏", "秋", "冬"][Math.floor(((this.day - 1) % 28) / 7)];
     bus.emit("clock:tick", { day: this.day, hour, minute, season });
 
-    // night tint: dusk 18-20, night 20-5, dawn 5-7
     const h = this.clockMin / 60;
     let a = 0;
     if (h >= 18 && h < 20) a = ((h - 18) / 2) * 0.55;
@@ -340,7 +399,6 @@ export class TownScene extends Phaser.Scene {
     this.input.on("pointerup", (p: Phaser.Input.Pointer) => {
       if (this.dragging || this.uiLock) return;
       const world = this.cameras.main.getWorldPoint(p.x, p.y);
-      // building door click?
       for (const z of this.doorZones) {
         if (z.rect.contains(world.x, world.y)) {
           this.enterBuilding(z.id);
@@ -359,29 +417,205 @@ export class TownScene extends Phaser.Scene {
     bus.on("panel:closed", () => {
       this.uiLock = false;
     });
+    bus.on("sleep:request", () => {
+      this.day += 1;
+      this.clockMin = 8 * 60;
+      this.autosave();
+      bus.emit("sleep:done", { day: this.day });
+      bus.emit("toast", { text: `第 ${this.day} 天的清晨。存档完成。` });
+    });
+    bus.on("farm:plant-confirm", ({ cell, title }) => {
+      void this.plantCrop(cell, title);
+    });
   }
 
   private tryTalk(agentId: string): void {
     if (this.uiLock) return;
     const npc = this.npcs.find((n) => n.def.id === agentId);
-    if (!npc) return;
+    if (!npc || npc.state === "inside") return;
     const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.sprite.x, npc.sprite.y);
     if (d > TILE * 3.2) {
       this.moveTarget = new Phaser.Math.Vector2(npc.sprite.x, npc.sprite.y + 8);
       return;
     }
     npc.state = "talk";
+    npc.path = null;
     npc.sprite.setVelocity(0, 0);
     const dir = npc.sprite.x > this.player.x ? "left" : "right";
     npc.sprite.play(`${npc.def.id}-idle-${dir}`, true);
     this.uiLock = true;
-    bus.emit("npc:talk", { agentId });
+    const duty = dutyFor(npc.def.id, Math.floor(this.clockMin / 60));
+    const activityZh =
+      duty.kind === "plaza" ? "正在广场歇脚" :
+      duty.kind === "inn" ? "正准备回旅店休息" :
+      duty.kind === "building" ? `今天在${BUILDINGS.find((b) => b.id === duty.id)?.nameZh ?? "镇里"}当班` :
+      "正在镇上转悠";
+    const activityEn =
+      duty.kind === "plaza" ? "taking a break at the plaza" :
+      duty.kind === "inn" ? "about to head back to the inn" :
+      duty.kind === "building" ? `on duty at the ${BUILDINGS.find((b) => b.id === duty.id)?.nameEn ?? "town"}` :
+      "out and about";
+    bus.emit("npc:talk", { agentId, activityZh, activityEn });
   }
 
   private enterBuilding(id: string): void {
     if (this.uiLock) return;
+    const b = BUILDINGS.find((bb) => bb.id === id);
+    if (!b) return;
+    const interior = INTERIOR_BY_BUILDING.get(id);
+    if (!interior) {
+      this.uiLock = true;
+      audio.page();
+      bus.emit("building:enter", { buildingId: id });
+      return;
+    }
     this.uiLock = true;
-    bus.emit("building:enter", { buildingId: id });
+    audio.door();
+    this.autosave();
+    this.cameras.main.fadeOut(260, 26, 20, 35);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.run("interior", {
+        interiorId: interior.id,
+        returnTx: b.tx,
+        returnTy: b.ty,
+        residents: this.residentsInside(id),
+      });
+      this.scene.sleep();
+    });
+  }
+
+  // -------------------------------------------------------------------- farm
+  private cellTile(cell: number): { tx: number; ty: number } {
+    return this.layout.farmSoil[cell];
+  }
+
+  private async initFarm(): Promise<void> {
+    if (currentMode() === "live") {
+      try {
+        const d = await getData<{ crops: { id?: string; title: string; stage: number; total: number }[] }>(
+          "/api/town/farm", "farm.json",
+        );
+        d.crops.slice(0, this.layout.farmSoil.length).forEach((c, i) => {
+          if (c.stage >= 5) return; // already harvested/done
+          this.setCrop({
+            cell: i,
+            title: c.title,
+            progress: Math.max(1, Math.min(4, c.stage)),
+            variety: CROP_VARIETIES[this.hashTitle(c.title) % CROP_VARIETIES.length],
+            taskId: c.id,
+          });
+        });
+        return;
+      } catch {
+        /* fall through to demo */
+      }
+    }
+    for (const c of this.demoCrops) {
+      if (c.progress >= 5) continue;
+      this.setCrop({ cell: c.cell, title: c.title, progress: c.progress, variety: c.variety });
+    }
+  }
+
+  private hashTitle(s: string): number {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  private setCrop(c: Crop): void {
+    const old = this.crops.get(c.cell);
+    old?.sprite?.destroy();
+    const { tx, ty } = this.cellTile(c.cell);
+    const frame = STAGE_ROW[c.progress] + c.variety;
+    const spr = this.add.image(tx * TILE + 8, (ty + 1) * TILE, "ts-lpc-crops", frame)
+      .setOrigin(0.5, 1).setDepth((ty + 1) * TILE - 1);
+    this.crops.set(c.cell, { ...c, sprite: spr });
+  }
+
+  private removeCrop(cell: number): void {
+    this.crops.get(cell)?.sprite?.destroy();
+    this.crops.delete(cell);
+  }
+
+  private nearestFarmCell(): number | null {
+    let best: number | null = null;
+    let bestD = TILE * 1.6;
+    for (let i = 0; i < this.layout.farmSoil.length; i++) {
+      const { tx, ty } = this.layout.farmSoil[i];
+      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, tx * TILE + 8, ty * TILE + 8);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  private async plantCrop(cell: number, title: string): Promise<void> {
+    this.uiLock = false;
+    if (!title.trim()) return;
+    const variety = CROP_VARIETIES[this.hashTitle(title) % CROP_VARIETIES.length];
+    if (currentMode() === "live") {
+      const r = await postData<{ id?: string }>("/api/town/farm/plant", { title });
+      this.setCrop({ cell, title, progress: 1, variety, taskId: r?.id });
+    } else {
+      this.demoCrops = this.demoCrops.filter((c) => c.cell !== cell);
+      this.demoCrops.push({ cell, title, progress: 1, variety, createdDay: this.day });
+      this.setCrop({ cell, title, progress: 1, variety });
+    }
+    audio.plant();
+    bus.emit("toast", { text: `种下任务：${title}` });
+    this.autosave();
+  }
+
+  private async waterCrop(crop: Crop): Promise<void> {
+    if (crop.progress >= 4) return;
+    crop.progress += 1;
+    if (currentMode() === "live" && crop.taskId) {
+      void postData("/api/town/farm/water", { id: crop.taskId });
+    } else {
+      const d = this.demoCrops.find((c) => c.cell === crop.cell);
+      if (d) d.progress = crop.progress;
+    }
+    this.setCrop(crop);
+    audio.water();
+    bus.emit("toast", { text: `浇水：${crop.title}（${crop.progress}/4）` });
+    this.autosave();
+  }
+
+  private async harvestCrop(crop: Crop): Promise<void> {
+    if (currentMode() === "live" && crop.taskId) {
+      void postData("/api/town/farm/harvest", { id: crop.taskId });
+    } else {
+      const d = this.demoCrops.find((c) => c.cell === crop.cell);
+      if (d) d.progress = 5;
+    }
+    const { tx, ty } = this.cellTile(crop.cell);
+    const pop = this.add.image(tx * TILE + 8, ty * TILE, "ts-lpc-crops", PRODUCT_ROW + crop.variety)
+      .setOrigin(0.5, 1).setDepth(99999);
+    this.tweens.add({
+      targets: pop, y: pop.y - 18, alpha: 0, duration: 900, ease: "Cubic.easeOut",
+      onComplete: () => pop.destroy(),
+    });
+    this.removeCrop(crop.cell);
+    this.harvested += 1;
+    audio.harvest();
+    bus.emit("toast", { text: `收获：${crop.title} ✅（累计 ${this.harvested}）` });
+    this.autosave();
+  }
+
+  // -------------------------------------------------------------------- save
+  private autosave(): void {
+    writeSave({
+      version: 1,
+      day: this.day,
+      clockMin: this.clockMin,
+      px: this.player.x,
+      py: this.player.y,
+      harvested: this.harvested,
+      demoCrops: this.demoCrops,
+      lang: "zh",
+    });
   }
 
   // ------------------------------------------------------------------ update
@@ -398,7 +632,6 @@ export class TownScene extends Phaser.Scene {
     return this.collide[ty][tx];
   }
 
-  /** axis-separated grid collision movement */
   private moveWithCollision(sprite: Phaser.Physics.Arcade.Sprite, vx: number, vy: number, dt: number): void {
     const nx = sprite.x + vx * dt;
     const ny = sprite.y + vy * dt;
@@ -439,6 +672,7 @@ export class TownScene extends Phaser.Scene {
       this.moveWithCollision(this.player, vx, vy, dt);
       const dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? "right" : "left") : vy > 0 ? "down" : "up";
       this.player.play(`player-walk-${dir}`, true);
+      audio.step();
       bus.emit("player:moved", { tx: Math.floor(this.player.x / TILE), ty: Math.floor(this.player.y / TILE) });
     } else {
       const cur = this.player.anims.currentAnim?.key ?? "player-walk-down";
@@ -449,11 +683,29 @@ export class TownScene extends Phaser.Scene {
       this.following = true;
       this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     }
-    if (Phaser.Input.Keyboard.JustDown(this.wasd.E) && !this.uiLock) {
-      // nearest npc within reach, else nearest door
+    if (Phaser.Input.Keyboard.JustDown(this.wasd.E) && !this.uiLock && this.time.now > this.actionCooldown) {
+      this.actionCooldown = this.time.now + 350;
+      // 1) farm action
+      const cell = this.nearestFarmCell();
+      if (cell !== null) {
+        const crop = this.crops.get(cell);
+        if (!crop) {
+          this.uiLock = true;
+          bus.emit("farm:plant-request", { cell });
+          return;
+        }
+        if (crop.progress >= 4) {
+          void this.harvestCrop(crop);
+        } else {
+          void this.waterCrop(crop);
+        }
+        return;
+      }
+      // 2) npc
       let best: Npc | null = null;
       let bestD = TILE * 2.6;
       for (const n of this.npcs) {
+        if (n.state === "inside") continue;
         const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, n.sprite.x, n.sprite.y);
         if (d < bestD) {
           bestD = d;
@@ -464,6 +716,7 @@ export class TownScene extends Phaser.Scene {
         this.tryTalk(best.def.id);
         return;
       }
+      // 3) door
       for (const z of this.doorZones) {
         if (z.rect.contains(this.player.x, this.player.y)) {
           this.enterBuilding(z.id);
@@ -473,9 +726,88 @@ export class TownScene extends Phaser.Scene {
     }
   }
 
+  // ---------------------------------------------------------------- schedule
+  private applyDuty(n: Npc, duty: Duty): void {
+    n.duty = duty.kind;
+    const exitInside = () => {
+      if (n.state === "inside" && n.insideBuilding) {
+        const b = BUILDINGS.find((bb) => bb.id === n.insideBuilding)!;
+        n.sprite.setPosition(b.tx * TILE + 8, (b.ty + 1) * TILE - 2);
+        n.sprite.setVisible(true).setAlpha(0);
+        n.label.setVisible(true);
+        this.tweens.add({ targets: n.sprite, alpha: 1, duration: 400 });
+        n.insideBuilding = null;
+      }
+    };
+
+    const goTo = (tx: number, ty: number, then: "inside" | "idle", buildingId?: string) => {
+      exitInside();
+      const sx = Math.floor(n.sprite.x / TILE);
+      const sy = Math.floor(n.sprite.y / TILE);
+      const path = findPath(this.collide, sx, sy, tx, ty);
+      if (!path || path.length === 0) {
+        if (then === "inside" && buildingId) this.hideInside(n, buildingId);
+        else n.state = "idle";
+        return;
+      }
+      n.path = path;
+      n.pathIdx = 0;
+      n.state = "path";
+      (n as Npc & { after?: { kind: string; buildingId?: string } }).after = undefined;
+      if (then === "inside" && buildingId) {
+        (n as Npc & { after?: { kind: string; buildingId?: string } }).after = { kind: "inside", buildingId };
+      }
+    };
+
+    switch (duty.kind) {
+      case "building": {
+        const b = BUILDINGS.find((bb) => bb.id === duty.id);
+        if (!b) return;
+        if (n.insideBuilding === duty.id) return;
+        goTo(b.tx, b.ty, "inside", duty.id);
+        break;
+      }
+      case "inn": {
+        const inn = BUILDINGS.find((bb) => bb.id === "agent-inn")!;
+        if (n.insideBuilding === "agent-inn") return;
+        goTo(inn.tx, inn.ty, "inside", "agent-inn");
+        break;
+      }
+      case "plaza": {
+        goTo(PLAZA.tx + Math.floor(Math.random() * 5) - 2, PLAZA.ty + Math.floor(Math.random() * 3) - 1, "idle");
+        break;
+      }
+      default: {
+        exitInside();
+        goTo(n.def.tx, n.def.ty, "idle");
+      }
+    }
+  }
+
+  private hideInside(n: Npc, buildingId: string): void {
+    n.state = "inside";
+    n.insideBuilding = buildingId;
+    n.path = null;
+    this.tweens.add({
+      targets: n.sprite, alpha: 0, duration: 350,
+      onComplete: () => {
+        n.sprite.setVisible(false);
+        n.label.setVisible(false);
+        n.emote.setVisible(false);
+      },
+    });
+  }
+
   private updateNpcs(time: number): void {
     const dt = this.game.loop.delta / 1000;
+    const hour = Math.floor(this.clockMin / 60);
     for (const n of this.npcs) {
+      const duty = dutyFor(n.def.id, hour);
+      if (duty.kind !== n.duty && n.state !== "talk") {
+        this.applyDuty(n, duty);
+      }
+      if (n.state === "inside") continue;
+
       n.label.setPosition(n.sprite.x, n.sprite.y - 24);
       n.emote.setPosition(n.sprite.x, n.sprite.y - 34);
       const near = Phaser.Math.Distance.Between(this.player.x, this.player.y, n.sprite.x, n.sprite.y) < TILE * 3.2;
@@ -489,12 +821,38 @@ export class TownScene extends Phaser.Scene {
         n.emote.stop();
       }
       if (n.state === "talk") continue;
+
+      if (n.state === "path" && n.path) {
+        const wp = n.path[n.pathIdx];
+        if (!wp) {
+          n.path = null;
+          const after = (n as Npc & { after?: { kind: string; buildingId?: string } }).after;
+          if (after?.kind === "inside" && after.buildingId) this.hideInside(n, after.buildingId);
+          else n.state = "idle";
+          continue;
+        }
+        const wx = wp.x * TILE + 8;
+        const wy = wp.y * TILE + 8;
+        const d = Phaser.Math.Distance.Between(n.sprite.x, n.sprite.y, wx, wy);
+        if (d < 3) {
+          n.pathIdx += 1;
+        } else {
+          const sp = 44;
+          const vx = ((wx - n.sprite.x) / d) * sp;
+          const vy = ((wy - n.sprite.y) / d) * sp;
+          this.moveWithCollision(n.sprite, vx, vy, dt);
+          const dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? "right" : "left") : vy > 0 ? "down" : "up";
+          n.sprite.play(`${n.def.id}-walk-${dir}`, true);
+        }
+        continue;
+      }
+
+      // free wander
       if (time > n.nextThink) {
         n.nextThink = time + 2200 + Math.random() * 3800;
         if (n.state === "idle" && Math.random() < 0.65) {
-          // wander within 4 tiles of anchor
-          const ax = n.def.tx * TILE + 8;
-          const ay = n.def.ty * TILE + 8;
+          const ax = n.sprite.x;
+          const ay = n.sprite.y;
           for (let tries = 0; tries < 6; tries++) {
             const tx = ax + (Math.random() * 8 - 4) * TILE;
             const ty = ay + (Math.random() * 6 - 3) * TILE;
@@ -524,7 +882,7 @@ export class TownScene extends Phaser.Scene {
           const dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? "right" : "left") : vy > 0 ? "down" : "up";
           n.sprite.play(`${n.def.id}-walk-${dir}`, true);
         }
-      } else {
+      } else if (n.state === "idle") {
         const cur = n.sprite.anims.currentAnim?.key ?? `${n.def.id}-walk-down`;
         const dir = cur.split("-").pop() ?? "down";
         n.sprite.play(`${n.def.id}-idle-${dir}`, true);
@@ -535,17 +893,27 @@ export class TownScene extends Phaser.Scene {
   private updateHint(): void {
     let hint = "";
     if (!this.uiLock) {
-      for (const n of this.npcs) {
-        if (Phaser.Math.Distance.Between(this.player.x, this.player.y, n.sprite.x, n.sprite.y) < TILE * 3.2) {
-          hint = `按 E 与 ${n.def.nameZh} 对话`;
-          break;
+      const cell = this.nearestFarmCell();
+      if (cell !== null) {
+        const crop = this.crops.get(cell);
+        if (!crop) hint = "按 E 在这块田里种下一个任务";
+        else if (crop.progress >= 4) hint = `按 E 收获「${crop.title}」`;
+        else hint = `按 E 给「${crop.title}」浇水（${crop.progress}/4）`;
+      }
+      if (!hint) {
+        for (const n of this.npcs) {
+          if (n.state === "inside") continue;
+          if (Phaser.Math.Distance.Between(this.player.x, this.player.y, n.sprite.x, n.sprite.y) < TILE * 3.2) {
+            hint = `按 E 与 ${n.def.nameZh} 对话`;
+            break;
+          }
         }
       }
       if (!hint) {
         for (const z of this.doorZones) {
           if (z.rect.contains(this.player.x, this.player.y)) {
             const b = BUILDINGS.find((bb) => bb.id === z.id)!;
-            hint = `按 E 进入 ${b.nameZh}`;
+            hint = INTERIOR_BY_BUILDING.has(b.id) ? `按 E 走进 ${b.nameZh}` : `按 E 查看 ${b.nameZh}`;
             break;
           }
         }

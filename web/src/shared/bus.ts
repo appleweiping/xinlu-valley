@@ -1,8 +1,9 @@
 /** Tiny typed event bus bridging Phaser (game world) and React (UI layer). */
 
 export type BusEvents = {
-  "npc:talk": { agentId: string };
+  "npc:talk": { agentId: string; activityZh?: string; activityEn?: string };
   "building:enter": { buildingId: string };
+  "building:enter-panel": { panel: string };
   "building:hover": { buildingId: string | null };
   "dialogue:closed": undefined;
   "panel:closed": undefined;
@@ -10,6 +11,10 @@ export type BusEvents = {
   "mode:detected": { live: boolean };
   "player:moved": { tx: number; ty: number };
   "toast": { text: string };
+  "sleep:request": undefined;
+  "sleep:done": { day: number };
+  "farm:plant-request": { cell: number };
+  "farm:plant-confirm": { cell: number; title: string };
 };
 
 type Handler<T> = (payload: T) => void;

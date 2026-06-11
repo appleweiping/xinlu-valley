@@ -1,7 +1,15 @@
+import { useState } from "react";
+import { audio } from "@/game/audio";
 import { useUI } from "./store";
 
 export function Hud() {
   const { clock, live, lang, setLang } = useUI();
+  const [muted, setMuted] = useState(audio.muted);
+  const toggleMute = () => {
+    const m = !muted;
+    setMuted(m);
+    audio.setMuted(m);
+  };
   const hh = String(clock.hour).padStart(2, "0");
   const mm = String(Math.floor(clock.minute / 10) * 10).padStart(2, "0");
   return (
@@ -26,6 +34,10 @@ export function Hud() {
           </span>
           <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }} onClick={() => setLang(lang === "zh" ? "en" : "zh")}>
             {lang === "zh" ? "EN" : "中"}
+          </button>
+          <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }} onClick={toggleMute}
+            title={muted ? "开启声音" : "静音"}>
+            {muted ? "🔇" : "🔊"}
           </button>
         </div>
       </div>

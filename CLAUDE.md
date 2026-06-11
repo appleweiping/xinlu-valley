@@ -50,5 +50,12 @@ The v2 Godot era is preserved at git tag `v2-godot-era`.
 
 - `cd web && npx tsc --noEmit` must pass.
 - `python -m py_compile backend/main.py backend/town_api.py` must pass.
-- Visual check: load /play.html, confirm no console errors, world renders,
-  a building panel opens with data.
+- **E2E smoke**: with backend + dev server running, open
+  `/play.html?v4test=1` in any browser — the in-page harness drives
+  schedules/interiors/farm/dialogue/audio/save and streams evidence to
+  `workspace/v4-report.jsonl` + `workspace/v4-shots/*.png` via the bridge.
+  Read those files to verify; works even when browser tooling is flaky.
+- Browser-tooling gotchas: hidden tabs freeze Phaser's RAF (scene stuck at
+  INIT — not a code bug); the loader runs one big batch
+  (maxParallelDownloads: 128) because batch-2 scheduling stalled in
+  embedded browsers.

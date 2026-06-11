@@ -305,21 +305,49 @@
   {
     "key": "ts-walls",
     "url": "assets/core/interior/walls.png",
-    "type": "image"
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
   },
   {
-    "key": "ts-floor-carpet",
-    "url": "assets/core/interior/floor-carpet.png",
-    "type": "image"
+    "key": "ts-walls-warm",
+    "url": "assets/core/interior/walls-warm.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
   },
   {
-    "key": "ts-floor-flooring",
-    "url": "assets/core/interior/floor-flooring.png",
-    "type": "image"
+    "key": "decor-door",
+    "url": "assets/core/interior/door.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
   },
   {
     "key": "ts-floor-wooden",
     "url": "assets/core/interior/floor-wooden.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "prop-bookshelf",
+    "url": "assets/core/props/bookshelf.png",
+    "type": "image"
+  },
+  {
+    "key": "prop-status-screen",
+    "url": "assets/core/props/status-screen.png",
+    "type": "image"
+  },
+  {
+    "key": "prop-forge",
+    "url": "assets/core/props/forge.png",
+    "type": "image"
+  },
+  {
+    "key": "prop-kanban",
+    "url": "assets/core/props/kanban.png",
     "type": "image"
   },
   {

@@ -167,8 +167,8 @@ const ROADMAP: { zh: string; en: string; date: string; done: boolean; descZh: st
   { zh: "v1 · React/Phaser 原型", en: "v1 · React/Phaser prototype", date: "2026-05", done: true, descZh: "第一版竖切：地图、随机游走 NPC、只读适配器。", descEn: "First slice: map, random-walk NPCs, read-only adapters." },
   { zh: "v2 · Godot 重建（35 栋建筑）", en: "v2 · Godot rebuild (35 buildings)", date: "2026-05", done: true, descZh: "FastAPI 180+ 端点 + 真实数据适配器；绘本画风（后被推翻）。", descEn: "FastAPI 180+ endpoints + real adapters; storybook art (later replaced)." },
   { zh: "v3 · 星露谷式 Web 重生", en: "v3 · Stardew-style web rebirth", date: "2026-06", done: true, descZh: "迁居 D:\\Company；真像素美术；八位居民各有专属物种；浏览器即点即玩；agentmemory 修复加固。", descEn: "Moved to D:\\Company; true pixel art; eight residents with unique species; instant browser play; agentmemory hardened." },
-  { zh: "v4 · 室内与活水（下一个大版本）", en: "v4 · Interiors & Living Data (next)", date: "排队中", done: false, descZh: "六个以上可进入室内（书架长廊/锻造台/状态大厅）；作物=真实任务双向联动；NPC 日程与寻路；联机模式 LLM 对话；音效与存档。", descEn: "6+ enterable interiors (library stacks, forge, status hall); crops bound to real tasks both ways; NPC schedules & pathfinding; LLM dialogue in live mode; audio & save system." },
-  { zh: "v5 · 矿洞与季节（储备）", en: "v5 · Mines & Seasons (backlog)", date: "构想", done: false, descZh: "技术债矿洞逐层下挖、日志钓鱼、四季换装、发布日=丰收节、成就图鉴。", descEn: "Tech-debt mines, log fishing, four seasons, release-day festivals, achievements." },
+  { zh: "v4 · 室内与活水", en: "v4 · Interiors & Living Data", date: "2026-06", done: true, descZh: "六个可进入室内（书架长廊/锻造间/状态大厅/卧室存档）；作物=真实任务双向联动；NPC 日程与 A* 寻路；对话桥可提问；全 CC0 音频；存档系统。", descEn: "Six enterable interiors (stacks, forge, status hall, bedroom saves); crops bound to real tasks; NPC schedules & A* pathfinding; ask-the-agent dialogue; CC0 audio; save system." },
+  { zh: "v5 · 矿洞与季节（下一个大版本）", en: "v5 · Mines & Seasons (next)", date: "排队中", done: false, descZh: "技术债矿洞逐层下挖、日志钓鱼图鉴、四季换装与降雪、发布日丰收节、成就墙与建设点升级。", descEn: "Tech-debt mines dug layer by layer, log-fishing almanac, four seasons with snowfall, release-day festivals, achievement wall & building upgrades." },
 ];
 
 function Landing() {

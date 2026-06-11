@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -237,22 +238,214 @@ def market_panel() -> dict:
 
 
 # ----------------------------------------------------------------------- farm
+# Crops ARE tasks: the ledger lives in workspace/tasks.json (project-local
+# write area). plant = create, water = advance progress, harvest = done.
+
+def _load_ledger() -> dict:
+    try:
+        data = json.loads(TASKS_FILE.read_text(encoding="utf-8", errors="ignore"))
+        if isinstance(data, list):
+            return {"tasks": data}
+        if isinstance(data, dict) and isinstance(data.get("tasks"), list):
+            return data
+    except Exception:
+        pass
+    return {"tasks": []}
+
+
+def _save_ledger(ledger: dict) -> None:
+    TASKS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    TASKS_FILE.write_text(json.dumps(ledger, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _task_stage(t: dict) -> int:
+    p = t.get("progress")
+    if isinstance(p, int) and 1 <= p <= 5:
+        return p
+    status = str(t.get("status", "open")).lower()
+    return {"open": 1, "todo": 1, "in_progress": 3, "doing": 3, "review": 4, "done": 5, "completed": 5}.get(status, 2)
+
+
 @router.get("/farm")
 def farm_panel() -> dict:
     crops: list[dict] = []
-    if TASKS_FILE.exists():
-        try:
-            data = json.loads(TASKS_FILE.read_text(encoding="utf-8", errors="ignore"))
-            tasks = data if isinstance(data, list) else data.get("tasks", [])
-            for t in tasks[:12]:
-                status = str(t.get("status", "open")).lower()
-                stage = {"open": 1, "todo": 1, "in_progress": 3, "doing": 3, "review": 4, "done": 5, "completed": 5}.get(status, 2)
-                crops.append({
-                    "title": str(t.get("title", t.get("id", "任务")))[:60],
-                    "stage": stage,
-                    "total": 5,
-                    "kind": status,
-                })
-        except Exception:
-            pass
+    for t in _load_ledger()["tasks"][:24]:
+        crops.append({
+            "id": str(t.get("id", "")),
+            "title": str(t.get("title", t.get("id", "任务")))[:60],
+            "stage": _task_stage(t),
+            "total": 5,
+            "kind": str(t.get("status", "open")),
+        })
     return {"crops": crops}
+
+
+@router.post("/farm/plant")
+def farm_plant(body: dict) -> dict:
+    title = str(body.get("title", "")).strip()[:120]
+    if not title:
+        return {"ok": False, "error": "title required"}
+    ledger = _load_ledger()
+    task = {
+        "id": uuid.uuid4().hex[:10],
+        "title": title,
+        "status": "open",
+        "progress": 1,
+        "created": datetime.now().isoformat(timespec="seconds"),
+        "updated": datetime.now().isoformat(timespec="seconds"),
+        "source": "newroad-valley-farm",
+    }
+    ledger["tasks"].append(task)
+    _save_ledger(ledger)
+    return {"ok": True, "id": task["id"]}
+
+
+@router.post("/farm/water")
+def farm_water(body: dict) -> dict:
+    tid = str(body.get("id", ""))
+    ledger = _load_ledger()
+    for t in ledger["tasks"]:
+        if str(t.get("id")) == tid:
+            t["progress"] = min(4, _task_stage(t) + 1)
+            t["status"] = "in_progress"
+            t["updated"] = datetime.now().isoformat(timespec="seconds")
+            _save_ledger(ledger)
+            return {"ok": True, "progress": t["progress"]}
+    return {"ok": False, "error": "task not found"}
+
+
+@router.post("/farm/harvest")
+def farm_harvest(body: dict) -> dict:
+    tid = str(body.get("id", ""))
+    ledger = _load_ledger()
+    for t in ledger["tasks"]:
+        if str(t.get("id")) == tid:
+            t["progress"] = 5
+            t["status"] = "done"
+            t["updated"] = datetime.now().isoformat(timespec="seconds")
+            _save_ledger(ledger)
+            return {"ok": True}
+    return {"ok": False, "error": "task not found"}
+
+
+# ------------------------------------------------------------------- dialogue
+PERSONAS = {
+    "opus": "Opus 总舵主，镇长兼首席架构师。沉稳、爱用建筑比喻。",
+    "codex": "Codex 协调官，广场调度员。干脆利落，关心任务队列与吞吐。",
+    "sonnet": "Sonnet 审查员，记忆图书馆管理员。温和书卷气，引用馆藏记忆。",
+    "haiku": "Haiku 闪电侠，小镇信使。说话极短，三句以内。",
+    "deepseek": "鲸鱼 DeepSeek，重载苦力。豪爽，张口就是大批量。",
+    "aris": "ARIS 研究员，研究大厅学者。严谨，强调可复现。",
+    "pixelcat": "像素猫，技能工坊匠人。句尾偶尔带'喵'。",
+    "fable": "Fable 说书狐，镇上书记官。爱把工作讲成寓言故事。",
+}
+
+
+def _llm_reply(agent_id: str, message: str) -> str | None:
+    """Use an OpenAI-compatible channel if a key is configured; else None."""
+    key = os.getenv("DEEPSEEK_API_KEY")
+    base, model = "https://api.deepseek.com", "deepseek-chat"
+    if not key:
+        key = os.getenv("OPENAI_API_KEY")
+        base = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    if not key:
+        return None
+    persona = PERSONAS.get(agent_id, "小镇居民")
+    try:
+        r = httpx.post(
+            f"{base}/chat/completions",
+            headers={"Authorization": f"Bearer {key}"},
+            json={
+                "model": model,
+                "max_tokens": 220,
+                "messages": [
+                    {"role": "system", "content": (
+                        f"你是像素小镇『新路谷物语』的居民：{persona} "
+                        "用中文回答，口语化，不超过三句话，贴合人设。"
+                        "这座小镇映射主人真实的本地工作系统（记忆库/wiki/科研/技能/代码仓库）。")},
+                    {"role": "user", "content": message[:500]},
+                ],
+            },
+            timeout=22.0,
+        )
+        r.raise_for_status()
+        return str(r.json()["choices"][0]["message"]["content"]).strip()[:600]
+    except Exception:
+        return None
+
+
+def _grounded_reply(agent_id: str, message: str) -> str:
+    """No LLM key — answer from real local data, in persona."""
+    try:
+        if agent_id == "sonnet":
+            found = _mcp_call("memory_smart_search", {"query": message[:120], "limit": 3}, timeout=8.0)
+            titles = [str(x.get("title", ""))[:40] for x in (found or {}).get("results", [])][:3]
+            if titles:
+                return "我翻了翻书架，相关的记忆有：" + "；".join(f"《{t}…》" for t in titles) + "。要细看就去馆里的书架。"
+            return "书架上暂时没有与此相关的记忆。等这件事做完，记得让它入册。"
+        if agent_id == "codex":
+            repos = code_panel()["repos"]
+            dirty = [r["name"] for r in repos if r.get("dirty")]
+            msg = f"镇里 {len(repos)} 个仓库在册"
+            return msg + ("，其中未提交的有：" + "、".join(dirty[:4]) + "。先收衣服再下雨。" if dirty else "，全部干净。队列通畅。")
+        if agent_id == "opus":
+            svcs = townhall_panel()["services"]
+            bad = [s["name"] for s in svcs if not s["ok"]]
+            return ("镇里各系统运转正常，地基很稳。" if not bad else "有几处需要修缮：" + "、".join(bad) + "。") + "想看细节就到市政厅的大屏。"
+        if agent_id == "aris":
+            boards = research_panel()["boards"][:3]
+            names = "、".join(b["name"] for b in boards)
+            return f"研究大厅最近的活跃看板：{names}。结论之前，先问三遍：可复现吗？"
+        if agent_id == "pixelcat":
+            total = skills_panel()["total"]
+            return f"工坊里登记着 {total} 个技能配方喵。你说的这个，要不要锻成一个新配方？"
+        if agent_id == "deepseek":
+            r = httpx.get(f"{AGENTMEMORY}/agentmemory/memories", params={"count": "true"}, timeout=5.0)
+            total = r.json().get("total", "很多") if r.status_code == 200 else "很多"
+            return f"记忆海里已经有 {total} 条了。这点活儿？一口吞。"
+        if agent_id == "haiku":
+            return "收到。马上办。完毕。"
+        if agent_id == "fable":
+            return "这事让我想起一则寓言：bug 开头，教训收尾。等你做完，我把它写进今天的镇志。"
+    except Exception:
+        pass
+    return "（点点头）这事记下了。回头到对应的建筑里看看吧。"
+
+
+# ----------------------------------------------------------------- e2e smoke
+REPORT_FILE = PROJECT_ROOT / "workspace" / "v4-report.jsonl"
+SHOTS_DIR = PROJECT_ROOT / "workspace" / "v4-shots"
+
+
+@router.post("/test-report")
+def test_report(body: dict) -> dict:
+    """In-game smoke harness sink: steps land as JSONL + canvas PNGs on disk,
+    so verification survives any browser/tooling crash mid-run."""
+    import base64
+
+    REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    step = str(body.get("step", "?"))[:60]
+    entry = {
+        "step": step,
+        "at": datetime.now().isoformat(timespec="seconds"),
+        "data": body.get("data"),
+    }
+    with REPORT_FILE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    img = body.get("image")
+    if isinstance(img, str) and img.startswith("data:image/png;base64,"):
+        SHOTS_DIR.mkdir(parents=True, exist_ok=True)
+        safe = re.sub(r"[^\w-]", "_", step)
+        (SHOTS_DIR / f"{safe}.png").write_bytes(base64.b64decode(img.split(",", 1)[1]))
+    return {"ok": True}
+
+
+@router.post("/dialogue")
+def dialogue(body: dict) -> dict:
+    agent_id = str(body.get("agentId", ""))
+    message = str(body.get("message", "")).strip()
+    if not message:
+        return {"reply": "（歪了歪头）你想说什么？"}
+    reply = _llm_reply(agent_id, message) or _grounded_reply(agent_id, message)
+    return {"reply": reply}

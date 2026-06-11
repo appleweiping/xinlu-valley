@@ -256,14 +256,47 @@ def build_interiors() -> None:
     walls = MYSTIC / "sprites/tilesets/walls"
     i = "core/interior"
     if (walls / "walls.png").exists():
-        copy(walls / "walls.png", f"{i}/walls.png", "ts-walls")
-    if floors.exists():
-        for f in sorted(floors.glob("*.png")):
-            copy(f, f"{i}/floor-{f.stem}.png", f"ts-floor-{f.stem}")
-    decor = MYSTIC / "sprites/objects/decor_16x16.png"
-    if decor.exists():
-        copy(decor, f"{i}/decor.png", "decor-interior", "spritesheet",
+        copy(walls / "walls.png", f"{i}/walls.png", "ts-walls",
+             "spritesheet", frameWidth=16, frameHeight=16)
+        # warm variant: shift the cold blue stone toward cozy brown for homes
+        cold = Image.open(walls / "walls.png").convert("RGBA")
+        warm = shift_hue(cold, dh=160.0, ds=0.55, dv=1.06,
+                         hue_range=(180.0, 280.0), min_sat=0.06)
+        warm.save(OUT / f"{i}/walls-warm.png")
+        emit("ts-walls-warm", f"{i}/walls-warm.png", "spritesheet",
              frameWidth=16, frameHeight=16)
+    if (walls / "wooden_door.png").exists():
+        copy(walls / "wooden_door.png", f"{i}/door.png", "decor-door",
+             "spritesheet", frameWidth=16, frameHeight=16)
+    # NOTE: carpet.png and decor_16x16.png are premium-watermarked in the
+    # free tier — only the wooden floor ships. Rugs come from the Sprout
+    # furniture sheet instead.
+    wooden = floors / "wooden.png"
+    if wooden.exists():
+        copy(wooden, f"{i}/floor-wooden.png", "ts-floor-wooden",
+             "spritesheet", frameWidth=16, frameHeight=16)
+    for stale in ["floor-carpet.png", "floor-flooring.png", "decor.png"]:
+        leftover = CORE / "interior" / stale
+        if leftover.exists():
+            leftover.unlink()
+    build_props()
+
+
+def build_props() -> None:
+    """Hand-drawn interior props the packs lack: bookshelf, status screen,
+    forge, kanban board (same matrix DSL as tools/creatures.py)."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from props import PROPS, draw_prop
+
+    outdir = CORE / "props"
+    outdir.mkdir(parents=True, exist_ok=True)
+    for pid in PROPS:
+        img = draw_prop(pid)
+        rel = f"core/props/{pid}.png"
+        img.save(OUT / rel)
+        emit(f"prop-{pid}", rel, "image")
 
 
 def build_open() -> None:
