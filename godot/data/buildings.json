@@ -52,7 +52,7 @@
     "color": "#b8d8ff",
     "backend": "code-workshop",
     "safety": "read-only-plus-draft",
-    "real_sources": ["D:\\Game_develop", "D:\\Research", "D:\\devtools"]
+    "real_sources": ["D:\\Company", "D:\\Research", "D:\\devtools"]
   },
   {
     "id": "github-harbor",
@@ -74,7 +74,7 @@
     "color": "#9fd0cb",
     "backend": "terminal-control",
     "safety": "confirm-required-allowlisted",
-    "real_sources": ["D:\\Game_develop\\ai-town", "workspace\\terminal-logs"]
+    "real_sources": ["D:\\Company\\xinlu-valley", "workspace\\terminal-logs"]
   },
   {
     "id": "system-monitor",
@@ -184,7 +184,7 @@
     "color": "#c7d2fe",
     "backend": "project-management-hall",
     "safety": "read-only-plus-draft",
-    "real_sources": ["D:\\Game_develop", "D:\\Research", "workspace\\tasks", "workspace\\project-briefs", "git metadata"]
+    "real_sources": ["D:\\Company", "D:\\Research", "workspace\\tasks", "workspace\\project-briefs", "git metadata"]
   },
   {
     "id": "download-station",
@@ -195,7 +195,7 @@
     "color": "#ffd6a5",
     "backend": "download-station",
     "safety": "read-only-plus-draft",
-    "real_sources": ["Downloads", "D:\\Downloads", "D:\\Game_develop\\Downloads", "art", "workspace\\download-intake"]
+    "real_sources": ["Downloads", "D:\\Downloads", "art", "workspace\\download-intake"]
   },
   {
     "id": "asset-gallery",
@@ -305,7 +305,7 @@
     "color": "#cdeac0",
     "backend": "backup-station",
     "safety": "read-only-plus-draft",
-    "real_sources": ["D:\\Game_develop\\ai-town", "D:\\research\\Vipin's Knowledgebase\\memory", "godot\\data", "docs", "workspace\\backup-plans", "D:\\Backups"]
+    "real_sources": ["D:\\Company\\xinlu-valley", "D:\\research\\Vipin's Knowledgebase\\memory", "godot\\data", "docs", "workspace\\backup-plans", "D:\\Backups"]
   },
   {
     "id": "goal-tower",
@@ -349,7 +349,7 @@
     "color": "#ffb7b2",
     "backend": "file-vault",
     "safety": "read-only-plus-draft",
-    "real_sources": ["D:\\Research", "D:\\Game_develop", "D:\\Company", "D:\\agent-resources", "D:\\devtools"]
+    "real_sources": ["D:\\Research", "D:\\Company", "D:\\agent-resources", "D:\\devtools"]
   },
   {
     "id": "research-hall",

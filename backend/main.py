@@ -146,7 +146,6 @@ FILE_VAULT_ITEM_CACHE: dict[str, dict] = {}
 PROJECT_PATH_CACHE: dict[str, str] = {}
 FILE_VAULT_ROOTS = [
     {"id": "research", "name": "Research", "path": RESEARCH_ROOT},
-    {"id": "game-dev", "name": "Game Development", "path": Path(r"D:\Game_develop")},
     {"id": "company", "name": "Company", "path": Path(r"D:\Company")},
     {"id": "knowledgebase", "name": "Knowledgebase", "path": KNOWLEDGE_BASE_DIR},
     {"id": "agent-resources", "name": "Agent Resources", "path": Path(r"D:\agent-resources")},
@@ -156,7 +155,6 @@ FILE_VAULT_ROOTS = [
 DOWNLOAD_STATION_ROOTS = [
     {"id": "user-downloads", "name": "User Downloads", "path": Path.home() / "Downloads"},
     {"id": "d-downloads", "name": "D Downloads", "path": Path(r"D:\Downloads")},
-    {"id": "game-downloads", "name": "Game Development Downloads", "path": Path(r"D:\Game_develop\Downloads")},
     {"id": "ai-town-art", "name": "AI Town Art Imports", "path": PROJECT_ROOT / "art"},
     {"id": "ai-town-assets", "name": "AI Town Asset Notes", "path": PROJECT_ROOT / "workspace" / "asset-intake"},
 ]
@@ -2000,27 +1998,15 @@ def default_workspaces() -> list[dict]:
             "safety": "allowlisted-lazy-read",
         },
         {
-            "id": "game-dev",
-            "name": "Game Development",
-            "path": r"D:\Game_develop",
-            "kind": "development",
-            "role": "local game and software projects",
-            "enabled": True,
-            "file_vault": True,
-            "project_browser": True,
-            "priority": "critical",
-            "safety": "allowlisted-lazy-read",
-        },
-        {
             "id": "company",
             "name": "Company",
             "path": r"D:\Company",
             "kind": "office",
-            "role": "company workspace and office material",
+            "role": "company projects and workspace (includes xinlu-valley)",
             "enabled": True,
             "file_vault": True,
-            "project_browser": False,
-            "priority": "high",
+            "project_browser": True,
+            "priority": "critical",
             "safety": "allowlisted-lazy-read",
         },
         {
@@ -11788,7 +11774,7 @@ def get_agent_tool_invocation_events(invocation_id: str, since: int = 0, limit: 
 
 PROJECT_SCAN_ROOTS = [
     ("AI Town", PROJECT_ROOT),
-    ("Game Development", Path(r"D:\Game_develop")),
+    ("Company", Path(r"D:\Company")),
     ("Research", RESEARCH_ROOT),
     ("Devtools", DEVTOOLS_DIR),
 ]
@@ -15743,7 +15729,6 @@ async def get_inventory():
     projects = []
     project_dirs = [
         ("Research", Path(r"D:\Research")),
-        ("Game Development", Path(r"D:\Game_develop")),
         ("Company", Path(r"D:\Company")),
         ("Terraria Archive", Path(r"D:\Terraria_doc")),
         ("Agent Resources", Path(r"D:\agent-resources")),
