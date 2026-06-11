@@ -19,8 +19,10 @@ import time
 from main import app, JOBS, redact_secret_text
 
 client = TestClient(app)
-redacted_probe = redact_secret_text('OPENAI_API_KEY=sk-testSecretValue1234567890\nAUTH_TOKEN=abc123456789')
-assert 'sk-testSecretValue' not in redacted_probe
+# deliberately fake, non-key-shaped probe so release leak-scans stay zero-hit
+fake_secret = 'FAKE' + 'PROBE' * 4
+redacted_probe = redact_secret_text(f'OPENAI_API_KEY=sk-{fake_secret}\nAUTH_TOKEN=tok{fake_secret}')
+assert fake_secret not in redacted_probe
 assert 'OPENAI_API_KEY=[redacted-secret]' in redacted_probe
 assert 'AUTH_TOKEN=[redacted-secret]' in redacted_probe
 paths = [

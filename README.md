@@ -1,3 +1,5 @@
+![Newroad Valley](docs/media/banner.png)
+
 # 新路谷物语 · Newroad Valley
 
 **A Stardew-style pixel town that runs on a real local work system.**

@@ -841,6 +841,41 @@ def _mirror(img: Image.Image) -> Image.Image:
     return img.transpose(Image.FLIP_LEFT_RIGHT)
 
 
+def _shade(img: Image.Image) -> Image.Image:
+    """Cheap volumetric pass: darken the bottom edge of every colour region
+    (form shadow) and lighten the top edge (rim light). Lifts the sprites
+    from flat stickers to rounded figures without redrawing any matrix."""
+    out = img.copy()
+    src = img.load()
+    px = out.load()
+    w, h = img.size
+
+    def solid(x: int, y: int) -> bool:
+        if x < 0 or y < 0 or x >= w or y >= h:
+            return False
+        p = src[x, y]
+        return p[3] > 0 and (p[0], p[1], p[2]) != OUTLINE[:3]
+
+    for y in range(h):
+        for x in range(w):
+            p = src[x, y]
+            if p[3] == 0 or (p[0], p[1], p[2]) == OUTLINE[:3]:
+                continue
+            below_open = not solid(x, y + 1)
+            above_open = not solid(x, y - 1)
+            r, g, b, a = p
+            if below_open and not above_open:
+                px[x, y] = (int(r * 0.85), int(g * 0.85), int(b * 0.85), a)
+            elif above_open and not below_open:
+                px[x, y] = (
+                    min(255, int(r * 1.08) + 10),
+                    min(255, int(g * 1.08) + 10),
+                    min(255, int(b * 1.08) + 10),
+                    a,
+                )
+    return out
+
+
 def build_sheet(sprite_id: str, scale: int = 2) -> Image.Image:
     """4x4 sheet of 48px cells; rows down/up/left/right, frames 0-3.
 
@@ -850,12 +885,12 @@ def build_sheet(sprite_id: str, scale: int = 2) -> Image.Image:
     """
     spec = SPRITES[sprite_id]
     pal = spec["pal"]
-    front = _draw(spec["front"], pal)
-    front2 = _draw(spec.get("front2", spec["front"]), pal)
-    back = _draw(spec.get("back", spec["front"]), pal)
-    back2 = _draw(spec.get("back2", spec.get("front2", spec["front"])), pal)
-    left = _draw(spec["side"], pal)
-    left2 = _draw(spec.get("side2", spec["side"]), pal)
+    front = _shade(_draw(spec["front"], pal))
+    front2 = _shade(_draw(spec.get("front2", spec["front"]), pal))
+    back = _shade(_draw(spec.get("back", spec["front"]), pal))
+    back2 = _shade(_draw(spec.get("back2", spec.get("front2", spec["front"])), pal))
+    left = _shade(_draw(spec["side"], pal))
+    left2 = _shade(_draw(spec.get("side2", spec["side"]), pal))
     right, right2 = _mirror(left), _mirror(left2)
 
     rows = [

@@ -36,6 +36,7 @@ export class InteriorScene extends Phaser.Scene {
   private interactables: { tx: number; ty: number; labelZh: string; panel?: string; action?: string }[] = [];
   private residents: { id: string; sprite: Phaser.GameObjects.Sprite }[] = [];
   private moveTarget: Phaser.Math.Vector2 | null = null;
+  private playerShadow!: Phaser.GameObjects.Ellipse;
 
   constructor() {
     super("interior");
@@ -44,6 +45,7 @@ export class InteriorScene extends Phaser.Scene {
   init(data: EnterData): void {
     this.enterData = data;
     this.def = INTERIORS.find((i) => i.id === data.interiorId)!;
+    this.leaving = false;
   }
 
   create(): void {
@@ -58,7 +60,10 @@ export class InteriorScene extends Phaser.Scene {
     this.buildFixtures();
     this.buildResidents();
 
-    this.player = this.add.sprite(def.exitX * T + 8, (def.h - 1) * T - 4, "char-player", 0);
+    this.playerShadow = this.add
+      .ellipse(def.exitX * T + 16, (def.h - 1) * T - 4, 16, 6, 0x1c140e, 0.3)
+      .setDepth(2.5);
+    this.player = this.add.sprite(def.exitX * T + 16, (def.h - 1) * T - 16, "char-player", 0);
     this.player.setDepth(this.player.y);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -133,16 +138,19 @@ export class InteriorScene extends Phaser.Scene {
       put(wallKey, WALL.sideR, def.w - 1, y, 1);
       this.collide[y][0] = this.collide[y][def.w - 1] = true;
     }
-    // bottom wall with door gap
+    // bottom wall with a two-tile door gap (one tile was fiddly to thread)
+    const gap = (x: number) => x === def.exitX || x === def.exitX + 1;
     for (let x = 0; x < def.w; x++) {
-      if (x === def.exitX) continue;
+      if (gap(x)) continue;
       const f = x === 0 ? WALL.botL : x === def.w - 1 ? WALL.botR : WALL.botT;
       put(wallKey, f, x, def.h - 1, (def.h - 1) * T + 8);
       this.collide[def.h - 1][x] = true;
     }
-    // door mat
-    this.add.image(def.exitX * T + 8, (def.h - 1) * T + 8, "decor-door", 0)
-      .setDepth(2).setAlpha(0.95);
+    // door mats across the gap
+    for (const x of [def.exitX, def.exitX + 1]) {
+      this.add.image(x * T + 8, (def.h - 1) * T + 8, "decor-door", 0)
+        .setDepth(2).setAlpha(0.95);
+    }
   }
 
   private buildFixtures(): void {
@@ -174,6 +182,7 @@ export class InteriorScene extends Phaser.Scene {
       const station = this.def.stations[id];
       const def = AGENTS.find((a) => a.id === id);
       if (!station || !def) continue;
+      this.add.ellipse(station.tx * T + 8, station.ty * T + 20, 16, 6, 0x1c140e, 0.3).setDepth(2.5);
       const s = this.add.sprite(station.tx * T + 8, station.ty * T + 8, def.texture, 0);
       s.setDepth(s.y);
       this.add
@@ -194,7 +203,7 @@ export class InteriorScene extends Phaser.Scene {
   }
 
   update(): void {
-    if (!this.player) return;
+    if (!this.player || this.leaving) return;
     const speed = 80;
     const dt = this.game.loop.delta / 1000;
     let vx = 0;
@@ -229,9 +238,15 @@ export class InteriorScene extends Phaser.Scene {
       const cur = this.player.anims.currentAnim?.key ?? "player-walk-down";
       this.player.play(`player-idle-${cur.split("-").pop() ?? "down"}`, true);
     }
+    this.playerShadow.setPosition(this.player.x, this.player.y + 12);
 
-    // exit through the door
-    if (this.player.y > (this.def.h - 1) * T + 2) {
+    // exit through the door: standing on the gap tiles near the threshold
+    // is enough — no need to squeeze past the wall row
+    const ptx = Math.floor(this.player.x / T);
+    if (
+      (ptx === this.def.exitX || ptx === this.def.exitX + 1) &&
+      this.player.y >= (this.def.h - 1) * T - 2
+    ) {
       this.leave();
       return;
     }
@@ -280,10 +295,16 @@ export class InteriorScene extends Phaser.Scene {
     }
   }
 
+  private leaving = false;
+
   private leave(): void {
+    // update() hits the threshold every frame — without this guard the
+    // fade restarts forever and the completion callback never fires
+    if (this.leaving) return;
+    this.leaving = true;
     audio.door();
-    this.cameras.main.fadeOut(280, 26, 20, 35);
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+    this.cameras.main.fadeOut(260, 26, 20, 35);
+    this.time.delayedCall(300, () => {
       this.scene.stop();
       this.scene.wake("town", { returnTx: this.enterData.returnTx, returnTy: this.enterData.returnTy });
     });

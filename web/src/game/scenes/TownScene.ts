@@ -52,6 +52,7 @@ interface Npc {
   sprite: Phaser.Physics.Arcade.Sprite;
   label: Phaser.GameObjects.Text;
   emote: Phaser.GameObjects.Sprite;
+  shadow: Phaser.GameObjects.Ellipse;
   state: "idle" | "walk" | "talk" | "path" | "inside";
   target: Phaser.Math.Vector2 | null;
   nextThink: number;
@@ -59,6 +60,9 @@ interface Npc {
   pathIdx: number;
   insideBuilding: string | null;
   duty: Duty["kind"] | "";
+  lastPX: number;
+  lastPY: number;
+  stuckMs: number;
 }
 
 interface Crop {
@@ -85,6 +89,8 @@ export class TownScene extends Phaser.Scene {
   private day = 1;
   private harvested = 0;
   private moveTarget: Phaser.Math.Vector2 | null = null;
+  private playerPath: { x: number; y: number }[] | null = null;
+  private playerPathIdx = 0;
   private following = true;
   private dragging = false;
   private dragStart = new Phaser.Math.Vector2();
@@ -95,6 +101,7 @@ export class TownScene extends Phaser.Scene {
   private crops = new Map<number, Crop>();
   private demoCrops: DemoCrop[] = [];
   private actionCooldown = 0;
+  private playerShadow!: Phaser.GameObjects.Ellipse;
 
   constructor() {
     super("town");
@@ -284,10 +291,16 @@ export class TownScene extends Phaser.Scene {
       x = px;
       y = py;
     }
+    this.playerShadow = this.makeShadow(x, y);
     this.player = this.physics.add.sprite(x, y, "char-player", 0);
     this.player.body!.setSize(12, 10);
     (this.player.body as Phaser.Physics.Arcade.Body).setOffset(18, 30);
     this.player.setDepth(this.player.y);
+  }
+
+  /** soft contact shadow — grounds every character on the map */
+  private makeShadow(x: number, y: number): Phaser.GameObjects.Ellipse {
+    return this.add.ellipse(x, y + 12, 16, 6, 0x2a2018, 0.26).setDepth(3);
   }
 
   // -------------------------------------------------------------------- npcs
@@ -304,10 +317,12 @@ export class TownScene extends Phaser.Scene {
         })
         .setOrigin(0.5, 1).setDepth(10000).setAlpha(0.92);
       const emote = this.add.sprite(sprite.x, sprite.y - 34, "ui-emotes", 0).setVisible(false).setDepth(10001);
+      const shadow = this.makeShadow(sprite.x, sprite.y);
       this.npcs.push({
-        def, sprite, label, emote,
+        def, sprite, label, emote, shadow,
         state: "idle", target: null, nextThink: 0,
         path: null, pathIdx: 0, insideBuilding: null, duty: "",
+        lastPX: sprite.x, lastPY: sprite.y, stuckMs: 0,
       });
       sprite.on("pointerdown", (p: Phaser.Input.Pointer) => {
         if (p.getDistance() < 6) this.tryTalk(def.id);
@@ -323,9 +338,11 @@ export class TownScene extends Phaser.Scene {
   private buildAnimals(): void {
     const cow = this.physics.add.sprite((FARM.x + 2) * TILE, (FARM.y - 3) * TILE, "anim-cow", 0);
     cow.play("cow-idle").setDepth(cow.y);
+    this.add.ellipse(cow.x, cow.y + 14, 24, 8, 0x2a2018, 0.24).setDepth(3);
     for (let i = 0; i < 3; i++) {
       const ch = this.physics.add.sprite((FARM.x + 5 + i * 2) * TILE, (FARM.y - 2.2) * TILE, "anim-chicken", 0);
       ch.play({ key: "chicken-peck", delay: i * 350 }).setDepth(ch.y);
+      this.add.ellipse(ch.x, ch.y + 7, 11, 4, 0x2a2018, 0.24).setDepth(3);
     }
   }
 
@@ -405,7 +422,7 @@ export class TownScene extends Phaser.Scene {
           return;
         }
       }
-      this.moveTarget = new Phaser.Math.Vector2(world.x, world.y);
+      this.setMoveTo(world.x, world.y);
     });
   }
 
@@ -429,13 +446,34 @@ export class TownScene extends Phaser.Scene {
     });
   }
 
+  /** click-to-walk: straight line when clear, A* around obstacles otherwise */
+  private setMoveTo(px: number, py: number): void {
+    this.playerPath = null;
+    this.moveTarget = null;
+    if (this.lineWalkable(this.player.x, this.player.y, px, py)) {
+      this.moveTarget = new Phaser.Math.Vector2(px, py);
+      return;
+    }
+    const path = findPath(
+      this.collide,
+      Math.floor(this.player.x / TILE), Math.floor(this.player.y / TILE),
+      Math.floor(px / TILE), Math.floor(py / TILE),
+    );
+    if (path && path.length > 0) {
+      this.playerPath = path;
+      this.playerPathIdx = 0;
+    } else {
+      bus.emit("toast", { text: "那里走不过去" });
+    }
+  }
+
   private tryTalk(agentId: string): void {
     if (this.uiLock) return;
     const npc = this.npcs.find((n) => n.def.id === agentId);
     if (!npc || npc.state === "inside") return;
     const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, npc.sprite.x, npc.sprite.y);
     if (d > TILE * 3.2) {
-      this.moveTarget = new Phaser.Math.Vector2(npc.sprite.x, npc.sprite.y + 8);
+      this.setMoveTo(npc.sprite.x, npc.sprite.y + 8);
       return;
     }
     npc.state = "talk";
@@ -633,13 +671,33 @@ export class TownScene extends Phaser.Scene {
   }
 
   private moveWithCollision(sprite: Phaser.Physics.Arcade.Sprite, vx: number, vy: number, dt: number): void {
+    const ox = sprite.x;
+    const oy = sprite.y;
     const nx = sprite.x + vx * dt;
     const ny = sprite.y + vy * dt;
     const footY = sprite.y + 12;
     if (vx !== 0 && !this.isBlocked(nx + Math.sign(vx) * 5, footY)) sprite.x = nx;
     const footNY = ny + 12;
     if (vy !== 0 && !this.isBlocked(sprite.x, footNY + (vy > 0 ? 2 : -2))) sprite.y = ny;
+    // corner-clip guard: the two axis moves can pass individually yet land
+    // the foot inside a blocked tile — that's how sprites used to tunnel
+    // through building corners. Revert outright if it happens.
+    if (this.isBlocked(sprite.x, sprite.y + 12)) {
+      sprite.x = ox;
+      sprite.y = oy;
+    }
     sprite.setDepth(sprite.y);
+  }
+
+  /** straight segment walkability (sampled every ~6px at foot height) */
+  private lineWalkable(x1: number, y1: number, x2: number, y2: number): boolean {
+    const d = Math.hypot(x2 - x1, y2 - y1);
+    const steps = Math.max(2, Math.ceil(d / 6));
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      if (this.isBlocked(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t + 12)) return false;
+    }
+    return true;
   }
 
   private updatePlayer(): void {
@@ -655,8 +713,23 @@ export class TownScene extends Phaser.Scene {
     }
     if (vx !== 0 || vy !== 0) {
       this.moveTarget = null;
+      this.playerPath = null;
       this.following = true;
       this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    } else if (this.playerPath && !this.uiLock) {
+      const wp = this.playerPath[this.playerPathIdx];
+      if (!wp) {
+        this.playerPath = null;
+      } else {
+        const wx = wp.x * TILE + 8;
+        const wy = wp.y * TILE + 8;
+        const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, wx, wy);
+        if (d < 3) this.playerPathIdx += 1;
+        else {
+          vx = (wx - this.player.x) / d;
+          vy = (wy - this.player.y) / d;
+        }
+      }
     } else if (this.moveTarget && !this.uiLock) {
       const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.moveTarget.x, this.moveTarget.y);
       if (d < 4) this.moveTarget = null;
@@ -679,6 +752,7 @@ export class TownScene extends Phaser.Scene {
       const dir = cur.split("-").pop() ?? "down";
       this.player.play(`player-idle-${dir}`, true);
     }
+    this.playerShadow.setPosition(this.player.x, this.player.y + 12);
     if (this.wasd.F.isDown && !this.following) {
       this.following = true;
       this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
@@ -735,6 +809,7 @@ export class TownScene extends Phaser.Scene {
         n.sprite.setPosition(b.tx * TILE + 8, (b.ty + 1) * TILE - 2);
         n.sprite.setVisible(true).setAlpha(0);
         n.label.setVisible(true);
+        n.shadow.setVisible(true);
         this.tweens.add({ targets: n.sprite, alpha: 1, duration: 400 });
         n.insideBuilding = null;
       }
@@ -794,6 +869,7 @@ export class TownScene extends Phaser.Scene {
         n.sprite.setVisible(false);
         n.label.setVisible(false);
         n.emote.setVisible(false);
+        n.shadow.setVisible(false);
       },
     });
   }
@@ -810,6 +886,8 @@ export class TownScene extends Phaser.Scene {
 
       n.label.setPosition(n.sprite.x, n.sprite.y - 24);
       n.emote.setPosition(n.sprite.x, n.sprite.y - 34);
+      n.shadow.setPosition(n.sprite.x, n.sprite.y + 12);
+      n.shadow.setVisible(n.sprite.visible);
       const near = Phaser.Math.Distance.Between(this.player.x, this.player.y, n.sprite.x, n.sprite.y) < TILE * 3.2;
       if (near && n.state !== "talk") {
         if (!n.emote.visible) {
@@ -821,6 +899,37 @@ export class TownScene extends Phaser.Scene {
         n.emote.stop();
       }
       if (n.state === "talk") continue;
+
+      // stuck watchdog: grinding against a wall for >1.2s means the straight
+      // line failed — re-route via A* (path) or give up (wander)
+      if (n.state === "walk" || n.state === "path") {
+        const moved = Math.hypot(n.sprite.x - n.lastPX, n.sprite.y - n.lastPY);
+        n.stuckMs = moved < 0.15 ? n.stuckMs + this.game.loop.delta : 0;
+        n.lastPX = n.sprite.x;
+        n.lastPY = n.sprite.y;
+        if (n.stuckMs > 1200) {
+          n.stuckMs = 0;
+          if (n.state === "path" && n.path && n.path.length > 0) {
+            const dest = n.path[n.path.length - 1];
+            const np = findPath(
+              this.collide,
+              Math.floor(n.sprite.x / TILE), Math.floor(n.sprite.y / TILE),
+              dest.x, dest.y,
+            );
+            if (np && np.length > 0) {
+              n.path = np;
+              n.pathIdx = 0;
+            } else {
+              n.path = null;
+              n.state = "idle";
+              (n as Npc & { after?: unknown }).after = undefined;
+            }
+          } else {
+            n.state = "idle";
+            n.target = null;
+          }
+        }
+      }
 
       if (n.state === "path" && n.path) {
         const wp = n.path[n.pathIdx];
@@ -856,7 +965,9 @@ export class TownScene extends Phaser.Scene {
           for (let tries = 0; tries < 6; tries++) {
             const tx = ax + (Math.random() * 8 - 4) * TILE;
             const ty = ay + (Math.random() * 6 - 3) * TILE;
-            if (!this.isBlocked(tx, ty + 12)) {
+            // destination must be free AND reachable in a straight line —
+            // otherwise the dumb walk just grinds against a house wall
+            if (!this.isBlocked(tx, ty + 12) && this.lineWalkable(n.sprite.x, n.sprite.y, tx, ty)) {
               n.target = new Phaser.Math.Vector2(tx, ty);
               n.state = "walk";
               break;

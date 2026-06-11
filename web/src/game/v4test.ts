@@ -94,9 +94,45 @@ export async function maybeRunV4Test(): Promise<void> {
     },
     true,
   );
-  interior?.leave?.();
-  await sleep(2500);
-  await report("interior-exit", { townActive: t.scene.isActive() }, true);
+  // walk out through the door using the game's own click-to-walk channel —
+  // this exercises the doorway geometry + exit threshold end to end
+  if (interior) {
+    const idef = (interior as unknown as { def: { exitX: number; h: number } }).def;
+    // a plain {x,y} satisfies the distance math the walker uses
+    (interior as unknown as { moveTarget: { x: number; y: number } | null }).moveTarget = {
+      x: idef.exitX * 16 + 16,
+      y: idef.h * 16,
+    };
+  }
+  await sleep(3500);
+  const idbg = interior as unknown as {
+    def?: { exitX: number; h: number };
+    player?: { x: number; y: number };
+    collide?: boolean[][];
+    uiLock?: boolean;
+    moveTarget?: unknown;
+    leave?: () => void;
+  } | null;
+  await report("interior-exit-via-door", {
+    townActive: t.scene.isActive(),
+    interiorActive: !!interior?.scene.isActive(),
+    debug: idbg?.def && idbg.player ? {
+      py: Math.round(idbg.player.y),
+      px: Math.round(idbg.player.x),
+      ptx: Math.floor(idbg.player.x / 16),
+      exitX: idbg.def.exitX,
+      threshold: (idbg.def.h - 1) * 16 - 2,
+      uiLock: idbg.uiLock,
+      moveTargetLeft: idbg.moveTarget != null,
+      bottomRow: idbg.collide?.[idbg.def.h - 1]?.map((b) => (b ? 1 : 0)).join(""),
+    } : null,
+  }, true);
+  // fallback so the rest of the suite still runs if the walk missed
+  if (interior?.scene.isActive()) {
+    idbg?.leave?.();
+    await sleep(2200);
+    await report("interior-exit-fallback", { townActive: t.scene.isActive() });
+  }
 
   // --- farm: plant -> water x3 -> harvest (live mode writes the ledger) ----
   t.lookAt(12, 37, 3);
