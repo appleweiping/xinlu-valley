@@ -1,4 +1,4 @@
-# 新路谷物语 Xinlu Valley — v3 (Stardew-style web rebuild)
+# 新路谷物语 Newroad Valley — v3 (Stardew-style web rebuild)
 
 A Stardew-style pixel town over the owner's real local work system
 (agentmemory, wiki, research metadata, skills, git). Relocated from
@@ -11,7 +11,7 @@ The v2 Godot era is preserved at git tag `v2-godot-era`.
   panels/dialogue (`src/ui/`), landing page in `src/landing/`. Path alias `@ = src`.
 - `backend/` — FastAPI local bridge on :8000. `main.py` is the large v2
   monolith (kept; hardened job queue). New v3 endpoints live in
-  `backend/xinlu_api.py` under `/api/xinlu/*` — add panel data there, not in main.py.
+  `backend/town_api.py` under `/api/town/*` — add panel data there, not in main.py.
 - `data/` — canonical JSON registries (agents, buildings, model profiles…).
 - `tools/build-assets.py` — regenerates `web/public/assets/core/` from
   `art/packs/`. Run after changing recolors/buildings: `python tools/build-assets.py`.
@@ -34,7 +34,7 @@ The v2 Godot era is preserved at git tag `v2-godot-era`.
   titles, no private paths, no key names with values. Live data flows only
   through localhost.
 - Memory writes follow `D:\devtools\AGENT-MEMORY-PROTOCOL.md`
-  (project: `xinlu-valley`, concepts must include `agent:cc`).
+  (project: `newroad-valley`, concepts must include `agent:cc`).
 
 ## Game data model
 
@@ -42,13 +42,13 @@ The v2 Godot era is preserved at git tag `v2-godot-era`.
   (deterministic seed). Buildings/NPCs defined in `web/src/data/town.ts`.
 - Dual data mode: `web/src/shared/api.ts` probes `127.0.0.1:8000/api/health`
   (1.5s) → LIVE, else DEMO snapshots. Panels share shapes with the bridge
-  (`web/src/shared/types.ts` ⇆ `backend/xinlu_api.py`).
+  (`web/src/shared/types.ts` ⇆ `backend/town_api.py`).
 - Sprout Lands grass autotile indices are documented in `mapgen.ts` header;
   verify any tile-index change visually (run dev + screenshot) before commit.
 
 ## Verification
 
 - `cd web && npx tsc --noEmit` must pass.
-- `python -m py_compile backend/main.py backend/xinlu_api.py` must pass.
+- `python -m py_compile backend/main.py backend/town_api.py` must pass.
 - Visual check: load /play.html, confirm no console errors, world renders,
   a building panel opens with data.

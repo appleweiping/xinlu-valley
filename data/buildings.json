@@ -74,7 +74,7 @@
     "color": "#9fd0cb",
     "backend": "terminal-control",
     "safety": "confirm-required-allowlisted",
-    "real_sources": ["D:\\Company\\xinlu-valley", "workspace\\terminal-logs"]
+    "real_sources": ["D:\\Company\\newroad-valley", "workspace\\terminal-logs"]
   },
   {
     "id": "system-monitor",
@@ -305,7 +305,7 @@
     "color": "#cdeac0",
     "backend": "backup-station",
     "safety": "read-only-plus-draft",
-    "real_sources": ["D:\\Company\\xinlu-valley", "D:\\research\\Vipin's Knowledgebase\\memory", "godot\\data", "docs", "workspace\\backup-plans", "D:\\Backups"]
+    "real_sources": ["D:\\Company\\newroad-valley", "D:\\research\\Vipin's Knowledgebase\\memory", "godot\\data", "docs", "workspace\\backup-plans", "D:\\Backups"]
   },
   {
     "id": "goal-tower",

@@ -28,6 +28,7 @@ export class TownScene extends Phaser.Scene {
   private waterTiles: Phaser.Tilemaps.Tile[] = [];
   private waterFrame = 0;
   private nightOverlay!: Phaser.GameObjects.Rectangle;
+  private lampGlows: Phaser.GameObjects.Arc[] = [];
   private clockMin = 8 * 60; // start 08:00
   private day = 1;
   private moveTarget: Phaser.Math.Vector2 | null = null;
@@ -49,6 +50,7 @@ export class TownScene extends Phaser.Scene {
 
     this.buildGround();
     this.buildDecor();
+    this.buildPlaza();
     this.buildBuildings();
     this.buildPlayer();
     this.buildNpcs();
@@ -56,6 +58,8 @@ export class TownScene extends Phaser.Scene {
     this.buildLighting();
     this.bindInput();
     this.bindBus();
+
+    this.cameras.main.fadeIn(750, 26, 20, 35);
 
     this.cameras.main.setBounds(0, 0, MAP_W * TILE, MAP_H * TILE);
     this.cameras.main.setZoom(3);
@@ -133,6 +137,44 @@ export class TownScene extends Phaser.Scene {
       this.add.image(c.tx * TILE + 8, c.ty * TILE + 6, "decor-plants", plantFrames[i++ % plantFrames.length])
         .setDepth(c.ty * TILE + 6);
     }
+  }
+
+  // ------------------------------------------------------------------- plaza
+  /** Dress the spawn plaza so the first thing players see matches the rest
+   * of the town: notice board, lamp posts, tulip beds, logs, a shade oak. */
+  private buildPlaza(): void {
+    const img = (tx: number, ty: number, key: string, frame?: number, solid = true) => {
+      const o = frame === undefined
+        ? this.add.image(tx * TILE + 8, (ty + 1) * TILE, key)
+        : this.add.image(tx * TILE + 8, (ty + 1) * TILE, key, frame);
+      o.setOrigin(0.5, 1).setDepth((ty + 1) * TILE);
+      if (solid) this.collide[ty][tx] = true;
+      return o;
+    };
+
+    img(29, 18, "decor-sign");                       // notice board by spawn
+    for (const [lx, ly] of [[27, 17], [37, 17], [27, 21], [37, 21]] as const) {
+      img(lx, ly, "decor-lamp");
+      // warm halo — only breathes after dusk (gated in tickClock)
+      const glow = this.add.circle(lx * TILE + 8, ly * TILE - 24, 14, 0xffc966, 0)
+        .setDepth(15000).setBlendMode(Phaser.BlendModes.ADD);
+      this.lampGlows.push(glow);
+    }
+    // tulip beds (outdoor decor sheet rows 8-9)
+    const tulips = [56, 57, 58, 59, 63, 64];
+    const beds: [number, number][] = [
+      [28, 17], [29, 17], [35, 17], [36, 17],
+      [28, 21], [29, 21], [35, 21], [36, 21],
+      [30, 16], [34, 16],
+    ];
+    beds.forEach(([fx, fy], i) => {
+      this.add.image(fx * TILE + 8, fy * TILE + 12, "decor-outdoor", tulips[i % tulips.length])
+        .setOrigin(0.5, 1).setDepth(fy * TILE + 12);
+    });
+    // log benches + a shade oak
+    img(33, 21, "decor-outdoor", 49);
+    img(34, 21, "decor-outdoor", 50);
+    img(36, 19, "decor-oak-small", 1);
   }
 
   // --------------------------------------------------------------- buildings
@@ -259,6 +301,10 @@ export class TownScene extends Phaser.Scene {
     else if (h >= 20 || h < 5) a = 0.55;
     else if (h >= 5 && h < 7) a = (1 - (h - 5) / 2) * 0.55;
     this.nightOverlay.fillAlpha = a;
+    const lampOn = a > 0.18;
+    for (const g of this.lampGlows) {
+      g.setAlpha(lampOn ? 0.16 + (Math.sin(this.time.now / 600) + 1) * 0.07 : 0);
+    }
   }
 
   // ------------------------------------------------------------------- input

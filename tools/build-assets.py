@@ -48,63 +48,24 @@ def copy(src: Path, dst_rel: str, key: str, kind: str = "image", **extra) -> Non
 
 
 # --------------------------------------------------------------------------
-# NPC recolors: shift the indigo/purple clothing cluster of the Sprout Lands
-# base character to a per-agent hue while leaving skin/outline alone.
+# Characters: one hand-authored species per resident (tools/creatures.py)
 # --------------------------------------------------------------------------
 
-AGENT_HUES = {
-    # id: (target hue degrees, sat scale, val scale)
-    "player": None,                 # original indigo
-    "opus": (255, 1.10, 0.82),      # deep royal indigo — Chief Architect
-    "codex": (175, 1.05, 0.95),     # teal — Coordinator
-    "sonnet": (335, 0.95, 1.05),    # rose — Reviewer
-    "haiku": (42, 1.10, 1.10),      # amber — Runner
-    "deepseek": (210, 1.15, 0.90),  # whale blue — Bulk Worker
-    "aris": (130, 0.90, 0.98),      # lab green — Research Frame
-    "pixelcat": (20, 1.15, 1.05),   # ginger — Builder
-}
-
-# clothing cluster on the base sheet: blue/purple hues
-CLOTH_HUE_RANGE = (200.0, 310.0)
-
-
-def recolor_sheet(src: Path, target: tuple | None) -> Image.Image:
-    img = Image.open(src).convert("RGBA")
-    if target is None:
-        return img
-    hue_t, s_scale, v_scale = target
-    px = img.load()
-    w, h = img.size
-    for y in range(h):
-        for x in range(w):
-            r, g, b, a = px[x, y]
-            if a == 0:
-                continue
-            hh, ss, vv = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-            deg = hh * 360
-            if ss > 0.18 and CLOTH_HUE_RANGE[0] <= deg <= CLOTH_HUE_RANGE[1]:
-                nh = (hue_t % 360) / 360
-                ns = min(1.0, ss * s_scale)
-                nv = min(1.0, vv * v_scale)
-                nr, ng, nb = colorsys.hsv_to_rgb(nh, ns, nv)
-                px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
-    return img
-
-
 def build_characters() -> None:
-    base = SPROUT / "Characters" / "Basic Charakter Spritesheet" / "Basic Charakter Spritesheet.png"
-    actions = SPROUT / "Characters" / "Basic Charakter Actions" / "Basic Charakter Actions.png"
+    """Hand-authored species per resident (tools/creatures.py) — every agent
+    gets its own silhouette instead of a recolored clone."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from creatures import ALL_IDS, build_sheet
+
     outdir = CORE / "characters"
     outdir.mkdir(parents=True, exist_ok=True)
-    for agent, target in AGENT_HUES.items():
-        sheet = recolor_sheet(base, target)
+    for agent in ALL_IDS:
+        sheet = build_sheet(agent)
         rel = f"core/characters/{agent}.png"
         sheet.save(OUT / rel)
         emit(f"char-{agent}", rel, "spritesheet", frameWidth=48, frameHeight=48)
-    act = Image.open(actions).convert("RGBA")
-    rel = "core/characters/player-actions.png"
-    act.save(OUT / rel)
-    emit("char-player-actions", rel, "spritesheet", frameWidth=48, frameHeight=48)
 
 
 # --------------------------------------------------------------------------
@@ -252,6 +213,14 @@ def build_tiles_and_decor() -> None:
          "spritesheet", frameWidth=32, frameHeight=48)
     copy(CUTE / "Outdoor decoration/Outdoor_Decor_Free.png", f"{d}/outdoor-decor.png",
          "decor-outdoor", "spritesheet", frameWidth=16, frameHeight=16)
+    # plaza fixtures cropped from the outdoor sheet (7 cols x 12 rows of 16px)
+    outdoor = Image.open(CUTE / "Outdoor decoration/Outdoor_Decor_Free.png").convert("RGBA")
+    sign = outdoor.crop((3 * 16, 0, 4 * 16, 16))
+    sign.save(OUT / f"{d}/sign.png")
+    emit("decor-sign", f"{d}/sign.png", "image")
+    lamp = outdoor.crop((5 * 16, 4 * 16, 6 * 16, 7 * 16))
+    lamp.save(OUT / f"{d}/lamp.png")
+    emit("decor-lamp", f"{d}/lamp.png", "image")
     copy(CUTE / "Outdoor decoration/House.png", f"{d}/cute-house.png", "bld-cute-house")
 
     a = "core/animals"

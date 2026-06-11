@@ -14,7 +14,7 @@ const T = {
     demoTitle: "小镇就在这里 · 即点即玩",
     demoSub: "拖拽平移 · 滚轮缩放 · 点击建筑 · 和 agent 对话 —— 这是真正的游戏画面，不是录像",
     demoStart: "▶ 启动小镇",
-    agentsTitle: "七位 agent 居民",
+    agentsTitle: "八位 agent 居民",
     agentsSub: "他们不是虚构角色——每一位都对应这台机器上真实存在的 agent 启动器",
     bldTitle: "十栋工作建筑",
     bldSub: "每栋建筑都是一个真实系统的入口：点击卡片展开它连接的数据源",
@@ -31,7 +31,7 @@ const T = {
     demoTitle: "The town is right here · play instantly",
     demoSub: "Drag to pan · wheel to zoom · click buildings · talk to agents — real gameplay, not a video",
     demoStart: "▶ Start the town",
-    agentsTitle: "Seven agent residents",
+    agentsTitle: "Eight agent residents",
     agentsSub: "Not fictional characters — each maps to a real agent launcher on this machine",
     bldTitle: "Ten working buildings",
     bldSub: "Every building is a doorway into a real system. Click a card to expand its data sources",
@@ -121,7 +121,7 @@ function Demo({ lang }: { lang: Lang }) {
   return (
     <div className="l-iframe-wrap">
       {started ? (
-        <iframe src="/play.html" title="Xinlu Valley" allow="fullscreen" />
+        <iframe src="/play.html" title="Newroad Valley" allow="fullscreen" />
       ) : (
         <div className="l-iframe-cover" onClick={() => setStarted(true)}>
           <img
@@ -179,19 +179,19 @@ function Landing() {
         <button className="wood-btn" onClick={() => setLang(lang === "zh" ? "en" : "zh")}>
           {lang === "zh" ? "EN" : "中文"}
         </button>
-        <a className="wood-btn" style={{ textDecoration: "none" }} href="https://github.com/appleweiping/xinlu-valley" target="_blank" rel="noreferrer">
+        <a className="wood-btn" style={{ textDecoration: "none" }} href="https://github.com/appleweiping/newroad-valley" target="_blank" rel="noreferrer">
           GitHub
         </a>
       </div>
 
       <header className="l-hero">
         <Stars />
-        <div style={{ fontSize: 14, letterSpacing: "0.3em", opacity: 0.8 }}>XINLU VALLEY · v3</div>
+        <div style={{ fontSize: 14, letterSpacing: "0.3em", opacity: 0.8 }}>Newroad Valley · v3</div>
         <h1>新路谷物语</h1>
         <div className="sub">{t.tag} — {t.sub}</div>
         <a className="wood-btn l-cta" href="/play.html">{t.cta}</a>
         <div className="l-marquee">
-          <div className="l-stat"><b>7</b><span>{lang === "zh" ? "agent 居民" : "agent residents"}</span></div>
+          <div className="l-stat"><b>8</b><span>{lang === "zh" ? "agent 居民" : "agent residents"}</span></div>
           <div className="l-stat"><b>10</b><span>{lang === "zh" ? "工作建筑" : "working buildings"}</span></div>
           <div className="l-stat"><b>440+</b><span>{lang === "zh" ? "记忆馆藏" : "memories shelved"}</span></div>
           <div className="l-stat"><b>741</b><span>{lang === "zh" ? "wiki 页面" : "wiki pages"}</span></div>
@@ -253,7 +253,7 @@ function Landing() {
           {lang === "zh" ? "原始资产包不随仓库分发；本站为非商业作品集演示。" : "Raw packs are not redistributed in the repo; this site is a non-commercial portfolio demo."}
         </div>
         <div>
-          新路谷物语 Xinlu Valley · <a href="https://github.com/appleweiping/xinlu-valley">appleweiping/pixel-ai-town</a> · 2026
+          新路谷物语 Newroad Valley · <a href="https://github.com/appleweiping/newroad-valley">appleweiping/pixel-ai-town</a> · 2026
         </div>
       </footer>
     </div>

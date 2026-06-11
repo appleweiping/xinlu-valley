@@ -1,4 +1,4 @@
-"""Xinlu Valley live-bridge endpoints.
+"""Newroad Valley live-bridge endpoints.
 
 Thin read-only aggregation layer that feeds the v3 web game's building
 panels with REAL local data, in exactly the shapes the demo snapshots use
@@ -20,7 +20,7 @@ from pathlib import Path
 import httpx
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/api/xinlu", tags=["xinlu"])
+router = APIRouter(prefix="/api/town", tags=["xinlu"])
 
 AGENTMEMORY = "http://localhost:3111"
 WIKI_ROOT = Path(r"D:\Research\WEIPING_WIKI\wiki")

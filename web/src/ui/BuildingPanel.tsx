@@ -25,7 +25,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 function MemoryPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<MemoryData>("/api/xinlu/memory", "memory.json");
+  const d = usePanelData<MemoryData>("/api/town/memory", "memory.json");
   if (!d) return <Loading />;
   return (
     <div>
@@ -51,7 +51,7 @@ function MemoryPanel({ lang }: { lang: "zh" | "en" }) {
 }
 
 function WikiPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<WikiData>("/api/xinlu/wiki", "wiki.json");
+  const d = usePanelData<WikiData>("/api/town/wiki", "wiki.json");
   const [open, setOpen] = useState<string | null>(null);
   if (!d) return <Loading />;
   return (
@@ -88,7 +88,7 @@ function WikiPanel({ lang }: { lang: "zh" | "en" }) {
 }
 
 function ResearchPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<ResearchData>("/api/xinlu/research", "research.json");
+  const d = usePanelData<ResearchData>("/api/town/research", "research.json");
   if (!d) return <Loading />;
   return (
     <div>
@@ -114,7 +114,7 @@ function ResearchPanel({ lang }: { lang: "zh" | "en" }) {
 }
 
 function SkillsPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<SkillsData>("/api/xinlu/skills", "skills.json");
+  const d = usePanelData<SkillsData>("/api/town/skills", "skills.json");
   if (!d) return <Loading />;
   return (
     <div>
@@ -138,7 +138,7 @@ function SkillsPanel({ lang }: { lang: "zh" | "en" }) {
 }
 
 function CodePanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<CodeData>("/api/xinlu/code", "code.json");
+  const d = usePanelData<CodeData>("/api/town/code", "code.json");
   if (!d) return <Loading />;
   return (
     <div>
@@ -185,7 +185,7 @@ function AgentsPanel({ lang }: { lang: "zh" | "en" }) {
 }
 
 function TownHallPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<TownHallData>("/api/xinlu/townhall", "townhall.json");
+  const d = usePanelData<TownHallData>("/api/town/townhall", "townhall.json");
   if (!d) return <Loading />;
   return (
     <div>
@@ -205,7 +205,7 @@ function TownHallPanel({ lang }: { lang: "zh" | "en" }) {
 }
 
 function MarketPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<MarketData>("/api/xinlu/market", "market.json");
+  const d = usePanelData<MarketData>("/api/town/market", "market.json");
   if (!d) return <Loading />;
   return (
     <div>
@@ -228,7 +228,7 @@ function MarketPanel({ lang }: { lang: "zh" | "en" }) {
 const STAGE_EMOJI = ["🌱", "🌿", "🪴", "🌾", "✅"];
 
 function FarmPanel({ lang }: { lang: "zh" | "en" }) {
-  const d = usePanelData<FarmData>("/api/xinlu/farm", "farm.json");
+  const d = usePanelData<FarmData>("/api/town/farm", "farm.json");
   if (!d) return <Loading />;
   return (
     <div>

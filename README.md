@@ -1,9 +1,11 @@
-# 新路谷物语 · Xinlu Valley
+# 新路谷物语 · Newroad Valley
 
 **A Stardew-style pixel town that runs on a real local work system.**
 一座星露谷风格的像素小镇，背后是一套真实运转的本地工作系统：agent 协作、长期记忆、wiki 知识塔、科研看板、技能配方与代码仓库。
 
-![Xinlu Valley town](docs/media/xl-town.png)
+![Newroad Valley town](docs/media/nr-prod-game.png)
+
+**▶ Play it now: https://newroad-valley.vercel.app**
 
 ## What is this?
 
@@ -19,7 +21,7 @@ Walk a cozy pixel valley where **work is the world**:
 | 市政厅 Town Hall | service health: memory engine, bridge, watchdogs |
 | 杂货市场 Market | model channels (key *presence* only — never values) |
 | 农场 Farm | tasks as crops: plant = create, water = progress, harvest = done |
-| 7 NPC 居民 | real agent launchers: Opus, Codex, Sonnet, Haiku, DeepSeek, ARIS, PixelCat |
+| 8 NPC 居民 | real agents, each with its own species: Opus(sage), Codex(robot), Sonnet(songbird), Haiku(chick), DeepSeek(whale), ARIS(owl), PixelCat(cat), Fable(fox) |
 
 Two data modes, automatically detected:
 
@@ -55,7 +57,7 @@ web/                Vite + TypeScript
 backend/            FastAPI local bridge (LIVE mode only)
 ├─ main.py          v2-era adapters + hardened job queue (retry/backoff,
 │                   idempotent dedup)
-└─ xinlu_api.py     /api/xinlu/* read-only aggregation for the panels
+└─ town_api.py     /api/town/* read-only aggregation for the panels
 
 data/               JSON registries (agents, buildings, quests…)
 tools/

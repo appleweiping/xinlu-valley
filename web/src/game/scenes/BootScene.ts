@@ -41,7 +41,7 @@ export class BootScene extends Phaser.Scene {
 
   private createAnims(): void {
     // Character sheets: 4x4 grid of 48px frames; rows: down, up, left, right.
-    const chars = ["player", "opus", "codex", "sonnet", "haiku", "deepseek", "aris", "pixelcat"];
+    const chars = ["player", "opus", "codex", "sonnet", "haiku", "deepseek", "aris", "pixelcat", "fable"];
     const dirs: [string, number][] = [["down", 0], ["up", 1], ["left", 2], ["right", 3]];
     for (const c of chars) {
       const key = `char-${c}`;

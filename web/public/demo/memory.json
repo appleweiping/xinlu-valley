@@ -4,9 +4,9 @@
   "shelves": [
     { "title": "agentmemory 全线 404 故障根因与修法", "type": "bug", "project": "agent-infra", "date": "2026-06-11", "preview": "exec worker 相对路径 + cwd 锁定互相打架 → 应用层从未启动。修法：绝对路径化 + 引擎热重载 + selfheal v2。" },
     { "title": "多 agent 写记忆的统一规约", "type": "workflow", "project": "_global", "date": "2026-05-21", "preview": "每条记忆必带 type/project/concepts + agent 身份标签；先查重再写入；同主题用 supersedes 更新。" },
-    { "title": "像素小镇 v3 技术选型", "type": "architecture", "project": "xinlu-valley", "date": "2026-06-11", "preview": "Phaser 3 渲染世界 + React 覆盖层做面板；双数据模式：本地联机 / 公开演示。" },
+    { "title": "像素小镇 v3 技术选型", "type": "architecture", "project": "newroad-valley", "date": "2026-06-11", "preview": "Phaser 3 渲染世界 + React 覆盖层做面板；双数据模式：本地联机 / 公开演示。" },
     { "title": "项目检查点先行原则", "type": "preference", "project": "_global", "date": "2026-05-30", "preview": "任何重构前：commit + tag + push。先存档，再动刀。" },
     { "title": "Windows 服务自愈的盲区模式", "type": "pattern", "project": "agent-infra", "date": "2026-06-11", "preview": "只检查端口监听会漏掉'端口活/应用死'的形态——健康探测必须打到应用层路由。" },
-    { "title": "星露谷式资产管线", "type": "workflow", "project": "xinlu-valley", "date": "2026-06-11", "preview": "授权包不入库：原始包 gitignore，处理脚本入库，构建产物只随部署走。" }
+    { "title": "星露谷式资产管线", "type": "workflow", "project": "newroad-valley", "date": "2026-06-11", "preview": "授权包不入库：原始包 gitignore，处理脚本入库，构建产物只随部署走。" }
   ]
 }

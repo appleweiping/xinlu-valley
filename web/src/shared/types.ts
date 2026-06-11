@@ -1,4 +1,4 @@
-/** Data shapes shared by the live bridge (/api/xinlu/*) and demo snapshots (/demo/*.json). */
+/** Data shapes shared by the live bridge (/api/town/*) and demo snapshots (/demo/*.json). */
 
 export interface MemoryData {
   total: number;

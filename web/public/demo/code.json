@@ -1,6 +1,6 @@
 {
   "repos": [
-    { "name": "xinlu-valley", "branch": "main", "lastCommit": "feat: v3 web rebuild — Stardew-style town over real workspace", "date": "2026-06-11", "dirty": true, "remote": "github.com/appleweiping/pixel-ai-town" },
+    { "name": "newroad-valley", "branch": "main", "lastCommit": "feat: v3 web rebuild — Stardew-style town over real workspace", "date": "2026-06-11", "dirty": true, "remote": "github.com/appleweiping/pixel-ai-town" },
     { "name": "WEIPING_WIKI", "branch": "main", "lastCommit": "docs: agentmemory selfheal handbook v2", "date": "2026-06-11", "dirty": false, "remote": "github.com/appleweiping/WEIPING_WIKI" },
     { "name": "workforce-intelligence-platform", "branch": "feature/full-platform", "lastCommit": "feat: phase 2 real data flow", "date": "2026-06-10", "dirty": false, "remote": "github.com/appleweiping/workforce-intelligence-platform" },
     { "name": "agentmemory", "branch": "main", "lastCommit": "fix: pin iii-sdk routing regression", "date": "2026-06-06", "dirty": false, "remote": "github.com/appleweiping/AGENT_RESOURCE" }

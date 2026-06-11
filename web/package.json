@@ -1,9 +1,9 @@
 {
-  "name": "xinlu-valley-web",
+  "name": "newroad-valley-web",
   "private": true,
   "version": "3.0.0",
   "type": "module",
-  "description": "新路谷物语 Xinlu Valley — a Stardew-style pixel work-life game over a real local agent workspace",
+  "description": "新路谷物语 Newroad Valley — a Stardew-style pixel work-life game over a real local agent workspace",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

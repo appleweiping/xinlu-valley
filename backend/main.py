@@ -27,9 +27,9 @@ app.add_middleware(
 )
 
 # v3 live-bridge endpoints for the Xinlu Valley web client (read-only aggregation)
-from xinlu_api import router as xinlu_router  # noqa: E402
+from town_api import router as town_router  # noqa: E402
 
-app.include_router(xinlu_router)
+app.include_router(town_router)
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")

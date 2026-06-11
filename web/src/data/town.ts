@@ -212,6 +212,19 @@ export const AGENTS: AgentDef[] = [
       { zh: "工坊的火，七天不灭。", en: "The workshop forge hasn't gone cold in seven days." },
     ],
   },
+  {
+    id: "fable", texture: "char-fable",
+    nameZh: "Fable 说书狐", nameEn: "Fable",
+    role: "Chronicler", roleZh: "镇上书记官", color: "#e2703c",
+    tx: 30, ty: 20, launcher: "D:\\devtools\\claude.cmd (Fable 5)",
+    bioZh: "广场告示牌旁的红狐，把小镇每天发生的工作写成故事。这次重建就是他执笔的。",
+    bioEn: "The red fox by the notice board, writing the town's daily work into tales. He penned this very rebuild.",
+    lines: [
+      { zh: "欢迎来到新路谷！告示牌上有今天的故事——昨天我们修好了记忆图书馆的地基。", en: "Welcome to Newroad Valley! Today's tale is on the board — yesterday we fixed the Memory Library's foundations." },
+      { zh: "每个提交都是一段寓言：开头是 bug，结尾是教训。", en: "Every commit is a little fable: it opens with a bug and closes with a lesson." },
+      { zh: "想听小镇的来历吗？v1 是草稿，v2 是插画书，v3——就是你脚下的这片土地。", en: "The town's history? v1 was a draft, v2 a picture book, v3 — the very ground you stand on." },
+    ],
+  },
 ];
 
 /** farm plot: tilled grid where crops (=tasks) grow */

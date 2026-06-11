@@ -91,6 +91,16 @@
     "frameHeight": 16
   },
   {
+    "key": "decor-sign",
+    "url": "assets/core/decor/sign.png",
+    "type": "image"
+  },
+  {
+    "key": "decor-lamp",
+    "url": "assets/core/decor/lamp.png",
+    "type": "image"
+  },
+  {
     "key": "bld-cute-house",
     "url": "assets/core/decor/cute-house.png",
     "type": "image"
@@ -138,6 +148,13 @@
     "frameHeight": 48
   },
   {
+    "key": "char-fable",
+    "url": "assets/core/characters/fable.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
     "key": "char-codex",
     "url": "assets/core/characters/codex.png",
     "type": "spritesheet",
@@ -175,13 +192,6 @@
   {
     "key": "char-pixelcat",
     "url": "assets/core/characters/pixelcat.png",
-    "type": "spritesheet",
-    "frameWidth": 48,
-    "frameHeight": 48
-  },
-  {
-    "key": "char-player-actions",
-    "url": "assets/core/characters/player-actions.png",
     "type": "spritesheet",
     "frameWidth": 48,
     "frameHeight": 48
