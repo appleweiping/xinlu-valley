@@ -57,3 +57,4 @@ secrets/
 art/.env
 art/test_*.py
 art/working_config.txt
+.gstack/

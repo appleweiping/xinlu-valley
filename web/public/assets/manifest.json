@@ -29,7 +29,9 @@
   {
     "key": "ts-fences",
     "url": "assets/core/tiles/fences.png",
-    "type": "image"
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
   },
   {
     "key": "decor-plants",
