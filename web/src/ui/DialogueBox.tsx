@@ -80,10 +80,10 @@ export function DialogueBox() {
             alt={agent.nameZh}
             style={{
               position: "absolute",
-              width: 192 * 1.8,
-              height: 192 * 1.8,
-              left: -48 * 1.8 + (84 - 48 * 1.8) / 2 + 43,
-              top: 6,
+              width: 672,
+              height: 672,
+              left: -42,
+              top: -76,
               imageRendering: "pixelated",
             }}
           />

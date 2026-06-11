@@ -26,6 +26,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# v3 live-bridge endpoints for the Xinlu Valley web client (read-only aggregation)
+from xinlu_api import router as xinlu_router  # noqa: E402
+
+app.include_router(xinlu_router)
+
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
 
@@ -133,7 +138,7 @@ CONFIRM_RUN_AGENT_RUNNER = "RUN_AGENT_RUNNER"
 CONFIRM_PLUGIN_ACTIVATION_PLAN = "PLAN_PLUGIN_ACTIVATION"
 CONFIRM_GITHUB_PUBLISH_PLAN = "PLAN_GITHUB_PUBLISH"
 MEMORY_CATEGORIES = ["decisions", "facts", "lessons", "preferences", "sessions", "workflows"]
-JOB_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ai-town-job")
+JOB_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="ai-town-job")
 JOBS: dict[str, dict] = {}
 MAX_JOBS = 50
 AGENT_TASKS: dict[str, dict] = {}
@@ -3294,6 +3299,20 @@ def backend_job_events(job_id: str, since: int = 0, limit: int = 32) -> dict:
 
 def start_job(kind: str, label: str, func, *args) -> dict:
     prune_jobs()
+    # Idempotent submission: an identical job already queued/running is
+    # returned as-is instead of spawning a duplicate. This is the first half
+    # of the multi-agent "needs manual retries" fix — duplicate submissions
+    # used to pile up behind the 2-worker executor and look like hangs.
+    for existing in JOBS.values():
+        if (
+            existing.get("kind") == kind
+            and existing.get("label") == label
+            and existing.get("status") in ("queued", "running")
+        ):
+            existing.setdefault("events", []).append(
+                {"at": time.time(), "message": "Duplicate submission coalesced into this job."}
+            )
+            return existing
     job_id = uuid.uuid4().hex[:12]
     now = time.time()
     job = {
@@ -3327,19 +3346,44 @@ def start_job(kind: str, label: str, func, *args) -> dict:
         job["cancelable"] = False
         job.setdefault("events", []).append({"at": job["updated_at"], "message": "Job started. Cancellation requests will be recorded but this runner will not kill processes."})
         persist_job_log(job, "started")
-        try:
-            result = func(*args)
-            if result is None:
-                job["status"] = "missing"
-                job["error"] = "Requested item was not found."
-                job["rollback_note"] = "No output was recorded because the requested item was missing."
-            else:
-                job["status"] = "done"
-                job["result"] = result
-                job["rollback_note"] = result.get("rollback_note", job.get("rollback_note", "")) if isinstance(result, dict) else job.get("rollback_note", "")
-        except Exception as exc:
+        # Bounded retry with exponential backoff. Jobs in this backend are
+        # read-only/project-local by design, so re-running a failed attempt
+        # is safe. This is the second half of the "needs manual retries"
+        # fix: transient errors (file locks, agentmemory hiccups, slow git)
+        # now self-heal instead of surfacing as failed jobs.
+        attempts = 3
+        backoffs = [1.5, 4.0]
+        last_exc: Exception | None = None
+        for attempt in range(1, attempts + 1):
+            try:
+                result = func(*args)
+                last_exc = None
+                if result is None:
+                    job["status"] = "missing"
+                    job["error"] = "Requested item was not found."
+                    job["rollback_note"] = "No output was recorded because the requested item was missing."
+                else:
+                    job["status"] = "done"
+                    job["result"] = result
+                    job["rollback_note"] = result.get("rollback_note", job.get("rollback_note", "")) if isinstance(result, dict) else job.get("rollback_note", "")
+                if attempt > 1:
+                    job.setdefault("events", []).append(
+                        {"at": time.time(), "message": f"Succeeded on retry attempt {attempt}/{attempts}."}
+                    )
+                break
+            except Exception as exc:
+                last_exc = exc
+                if attempt < attempts and not job.get("cancel_requested"):
+                    wait_s = backoffs[min(attempt - 1, len(backoffs) - 1)]
+                    job.setdefault("events", []).append(
+                        {"at": time.time(), "message": f"Attempt {attempt}/{attempts} failed ({exc}); retrying in {wait_s}s."}
+                    )
+                    job["updated_at"] = time.time()
+                    persist_job_log(job, f"retry-{attempt}")
+                    time.sleep(wait_s)
+        if last_exc is not None:
             job["status"] = "failed"
-            job["error"] = str(exc)
+            job["error"] = str(last_exc)
             job["rollback_note"] = "Inspect the error and any project-local log/report paths before retrying. No automatic rollback was attempted."
         job["updated_at"] = time.time()
         job["cancelable"] = False
