@@ -1,0 +1,8 @@
+{
+  "models": [
+    { "name": "Claude Fable 5", "provider": "Anthropic", "status": "主力渠道", "role": "总舵主的本体：架构、重构、长程任务。" },
+    { "name": "DeepSeek V4", "provider": "DeepSeek", "status": "可用", "role": "批量处理与 NPC 对话的高性价比引擎。" },
+    { "name": "GPT 系列", "provider": "OpenAI 兼容", "status": "可用", "role": "Codex 协调官的老家，代码协作渠道。" },
+    { "name": "本地代理", "provider": "localhost", "status": "按需", "role": "OpenAI 兼容本地网关，离线兜底。" }
+  ]
+}

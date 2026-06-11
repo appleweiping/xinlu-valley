@@ -1,0 +1,327 @@
+[
+  {
+    "key": "ts-grass",
+    "url": "assets/core/tiles/grass.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-dirt",
+    "url": "assets/core/tiles/dirt.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-hills",
+    "url": "assets/core/tiles/hills.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-water",
+    "url": "assets/core/tiles/water.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "ts-paths",
+    "url": "assets/core/tiles/paths.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-fences",
+    "url": "assets/core/tiles/fences.png",
+    "type": "image"
+  },
+  {
+    "key": "decor-plants",
+    "url": "assets/core/decor/plants.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "decor-biom",
+    "url": "assets/core/decor/biom.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "decor-furniture",
+    "url": "assets/core/decor/furniture.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "decor-bridge",
+    "url": "assets/core/decor/bridge.png",
+    "type": "image"
+  },
+  {
+    "key": "decor-chest",
+    "url": "assets/core/decor/chest.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "decor-chicken-house",
+    "url": "assets/core/decor/chicken-house.png",
+    "type": "image"
+  },
+  {
+    "key": "decor-oak",
+    "url": "assets/core/decor/oak-tree.png",
+    "type": "image"
+  },
+  {
+    "key": "decor-oak-small",
+    "url": "assets/core/decor/oak-tree-small.png",
+    "type": "spritesheet",
+    "frameWidth": 32,
+    "frameHeight": 48
+  },
+  {
+    "key": "decor-outdoor",
+    "url": "assets/core/decor/outdoor-decor.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "bld-cute-house",
+    "url": "assets/core/decor/cute-house.png",
+    "type": "image"
+  },
+  {
+    "key": "anim-chicken",
+    "url": "assets/core/animals/chicken.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "anim-cow",
+    "url": "assets/core/animals/cow.png",
+    "type": "spritesheet",
+    "frameWidth": 32,
+    "frameHeight": 32
+  },
+  {
+    "key": "anim-pig",
+    "url": "assets/core/animals/pig.png",
+    "type": "spritesheet",
+    "frameWidth": 32,
+    "frameHeight": 32
+  },
+  {
+    "key": "anim-sheep",
+    "url": "assets/core/animals/sheep.png",
+    "type": "spritesheet",
+    "frameWidth": 32,
+    "frameHeight": 32
+  },
+  {
+    "key": "char-player",
+    "url": "assets/core/characters/player.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-opus",
+    "url": "assets/core/characters/opus.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-codex",
+    "url": "assets/core/characters/codex.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-sonnet",
+    "url": "assets/core/characters/sonnet.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-haiku",
+    "url": "assets/core/characters/haiku.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-deepseek",
+    "url": "assets/core/characters/deepseek.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-aris",
+    "url": "assets/core/characters/aris.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-pixelcat",
+    "url": "assets/core/characters/pixelcat.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-player-actions",
+    "url": "assets/core/characters/player-actions.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "bld-town-hall",
+    "url": "assets/core/buildings/town-hall.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-memory-library",
+    "url": "assets/core/buildings/memory-library.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-knowledge-tower",
+    "url": "assets/core/buildings/knowledge-tower.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-research-hall",
+    "url": "assets/core/buildings/research-hall.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-skill-workshop",
+    "url": "assets/core/buildings/skill-workshop.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-code-workshop",
+    "url": "assets/core/buildings/code-workshop.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-agent-inn",
+    "url": "assets/core/buildings/agent-inn.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-market",
+    "url": "assets/core/buildings/market.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-player-house",
+    "url": "assets/core/buildings/player-house.png",
+    "type": "image"
+  },
+  {
+    "key": "bld-greenhouse",
+    "url": "assets/core/buildings/greenhouse.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-dialog-big",
+    "url": "assets/core/ui/dialog-big.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-dialog-medium",
+    "url": "assets/core/ui/dialog-medium.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-dialog-small",
+    "url": "assets/core/ui/dialog-small.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-dialog-9slice",
+    "url": "assets/core/ui/dialog-9slice.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-dialog-next",
+    "url": "assets/core/ui/dialog-next.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "ui-icons",
+    "url": "assets/core/ui/icons.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "ui-emotes",
+    "url": "assets/core/ui/emotes.png",
+    "type": "spritesheet",
+    "frameWidth": 16,
+    "frameHeight": 16
+  },
+  {
+    "key": "ui-buttons-26",
+    "url": "assets/core/ui/buttons-26.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-cursor",
+    "url": "assets/core/ui/cursor.png",
+    "type": "image"
+  },
+  {
+    "key": "ui-cursor-paw",
+    "url": "assets/core/ui/cursor-paw.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-walls",
+    "url": "assets/core/interior/walls.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-floor-carpet",
+    "url": "assets/core/interior/floor-carpet.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-floor-flooring",
+    "url": "assets/core/interior/floor-flooring.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-floor-wooden",
+    "url": "assets/core/interior/floor-wooden.png",
+    "type": "image"
+  },
+  {
+    "key": "ts-kenney-farm",
+    "url": "assets/open/kenney-farm.png",
+    "type": "spritesheet",
+    "frameWidth": 18,
+    "frameHeight": 18
+  },
+  {
+    "key": "ts-lpc-crops",
+    "url": "assets/open/lpc-crops.png",
+    "type": "spritesheet",
+    "frameWidth": 32,
+    "frameHeight": 32
+  }
+]

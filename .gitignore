@@ -43,6 +43,10 @@ art/processed/
 # Raw third-party asset packs (downloaded; licenses may restrict
 # redistribution — only processed sprites under web/public/assets ship)
 art/packs/
+art/_inspect/
+# Licensed-pack-derived game assets: present locally + in deploys, never in
+# the public repo. Regenerate with: python tools/build-assets.py
+web/public/assets/core/
 
 # Secrets (never commit)
 *.env.local

@@ -1,0 +1,16 @@
+{
+  "pages": 741,
+  "topics": [
+    { "name": "工作流 Workflows", "count": 96, "children": [ { "name": "agent 协作", "count": 31 }, { "name": "记忆规约", "count": 18 }, { "name": "发布流程", "count": 12 } ] },
+    { "name": "工程笔记 Engineering", "count": 188, "children": [ { "name": "前端", "count": 54 }, { "name": "后端", "count": 61 }, { "name": "DevOps", "count": 38 } ] },
+    { "name": "研究方法 Research Methods", "count": 121, "children": [ { "name": "实验设计", "count": 42 }, { "name": "复现清单", "count": 27 } ] },
+    { "name": "工具档案 Tools", "count": 154, "children": [ { "name": "CLI", "count": 66 }, { "name": "MCP", "count": 29 } ] },
+    { "name": "每日提示 Daily Prompts", "count": 182 }
+  ],
+  "recent": [
+    { "title": "agentmemory 自愈手册 v2", "date": "2026-06-11" },
+    { "title": "像素美术资产许可对照表", "date": "2026-06-11" },
+    { "title": "多 agent 信号通道用法", "date": "2026-06-10" },
+    { "title": "Vite 多页应用部署到 Vercel", "date": "2026-06-09" }
+  ]
+}

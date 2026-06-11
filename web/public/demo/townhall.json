@@ -1,0 +1,15 @@
+{
+  "services": [
+    { "name": "agentmemory (端口 3111)", "ok": true, "detail": "53 个记忆工具在线 · KV 延迟 3.7ms · watchdog 守护中" },
+    { "name": "本地数据桥 (端口 8000)", "ok": false, "detail": "演示模式下不连接本地桥；联机模式自动检测。" },
+    { "name": "GitHub 同步", "ok": true, "detail": "main 分支与远程同步 · tag v2-godot-era 保存了旧时代" },
+    { "name": "Vercel 部署", "ok": true, "detail": "本站即部署产物：游戏与数据面板全静态运行。" }
+  ],
+  "rules": [
+    "每条记忆必带 type / project / concepts（含 agent 身份标签）",
+    "先查重再写入；同主题用 supersedes 更新，不堆流水账",
+    "密钥永不入库、永不入记忆、永不入日志",
+    "重构之前先存档：commit + tag + push",
+    "科研根目录 D:\\Research 神圣不可侵犯"
+  ]
+}

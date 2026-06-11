@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>新路谷物语 · 进入小镇 — Xinlu Valley</title>
+    <meta name="description" content="A Stardew-style pixel town that runs on a real local agent workspace: memories, wiki, research, skills and git." />
+    <link rel="icon" type="image/png" href="/assets/core/characters/player.png" />
+    <style>
+      html, body { margin: 0; padding: 0; background: #1a1423; height: 100%; overflow: hidden; }
+      #game-root { position: fixed; inset: 0; }
+      #game-root canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+      #ui-root { position: fixed; inset: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="game-root"></div>
+    <div id="ui-root"></div>
+    <script type="module" src="/src/game/boot.ts"></script>
+  </body>
+</html>

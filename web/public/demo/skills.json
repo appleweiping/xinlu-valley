@@ -1,0 +1,18 @@
+{
+  "total": 133,
+  "categories": [
+    { "name": "工程 Engineering", "count": 34 },
+    { "name": "科研 Research", "count": 22 },
+    { "name": "写作 Writing", "count": 18 },
+    { "name": "运维 Ops", "count": 16 },
+    { "name": "设计 Design", "count": 12 },
+    { "name": "数据 Data", "count": 15 },
+    { "name": "其他 Misc", "count": 16 }
+  ],
+  "featured": [
+    { "name": "workstation-maintenance", "desc": "带清单与回滚的磁盘整理：保护科研根目录，先盘点后移动。", "category": "运维 Ops" },
+    { "name": "project-hardness", "desc": "把模糊需求硬化成任务规格：目标、影响面、验收标准、测试命令。", "category": "工程 Engineering" },
+    { "name": "deep-research", "desc": "多源检索 + 对抗式核查 + 引用合成的深度调研管线。", "category": "科研 Research" },
+    { "name": "build-assets", "desc": "像素资产管线：包→切片→变体→清单，授权与产物分轨。", "category": "设计 Design" }
+  ]
+}

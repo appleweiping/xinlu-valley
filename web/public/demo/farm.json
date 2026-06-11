@@ -1,0 +1,10 @@
+{
+  "crops": [
+    { "title": "重构 ai-town 为新路谷物语", "stage": 3, "total": 5, "kind": "史诗任务" },
+    { "title": "修复 agentmemory 间歇性失效", "stage": 5, "total": 5, "kind": "已收获" },
+    { "title": "Vercel 动态网站部署", "stage": 2, "total": 5, "kind": "进行中" },
+    { "title": "多 agent 重试问题加固", "stage": 4, "total": 5, "kind": "进行中" },
+    { "title": "GitHub 仓库 v3 更新", "stage": 2, "total": 5, "kind": "进行中" },
+    { "title": "D 盘维护巡检报告", "stage": 1, "total": 5, "kind": "排期中" }
+  ]
+}

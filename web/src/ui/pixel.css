@@ -1,0 +1,102 @@
+/* Stardew-flavored pixel UI. Wooden frames are drawn with layered borders +
+   box-shadows so panels scale freely while keeping the chunky pixel look. */
+
+:root {
+  --wood-dark: #5a3b28;
+  --wood: #8a5a3b;
+  --wood-light: #c98a5b;
+  --paper: #f4e4c1;
+  --paper-dark: #e6cf9f;
+  --ink: #4a3327;
+  --accent: #e8a33d;
+  --night: #1a1423;
+}
+
+.pixel-font {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.wood-panel {
+  background: var(--paper);
+  border: 4px solid var(--wood);
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 4px var(--wood-dark),
+    0 0 0 6px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 2px var(--paper-dark),
+    0 10px 24px rgba(0, 0, 0, 0.45);
+  color: var(--ink);
+  image-rendering: pixelated;
+}
+
+.wood-title {
+  background: linear-gradient(180deg, var(--wood-light), var(--wood));
+  border-bottom: 4px solid var(--wood-dark);
+  color: #fff7e6;
+  text-shadow: 1px 1px 0 var(--wood-dark);
+  padding: 8px 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 2px 2px 0 0;
+}
+
+.wood-btn {
+  background: linear-gradient(180deg, var(--wood-light), var(--wood));
+  border: 3px solid var(--wood-dark);
+  border-radius: 4px;
+  color: #fff7e6;
+  text-shadow: 1px 1px 0 var(--wood-dark);
+  padding: 4px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: inherit;
+}
+.wood-btn:hover { filter: brightness(1.12); }
+.wood-btn:active { transform: translateY(1px); }
+
+.pixel-chip {
+  display: inline-block;
+  background: var(--paper-dark);
+  border: 2px solid var(--wood);
+  border-radius: 3px;
+  padding: 1px 7px;
+  margin: 2px;
+  font-size: 12px;
+}
+
+.typewriter-cursor::after {
+  content: "▾";
+  animation: blink 0.8s steps(1) infinite;
+  color: var(--wood-dark);
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.panel-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--wood) var(--paper-dark); }
+.panel-scroll::-webkit-scrollbar { width: 10px; }
+.panel-scroll::-webkit-scrollbar-track { background: var(--paper-dark); }
+.panel-scroll::-webkit-scrollbar-thumb { background: var(--wood); border: 2px solid var(--paper-dark); }
+
+.fade-in { animation: fadeIn 0.18s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.book-card {
+  background: var(--paper-dark);
+  border: 3px solid var(--wood);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin: 6px 0;
+}
+.book-card h4 { margin: 0 0 4px; font-size: 13px; color: var(--wood-dark); }
+.book-card p { margin: 0; font-size: 12px; line-height: 1.5; }
+
+.bar-outer {
+  background: var(--wood-dark);
+  border-radius: 3px;
+  height: 10px;
+  overflow: hidden;
+  border: 2px solid var(--wood-dark);
+}
+.bar-inner { height: 100%; background: linear-gradient(180deg, #9be564, #5cb83a); }
