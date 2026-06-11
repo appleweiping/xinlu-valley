@@ -40,18 +40,18 @@ AGENTMEMORY_URL = "http://localhost:3111"
 MAX_SCAN_ITEMS = 250
 MEMORY_PREVIEW_CHARS = 2400
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-GODOT_DATA_DIR = PROJECT_ROOT / "godot" / "data"
-BUILDING_REGISTRY_PATH = GODOT_DATA_DIR / "buildings.json"
-AGENT_REGISTRY_PATH = GODOT_DATA_DIR / "agents.json"
-MODEL_PROFILE_REGISTRY_PATH = GODOT_DATA_DIR / "model_profiles.json"
-WORKSPACE_REGISTRY_PATH = GODOT_DATA_DIR / "workspaces.json"
-QUEST_REGISTRY_PATH = GODOT_DATA_DIR / "quests.json"
-DISTRICT_REGISTRY_PATH = GODOT_DATA_DIR / "districts.json"
-NPC_QUEST_REGISTRY_PATH = GODOT_DATA_DIR / "npc_quests.json"
-ROOM_SCENE_REGISTRY_PATH = GODOT_DATA_DIR / "room_scenes.json"
-MAP_DECOR_REGISTRY_PATH = GODOT_DATA_DIR / "map_decor.json"
-WORKFLOW_ROUTE_REGISTRY_PATH = GODOT_DATA_DIR / "workflow_routes.json"
-PLUGIN_MANIFEST_REGISTRY_PATH = GODOT_DATA_DIR / "plugin_manifests.json"
+DATA_DIR = PROJECT_ROOT / "data"
+BUILDING_REGISTRY_PATH = DATA_DIR / "buildings.json"
+AGENT_REGISTRY_PATH = DATA_DIR / "agents.json"
+MODEL_PROFILE_REGISTRY_PATH = DATA_DIR / "model_profiles.json"
+WORKSPACE_REGISTRY_PATH = DATA_DIR / "workspaces.json"
+QUEST_REGISTRY_PATH = DATA_DIR / "quests.json"
+DISTRICT_REGISTRY_PATH = DATA_DIR / "districts.json"
+NPC_QUEST_REGISTRY_PATH = DATA_DIR / "npc_quests.json"
+ROOM_SCENE_REGISTRY_PATH = DATA_DIR / "room_scenes.json"
+MAP_DECOR_REGISTRY_PATH = DATA_DIR / "map_decor.json"
+WORKFLOW_ROUTE_REGISTRY_PATH = DATA_DIR / "workflow_routes.json"
+PLUGIN_MANIFEST_REGISTRY_PATH = DATA_DIR / "plugin_manifests.json"
 DRAFTS_DIR = PROJECT_ROOT / "workspace" / "drafts"
 AGENT_DISPATCH_DRAFTS_DIR = PROJECT_ROOT / "workspace" / "agent-dispatch"
 AGENT_RUNNER_DISPATCH_DIR = PROJECT_ROOT / "workspace" / "agent-runner-dispatches"
@@ -257,7 +257,7 @@ RELEASE_READINESS_FILES = [
     {"id": "packaged-launcher", "name": "Packaged Launcher", "path": PROJECT_ROOT / "start-packaged.cmd", "required": True, "role": "one-click exported game plus backend launcher"},
 ]
 PLUGIN_REGISTRY_ROOTS = [
-    {"id": "godot-data", "name": "Godot Registries", "path": GODOT_DATA_DIR, "role": "runtime JSON registries for buildings, agents, and model profiles"},
+    {"id": "godot-data", "name": "Godot Registries", "path": DATA_DIR, "role": "runtime JSON registries for buildings, agents, and model profiles"},
     {"id": "godot-scripts", "name": "Godot Scripts", "path": PROJECT_ROOT / "godot" / "scripts", "role": "client-side room, UI, and gameplay scripts"},
     {"id": "backend", "name": "FastAPI Backend", "path": PROJECT_ROOT / "backend", "role": "local API adapters and room endpoints"},
     {"id": "tools", "name": "Project Tools", "path": PROJECT_ROOT / "tools", "role": "local scripts, verifiers, and bundled executables"},
@@ -270,7 +270,7 @@ PLUGIN_FILE_EXTENSIONS = {".json", ".gd", ".py", ".ps1", ".cmd", ".md", ".toml",
 BACKUP_STATION_SOURCES = [
     {"id": "ai-town-project", "name": "AI Town Project", "path": PROJECT_ROOT, "priority": "critical"},
     {"id": "shared-memory", "name": "Shared Agent Memory", "path": SHARED_MEMORY_DIR, "priority": "critical"},
-    {"id": "godot-registries", "name": "Godot Registries", "path": GODOT_DATA_DIR, "priority": "high"},
+    {"id": "godot-registries", "name": "Godot Registries", "path": DATA_DIR, "priority": "high"},
     {"id": "project-docs", "name": "Project Docs", "path": PROJECT_ROOT / "docs", "priority": "high"},
     {"id": "local-workspace", "name": "AI Town Workspace", "path": PROJECT_ROOT / "workspace", "priority": "medium"},
 ]
@@ -1800,7 +1800,7 @@ def town_capability_connection_map() -> dict[str, dict]:
             "capabilities": ["local task cards", "task status updates", "task previews", "task agent briefs"],
         },
         "settings-center": {
-            "real_paths": [str(GODOT_DATA_DIR), str(SETTINGS_DRAFTS_DIR)],
+            "real_paths": [str(DATA_DIR), str(SETTINGS_DRAFTS_DIR)],
             "endpoints": ["/api/settings-center/overview", "/api/settings-center/drafts", "/api/config/registry-health"],
             "tools": ["registry health validator", "env status inspector"],
             "apis": [],

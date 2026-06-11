@@ -40,6 +40,9 @@ _legacy/
 # Art generation
 art/generated/
 art/processed/
+# Raw third-party asset packs (downloaded; licenses may restrict
+# redistribution — only processed sprites under web/public/assets ship)
+art/packs/
 
 # Secrets (never commit)
 *.env.local
