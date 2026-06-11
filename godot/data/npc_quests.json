@@ -1,0 +1,562 @@
+[
+  {
+    "id": "codex-vault-apprentice",
+    "building_id": "file-vault",
+    "npc": "Codex",
+    "title": "Vault Apprentice",
+    "chapter": "NPC Chain: Local Workcraft",
+    "summary": "Learn to turn real D-drive folders into safe in-game cabinets without recursive scans or source-file writes.",
+    "reward": "Cabinet Apprentice Mark",
+    "safety": "local-save-only",
+    "stages": [
+      {"id": "meet", "label": "Meet Codex at the File Vault desk", "action": "enter_room"},
+      {"id": "roots", "label": "Review allowlisted root cabinets", "action": "file_roots"},
+      {"id": "preview", "label": "Open a bounded file preview", "action": "preview_file"},
+      {"id": "tag", "label": "Add a project-local tag", "action": "tag_file"}
+    ]
+  },
+  {
+    "id": "aris-research-scribe",
+    "building_id": "research-hall",
+    "npc": "ARIS",
+    "title": "Research Scribe",
+    "chapter": "NPC Chain: Evidence Before Claims",
+    "summary": "Practice reading project boards, drafting local research logs, and queueing read-only research briefs before any experiment work.",
+    "reward": "Evidence Scribe Seal",
+    "safety": "project-local-drafts-only",
+    "stages": [
+      {"id": "meet", "label": "Meet ARIS under the glass dome", "action": "enter_room"},
+      {"id": "projects", "label": "Load research project boards", "action": "research_projects"},
+      {"id": "detail", "label": "Open one project detail board", "action": "project_detail"},
+      {"id": "log", "label": "Create a project-local research log", "action": "research_log"}
+    ]
+  },
+  {
+    "id": "codex-workshop-brief",
+    "building_id": "code-workshop",
+    "npc": "Codex",
+    "title": "Workshop Brief",
+    "chapter": "NPC Chain: Narrow Safe Slices",
+    "summary": "Turn a selected Git repository into a safe task draft, context pack, and patch plan before any code edit.",
+    "reward": "Patch Planner Pin",
+    "safety": "selected-repo-read-only-plus-local-drafts",
+    "stages": [
+      {"id": "meet", "label": "Meet Codex at the gear bench", "action": "enter_room"},
+      {"id": "repos", "label": "Load bounded Code Projects", "action": "code_projects"},
+      {"id": "task", "label": "Create a rich Code Task draft", "action": "code_task"},
+      {"id": "plan", "label": "Create a Patch Plan handoff", "action": "patch_plan"}
+    ]
+  },
+  {
+    "id": "guild-clerk-dispatch",
+    "building_id": "agent-hub",
+    "npc": "Guild Clerk",
+    "title": "Dispatch Clerk",
+    "chapter": "NPC Chain: Agent Guild Basics",
+    "summary": "Learn the difference between roster, companion, chat, task queue, and registered tool flows without launching external runners.",
+    "reward": "Guild Dispatch Ribbon",
+    "safety": "local-agent-state-only",
+    "stages": [
+      {"id": "meet", "label": "Meet the Guild Clerk", "action": "enter_room"},
+      {"id": "roster", "label": "Inspect the Agent Roster", "action": "agent_roster"},
+      {"id": "companion", "label": "Recruit a local companion", "action": "recruit_agent"},
+      {"id": "events", "label": "Review task or tool events", "action": "agent_events"}
+    ]
+  },
+  {
+    "id": "verifier-proof-lanterns",
+    "building_id": "testing-arena",
+    "npc": "Verifier",
+    "title": "Proof Lanterns",
+    "chapter": "NPC Chain: Evidence Habit",
+    "summary": "Build the habit of checking smoke scripts, visual artifacts, and test-plan drafts after each implementation slice.",
+    "reward": "Proof Lantern",
+    "safety": "inspect-plus-local-test-plan",
+    "stages": [
+      {"id": "meet", "label": "Meet the Verifier in the arena", "action": "enter_room"},
+      {"id": "overview", "label": "Inspect verification evidence", "action": "testing_overview"},
+      {"id": "plan", "label": "Create a local test-plan draft", "action": "test_plan"},
+      {"id": "scan", "label": "Run a safe Testing Arena scan", "action": "scan"}
+    ]
+  },
+  {
+    "id": "sonnet-memory-archivist",
+    "building_id": "memory-library",
+    "npc": "Sonnet",
+    "title": "Memory Archivist",
+    "chapter": "NPC Chain: Shared Memory Care",
+    "summary": "Practice reading shared memory, opening bounded previews, drafting reviewed proposals, and using confirm-required promotion.",
+    "reward": "Archivist Bookmark",
+    "safety": "shared-memory-review-gated",
+    "stages": [
+      {"id": "meet", "label": "Meet Sonnet beside the memory shelves", "action": "enter_room"},
+      {"id": "index", "label": "Load shared memory shelves", "action": "memory_index"},
+      {"id": "detail", "label": "Open a bounded memory note preview", "action": "memory_detail"},
+      {"id": "proposal", "label": "Create a project-local memory proposal", "action": "memory_proposal"}
+    ]
+  },
+  {
+    "id": "sonnet-knowledge-cartographer",
+    "building_id": "knowledge-tower",
+    "npc": "Sonnet",
+    "title": "Knowledge Cartographer",
+    "chapter": "NPC Chain: Search Before Action",
+    "summary": "Use the allowlisted cached knowledge index, search it, and open bounded document previews before changing anything.",
+    "reward": "Index Compass",
+    "safety": "allowlisted-index-read-only",
+    "stages": [
+      {"id": "meet", "label": "Meet Sonnet at the crystal index", "action": "enter_room"},
+      {"id": "index", "label": "Inspect Knowledge Tower index status", "action": "knowledge_index"},
+      {"id": "search", "label": "Search cached knowledge", "action": "knowledge_search"},
+      {"id": "detail", "label": "Open one bounded knowledge preview", "action": "knowledge_detail"}
+    ]
+  },
+  {
+    "id": "harbor-master-handoff",
+    "building_id": "github-harbor",
+    "npc": "Harbor Master",
+    "title": "Release Harbor Handoff",
+    "chapter": "NPC Chain: No Surprise Publishing",
+    "summary": "Inspect local Git docks, read GitHub status, and create a local handoff draft before any future publishing action.",
+    "reward": "Harbor Compass",
+    "safety": "git-read-only-plus-local-drafts",
+    "stages": [
+      {"id": "meet", "label": "Meet the Harbor Master", "action": "enter_room"},
+      {"id": "repos", "label": "Inspect local Git docks", "action": "harbor_repos"},
+      {"id": "github", "label": "Read GitHub CLI status", "action": "harbor_github"},
+      {"id": "draft", "label": "Create a local GitHub handoff draft", "action": "harbor_draft"}
+    ]
+  },
+  {
+    "id": "terminal-keeper-command-safety",
+    "building_id": "terminal-control",
+    "npc": "Terminal Keeper",
+    "title": "Command Safety Keeper",
+    "chapter": "NPC Chain: Confirmed Commands",
+    "summary": "Inspect the command catalog, request a confirm-required command preview, and review bounded command evidence.",
+    "reward": "Command Seal",
+    "safety": "confirm-required-terminal-only",
+    "stages": [
+      {"id": "meet", "label": "Meet the Terminal Keeper", "action": "enter_room"},
+      {"id": "catalog", "label": "Load allowlisted command catalog", "action": "terminal_commands"},
+      {"id": "preview", "label": "Request a command confirmation preview", "action": "terminal_run"},
+      {"id": "log", "label": "Inspect bounded command evidence", "action": "terminal_log"}
+    ]
+  },
+  {
+    "id": "model-broker-route-check",
+    "building_id": "model-market",
+    "npc": "Model Broker",
+    "title": "Gateway Route Check",
+    "chapter": "NPC Chain: No-Secret Model Ops",
+    "summary": "Inspect model gateway status, profile definitions, dry-run tests, and encrypted key-vault metadata without exposing secrets.",
+    "reward": "Gateway Token",
+    "safety": "no-secret-display",
+    "stages": [
+      {"id": "meet", "label": "Meet the Model Broker", "action": "enter_room"},
+      {"id": "status", "label": "Inspect model gateway status", "action": "model_status"},
+      {"id": "profiles", "label": "Review model profile registry", "action": "model_profiles"},
+      {"id": "test", "label": "Record a dry-run profile test", "action": "model_test"}
+    ]
+  },
+  {
+    "id": "aris-paper-reader",
+    "building_id": "paper-reading-room",
+    "npc": "ARIS",
+    "title": "Paper Reading Scribe",
+    "chapter": "NPC Chain: Citation Grounding",
+    "summary": "Map paper artifacts, create reading notes, and queue bounded PDF extraction reports before making citation claims.",
+    "reward": "Citation Ribbon",
+    "safety": "bounded-paper-read-plus-local-reports",
+    "stages": [
+      {"id": "meet", "label": "Meet ARIS in the reading alcove", "action": "enter_room"},
+      {"id": "overview", "label": "Inspect bounded paper map", "action": "paper_overview"},
+      {"id": "note", "label": "Create a project-local reading note", "action": "paper_note"},
+      {"id": "extract", "label": "Queue or dry-run bounded PDF extraction", "action": "paper_extract"}
+    ]
+  },
+  {
+    "id": "depot-clerk-intake-route",
+    "building_id": "download-station",
+    "npc": "Depot Clerk",
+    "title": "Download Intake Route",
+    "chapter": "NPC Chain: Sort Before Touching",
+    "summary": "Inspect allowlisted download roots, triage recent files, and create local intake drafts without moving, opening, installing, or deleting downloaded content.",
+    "reward": "Depot Route Stamp",
+    "safety": "read-only-downloads-plus-local-drafts",
+    "stages": [
+      {"id": "meet", "label": "Meet the Depot Clerk", "action": "enter_room"},
+      {"id": "overview", "label": "Review allowlisted download roots", "action": "download_overview"},
+      {"id": "triage", "label": "Triage recent download artifacts", "action": "download_triage"},
+      {"id": "intake", "label": "Create a project-local intake note", "action": "download_intake"}
+    ]
+  },
+  {
+    "id": "backup-keeper-restore-map",
+    "building_id": "backup-station",
+    "npc": "Backup Keeper",
+    "title": "Restore Map Keeper",
+    "chapter": "NPC Chain: Prove Before Copying",
+    "summary": "Map backup sources, sample restore-check hashes, and draft a local backup plan without copying, pruning, or overwriting anything.",
+    "reward": "Restore Leaf Seal",
+    "safety": "read-only-restore-check-plus-local-plan",
+    "stages": [
+      {"id": "meet", "label": "Meet the Backup Keeper", "action": "enter_room"},
+      {"id": "overview", "label": "Inspect backup source and target map", "action": "backup_overview"},
+      {"id": "integrity", "label": "Run a bounded restore-check sample", "action": "backup_integrity"},
+      {"id": "plan", "label": "Create a project-local backup plan", "action": "backup_plan"}
+    ]
+  },
+  {
+    "id": "muse-idea-lanterns",
+    "building_id": "inspiration-station",
+    "npc": "Muse",
+    "title": "Idea Lanterns",
+    "chapter": "NPC Chain: Catch Useful Sparks",
+    "summary": "Read visual and project signals, inspect nearby draft shelves, and turn a spark into a local inspiration note.",
+    "reward": "Idea Lantern",
+    "safety": "read-only-signals-plus-local-note",
+    "stages": [
+      {"id": "meet", "label": "Meet the Muse", "action": "enter_room"},
+      {"id": "signals", "label": "Inspect idea signals", "action": "inspiration_overview"},
+      {"id": "drafts", "label": "Review nearby draft shelves", "action": "inspiration_overview"},
+      {"id": "note", "label": "Create a project-local inspiration note", "action": "inspiration_note"}
+    ]
+  },
+  {
+    "id": "office-steward-followups",
+    "building_id": "local-office-center",
+    "npc": "Office Steward",
+    "title": "Follow-Up Parlor",
+    "chapter": "NPC Chain: Office Work Without Surprise Edits",
+    "summary": "Map local office folders, review bounded document signals, and create a project-local follow-up note without editing company/source files.",
+    "reward": "Office Follow-Up Stamp",
+    "safety": "read-only-office-map-plus-local-note",
+    "stages": [
+      {"id": "meet", "label": "Meet the Office Steward", "action": "enter_room"},
+      {"id": "overview", "label": "Inspect office roots and recent items", "action": "office_overview"},
+      {"id": "shelf", "label": "Review bounded office document signals", "action": "office_overview"},
+      {"id": "note", "label": "Create a project-local office note", "action": "office_note"}
+    ]
+  },
+  {
+    "id": "timekeeper-schedule-route",
+    "building_id": "schedule-plan-center",
+    "npc": "Timekeeper",
+    "title": "Timebox Route",
+    "chapter": "NPC Chain: Plan Before Committing Time",
+    "summary": "Inspect PLAN, task, office, and memory signals, then create a local schedule draft without touching calendars or schedulers.",
+    "reward": "Timebox Charm",
+    "safety": "read-only-planning-signals-plus-local-draft",
+    "stages": [
+      {"id": "meet", "label": "Meet the Timekeeper", "action": "enter_room"},
+      {"id": "signals", "label": "Inspect planning signals", "action": "schedule_overview"},
+      {"id": "timeboxes", "label": "Review suggested time boxes", "action": "schedule_overview"},
+      {"id": "draft", "label": "Create a project-local schedule draft", "action": "schedule_draft"}
+    ]
+  },
+  {
+    "id": "coach-skill-practice",
+    "building_id": "learning-training-grounds",
+    "npc": "Coach",
+    "title": "Skill Practice Grove",
+    "chapter": "NPC Chain: Practice As A Local Plan",
+    "summary": "Inspect local skill resources and practice tracks, then create a learning plan without installing skills or invoking agents.",
+    "reward": "Practice Leaf",
+    "safety": "read-only-skill-map-plus-local-plan",
+    "stages": [
+      {"id": "meet", "label": "Meet the Coach", "action": "enter_room"},
+      {"id": "map", "label": "Inspect the local skill map", "action": "learning_overview"},
+      {"id": "track", "label": "Review practice tracks", "action": "learning_overview"},
+      {"id": "plan", "label": "Create a project-local learning plan", "action": "learning_plan"}
+    ]
+  },
+  {
+    "id": "phrase-tutor-practice-cards",
+    "building_id": "language-learning-area",
+    "npc": "Phrase Tutor",
+    "title": "Phrase Practice Cards",
+    "chapter": "NPC Chain: Language Practice Without Live Translation",
+    "summary": "Inspect local multilingual/UI signals and create a local phrase-practice note without calling translators or editing source text.",
+    "reward": "Phrase Card",
+    "safety": "read-only-language-signals-plus-local-note",
+    "stages": [
+      {"id": "meet", "label": "Meet the Phrase Tutor", "action": "enter_room"},
+      {"id": "map", "label": "Inspect language practice signals", "action": "language_overview"},
+      {"id": "cards", "label": "Review generated phrase-card ideas", "action": "language_overview"},
+      {"id": "practice", "label": "Create a project-local phrase note", "action": "language_practice"}
+    ]
+  },
+  {
+    "id": "data-scribe-provenance",
+    "building_id": "research-data-center",
+    "npc": "Data Scribe",
+    "title": "Provenance Lab",
+    "chapter": "NPC Chain: Data Before Claims",
+    "summary": "Map likely dataset/result artifacts and create a provenance note without launching experiments, editing data, or promoting claims.",
+    "reward": "Provenance Lens",
+    "safety": "read-only-research-data-plus-local-note",
+    "stages": [
+      {"id": "meet", "label": "Meet the Data Scribe", "action": "enter_room"},
+      {"id": "map", "label": "Inspect research data map", "action": "research_data_overview"},
+      {"id": "artifacts", "label": "Review sampled artifacts", "action": "research_data_overview"},
+      {"id": "note", "label": "Create a project-local provenance note", "action": "research_data_note"}
+    ]
+  },
+  {
+    "id": "release-herald-readiness",
+    "building_id": "version-release-plaza",
+    "npc": "Release Herald",
+    "title": "Release Readiness Herald",
+    "chapter": "NPC Chain: Proof Before Publishing",
+    "summary": "Inspect release-readiness evidence and create local checklist/report drafts without staging, committing, tagging, pushing, or opening releases.",
+    "reward": "Release Ribbon",
+    "safety": "read-only-release-evidence-plus-local-drafts",
+    "stages": [
+      {"id": "meet", "label": "Meet the Release Herald", "action": "enter_room"},
+      {"id": "overview", "label": "Inspect release-readiness gates", "action": "release_overview"},
+      {"id": "checklist", "label": "Create a local release checklist", "action": "release_checklist"},
+      {"id": "report", "label": "Create a local release report", "action": "release_report"}
+    ]
+  },
+  {
+    "id": "system-keeper-observatory",
+    "building_id": "system-monitor",
+    "npc": "System Keeper",
+    "title": "Lantern Observatory",
+    "chapter": "NPC Chain: Observe Before Acting",
+    "summary": "Inspect service status, backend job history, and the local event timeline without starting, stopping, or modifying services.",
+    "reward": "Observability Lens",
+    "safety": "read-only-system-observability",
+    "stages": [
+      {"id": "meet", "label": "Meet the System Keeper", "action": "enter_room"},
+      {"id": "services", "label": "Inspect service lanterns", "action": "system_overview"},
+      {"id": "jobs", "label": "Review backend job queue", "action": "system_jobs"},
+      {"id": "events", "label": "Read the system event timeline", "action": "system_events"}
+    ]
+  },
+  {
+    "id": "gate-archivist-safety-seals",
+    "building_id": "permission-hall",
+    "npc": "Gate Archivist",
+    "title": "Safety Seal Ledger",
+    "chapter": "NPC Chain: Permissions Before Power",
+    "summary": "Review permission policy and run the bounded secret-exposure audit without displaying secret text or changing authorization rules.",
+    "reward": "Safety Seal",
+    "safety": "read-only-policy-map-plus-bounded-secret-audit",
+    "stages": [
+      {"id": "meet", "label": "Meet the Gate Archivist", "action": "enter_room"},
+      {"id": "policy", "label": "Inspect permission policy map", "action": "permission_overview"},
+      {"id": "audit", "label": "Run the bounded secret exposure audit", "action": "permission_secret_audit"},
+      {"id": "receipts", "label": "Review audit and permission receipts", "action": "permission_overview"}
+    ]
+  },
+  {
+    "id": "registry-clerk-clockwork",
+    "building_id": "settings-center",
+    "npc": "Registry Clerk",
+    "title": "Clockwork Registry Desk",
+    "chapter": "NPC Chain: Draft Configuration Changes",
+    "summary": "Inspect registry and launcher status, validate schema health, then create a project-local settings draft without applying configuration changes.",
+    "reward": "Registry Gear",
+    "safety": "read-only-registry-health-plus-local-draft",
+    "stages": [
+      {"id": "meet", "label": "Meet the Registry Clerk", "action": "enter_room"},
+      {"id": "map", "label": "Inspect registry and launcher map", "action": "settings_overview"},
+      {"id": "health", "label": "Validate registry schema health", "action": "registry_health"},
+      {"id": "draft", "label": "Create a project-local settings draft", "action": "settings_draft"}
+    ]
+  },
+  {
+    "id": "quest-clerk-local-ledger",
+    "building_id": "task-board",
+    "npc": "Quest Clerk",
+    "title": "Local Task Ledger",
+    "chapter": "NPC Chain: Turn Work Into Quests",
+    "summary": "Inspect the project-local task ledger, create a safe task card, and open a bounded task preview without touching external trackers.",
+    "reward": "Task Ribbon",
+    "safety": "project-local-task-ledger",
+    "stages": [
+      {"id": "meet", "label": "Meet the Quest Clerk", "action": "enter_room"},
+      {"id": "ledger", "label": "Inspect the local task ledger", "action": "task_overview"},
+      {"id": "card", "label": "Create a project-local task card", "action": "task_create"},
+      {"id": "preview", "label": "Open a bounded task preview", "action": "task_detail"}
+    ]
+  },
+  {
+    "id": "ink-scribe-draft-atelier",
+    "building_id": "writing-studio",
+    "npc": "Ink Scribe",
+    "title": "Draft Atelier",
+    "chapter": "NPC Chain: Draft Without Overwriting",
+    "summary": "Inspect project documents and create a local writing draft with memory evidence without overwriting source docs.",
+    "reward": "Ink Bookmark",
+    "safety": "read-only-doc-shelf-plus-local-draft",
+    "stages": [
+      {"id": "meet", "label": "Meet the Ink Scribe", "action": "enter_room"},
+      {"id": "shelf", "label": "Inspect project document shelves", "action": "writing_overview"},
+      {"id": "draft", "label": "Create a project-local writing draft", "action": "writing_draft"},
+      {"id": "review", "label": "Review draft shelf signals", "action": "writing_overview"}
+    ]
+  },
+  {
+    "id": "gearwright-blueprint-mill",
+    "building_id": "automation-factory",
+    "npc": "Gearwright",
+    "title": "Blueprint Mill",
+    "chapter": "NPC Chain: Design Before Automating",
+    "summary": "Inspect script catalog and scheduler state, then create a project-local automation blueprint without running scripts or changing schedules.",
+    "reward": "Clockwork Blueprint",
+    "safety": "read-only-script-scheduler-plus-local-blueprint",
+    "stages": [
+      {"id": "meet", "label": "Meet the Gearwright", "action": "enter_room"},
+      {"id": "catalog", "label": "Inspect the safe script catalog", "action": "automation_overview"},
+      {"id": "scheduler", "label": "Read the scheduler snapshot", "action": "automation_scheduler"},
+      {"id": "draft", "label": "Create a project-local automation blueprint", "action": "automation_draft"}
+    ]
+  },
+  {
+    "id": "remedy-nurse-diagnostics",
+    "building_id": "bug-clinic",
+    "npc": "Remedy Nurse",
+    "title": "Diagnostic Remedy Round",
+    "chapter": "NPC Chain: Failures Into Fix Plans",
+    "summary": "Inspect diagnostic signals and create a project-local bug report draft without changing code or rerunning failed jobs.",
+    "reward": "Repair Plaster",
+    "safety": "read-only-diagnostics-plus-local-bug-report",
+    "stages": [
+      {"id": "meet", "label": "Meet the Remedy Nurse", "action": "enter_room"},
+      {"id": "diagnostics", "label": "Inspect diagnostic signals", "action": "bug_overview"},
+      {"id": "evidence", "label": "Review failed job and log evidence", "action": "bug_overview"},
+      {"id": "report", "label": "Create a project-local bug report draft", "action": "bug_report"}
+    ]
+  },
+  {
+    "id": "portfolio-steward-compass",
+    "building_id": "project-management-hall",
+    "npc": "Portfolio Steward",
+    "title": "Portfolio Compass",
+    "chapter": "NPC Chain: Choose The Next Project Move",
+    "summary": "Inspect local project, research, task, and Git signals, then create a project-local portfolio brief without changing trackers or repos.",
+    "reward": "Compass Pin",
+    "safety": "read-only-portfolio-plus-local-brief",
+    "stages": [
+      {"id": "meet", "label": "Meet the Portfolio Steward", "action": "enter_room"},
+      {"id": "projects", "label": "Inspect local project portfolio", "action": "project_management_overview"},
+      {"id": "boards", "label": "Review research boards and task signals", "action": "project_management_overview"},
+      {"id": "brief", "label": "Create a project-local portfolio brief", "action": "project_brief"}
+    ]
+  },
+  {
+    "id": "gallery-curator-asset-shelves",
+    "building_id": "asset-gallery",
+    "npc": "Gallery Curator",
+    "title": "Asset Curation Shelves",
+    "chapter": "NPC Chain: Traceable Visual Production",
+    "summary": "Inspect allowlisted asset shelves, read one asset metadata sample, and create a curation note without editing, importing, copying, or moving asset files.",
+    "reward": "Curator Lens",
+    "safety": "read-only-asset-inspection-plus-local-note",
+    "stages": [
+      {"id": "meet", "label": "Meet the Gallery Curator", "action": "enter_room"},
+      {"id": "shelves", "label": "Inspect asset roots and style contracts", "action": "asset_overview"},
+      {"id": "inspect", "label": "Inspect one allowlisted asset", "action": "asset_inspect"},
+      {"id": "note", "label": "Create a project-local asset curation note", "action": "asset_note"}
+    ]
+  },
+  {
+    "id": "skill-keeper-workflow-shelves",
+    "building_id": "skill-workshop",
+    "npc": "Skill Keeper",
+    "title": "Workflow Skill Shelves",
+    "chapter": "NPC Chain: Know The Available Skills",
+    "summary": "Inspect local skill and workflow categories, then run a safe room scan without installing, editing, or invoking skills.",
+    "reward": "Skill Lantern",
+    "safety": "read-only-local-skill-inventory",
+    "stages": [
+      {"id": "meet", "label": "Meet the Skill Keeper", "action": "enter_room"},
+      {"id": "skills", "label": "Inspect local skill inventory", "action": "skill_overview"},
+      {"id": "categories", "label": "Review workflow categories", "action": "skill_overview"},
+      {"id": "scan", "label": "Complete a safe room scan", "action": "skill_scan"}
+    ]
+  },
+  {
+    "id": "toolwright-launcher-lab",
+    "building_id": "devtools-lab",
+    "npc": "Toolwright",
+    "title": "Launcher Gear Lab",
+    "chapter": "NPC Chain: Tools Before Commands",
+    "summary": "Inspect local D-drive CLI launcher metadata and complete a safe scan without executing tools or changing PATH.",
+    "reward": "Tool Gear",
+    "safety": "read-only-devtools-inventory",
+    "stages": [
+      {"id": "meet", "label": "Meet the Toolwright", "action": "enter_room"},
+      {"id": "tools", "label": "Inspect local CLI launchers", "action": "devtools_overview"},
+      {"id": "paths", "label": "Review launcher paths", "action": "devtools_overview"},
+      {"id": "scan", "label": "Complete a safe room scan", "action": "devtools_scan"}
+    ]
+  },
+  {
+    "id": "town-archivist-charter",
+    "building_id": "town-hall",
+    "npc": "Town Archivist",
+    "title": "Town Charter Atlas",
+    "chapter": "NPC Chain: Understand The Workworld",
+    "summary": "Inspect the building capability atlas and workflow routes without claiming progress, running tools, or mutating backend state.",
+    "reward": "Charter Seal",
+    "safety": "read-only-town-governance",
+    "stages": [
+      {"id": "meet", "label": "Meet the Town Archivist", "action": "enter_room"},
+      {"id": "atlas", "label": "Inspect the capability atlas", "action": "town_capability"},
+      {"id": "routes", "label": "Inspect workflow routes", "action": "town_workflows"},
+      {"id": "detail", "label": "Review a town governance detail", "action": "town_capability"}
+    ]
+  },
+  {
+    "id": "rune-registrar-extensions",
+    "building_id": "plugin-registry",
+    "npc": "Rune Registrar",
+    "title": "Extension Rune Registry",
+    "chapter": "NPC Chain: Plan Extensions Safely",
+    "summary": "Inspect extension candidates and typed manifests, then create a project-local plugin proposal without installing or activating anything.",
+    "reward": "Extension Rune",
+    "safety": "read-only-extension-map-plus-local-proposal",
+    "stages": [
+      {"id": "meet", "label": "Meet the Rune Registrar", "action": "enter_room"},
+      {"id": "registry", "label": "Inspect extension registry map", "action": "plugin_overview"},
+      {"id": "manifests", "label": "Review typed plugin manifests", "action": "plugin_manifests"},
+      {"id": "draft", "label": "Create a project-local plugin proposal", "action": "plugin_draft"}
+    ]
+  },
+  {
+    "id": "goal-oracle-star-map",
+    "building_id": "goal-tower",
+    "npc": "Goal Oracle",
+    "title": "Milestone Star Map",
+    "chapter": "NPC Chain: Long View Before Next Step",
+    "summary": "Inspect PLAN, memory, task, and portfolio goal signals, then create a local goal draft without touching trackers or schedules.",
+    "reward": "Milestone Star",
+    "safety": "read-only-goal-map-plus-local-draft",
+    "stages": [
+      {"id": "meet", "label": "Meet the Goal Oracle", "action": "enter_room"},
+      {"id": "map", "label": "Inspect long-term goal map", "action": "goal_overview"},
+      {"id": "signals", "label": "Review milestone signals", "action": "goal_overview"},
+      {"id": "draft", "label": "Create a project-local goal draft", "action": "goal_draft"}
+    ]
+  },
+  {
+    "id": "draft-courier-scratch-box",
+    "building_id": "temporary-draft-box",
+    "npc": "Draft Courier",
+    "title": "Scratch Note Mailbox",
+    "chapter": "NPC Chain: Capture Before Routing",
+    "summary": "Inspect project-local draft shelves and create a scratch note without promoting, sending, overwriting, or routing it.",
+    "reward": "Scratch Tag",
+    "safety": "project-local-temporary-drafts",
+    "stages": [
+      {"id": "meet", "label": "Meet the Draft Courier", "action": "enter_room"},
+      {"id": "shelves", "label": "Inspect draft shelves", "action": "temp_drafts_overview"},
+      {"id": "scratch", "label": "Review temporary scratch notes", "action": "temp_drafts_overview"},
+      {"id": "draft", "label": "Create a project-local scratch note", "action": "temp_draft"}
+    ]
+  }
+]

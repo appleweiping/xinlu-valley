@@ -1,0 +1,86 @@
+[
+  {
+    "id": "research",
+    "name": "Research",
+    "path": "D:\\Research",
+    "kind": "research",
+    "role": "research projects, papers, experiments, and datasets",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": true,
+    "priority": "critical",
+    "safety": "allowlisted-lazy-read"
+  },
+  {
+    "id": "game-dev",
+    "name": "Game Development",
+    "path": "D:\\Game_develop",
+    "kind": "development",
+    "role": "local game and software projects",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": true,
+    "priority": "critical",
+    "safety": "allowlisted-lazy-read"
+  },
+  {
+    "id": "company",
+    "name": "Company",
+    "path": "D:\\Company",
+    "kind": "office",
+    "role": "company workspace and office material",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": false,
+    "priority": "high",
+    "safety": "allowlisted-lazy-read"
+  },
+  {
+    "id": "knowledgebase",
+    "name": "Knowledgebase",
+    "path": "D:\\research\\Vipin's Knowledgebase",
+    "kind": "knowledge",
+    "role": "shared knowledge base, memory context, and project notes",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": false,
+    "priority": "critical",
+    "safety": "allowlisted-lazy-read"
+  },
+  {
+    "id": "agent-resources",
+    "name": "Agent Resources",
+    "path": "D:\\agent-resources",
+    "kind": "agent-resources",
+    "role": "skills, workflows, templates, and agent-side resources",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": false,
+    "priority": "high",
+    "safety": "allowlisted-lazy-read"
+  },
+  {
+    "id": "devtools",
+    "name": "Devtools",
+    "path": "D:\\devtools",
+    "kind": "tools",
+    "role": "local agent launchers, tools, and infrastructure",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": true,
+    "priority": "high",
+    "safety": "allowlisted-lazy-read"
+  },
+  {
+    "id": "project",
+    "name": "AI Town Project",
+    "path": "D:\\Game_develop\\ai-town",
+    "kind": "project",
+    "role": "current AI Town source tree and docs",
+    "enabled": true,
+    "file_vault": true,
+    "project_browser": true,
+    "priority": "critical",
+    "safety": "project-local-read"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "central-plaza",
+    "name": "Central Plaza",
+    "role": "main arrival space, quest board, player orientation, agent access",
+    "anchor": [768, 620],
+    "portal_pos": [912, 410],
+    "color": "#dcd6f7",
+    "buildings": ["town-hall", "task-board", "agent-hub", "memory-library"],
+    "status": "active"
+  },
+  {
+    "id": "research-quarter",
+    "name": "Research Quarter",
+    "role": "research projects, paper reading, datasets, experiment provenance",
+    "anchor": [390, 330],
+    "portal_pos": [520, 365],
+    "color": "#bfe6c8",
+    "buildings": ["research-hall", "research-data-center", "paper-reading-room", "knowledge-tower"],
+    "status": "active"
+  },
+  {
+    "id": "developer-row",
+    "name": "Developer Row",
+    "role": "code workshop, terminal control, testing, bug triage, plugin work",
+    "anchor": [1070, 560],
+    "portal_pos": [1005, 530],
+    "color": "#b8d8ff",
+    "buildings": ["code-workshop", "terminal-control", "testing-arena", "bug-clinic", "plugin-registry"],
+    "status": "active"
+  },
+  {
+    "id": "harbor-and-release",
+    "name": "Harbor And Release",
+    "role": "GitHub Harbor, version release plaza, backup station, public handoff preparation",
+    "anchor": [1080, 760],
+    "portal_pos": [1135, 720],
+    "color": "#c8d4ff",
+    "buildings": ["github-harbor", "version-release-plaza", "backup-station"],
+    "status": "active"
+  },
+  {
+    "id": "office-gardens",
+    "name": "Office Gardens",
+    "role": "local office, planning, writing, learning, language practice, inspiration",
+    "anchor": [650, 770],
+    "portal_pos": [585, 670],
+    "color": "#ffd8a8",
+    "buildings": ["local-office-center", "schedule-plan-center", "writing-studio", "learning-training-grounds", "language-learning-area", "inspiration-station"],
+    "status": "active"
+  }
+]

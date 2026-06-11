@@ -1,0 +1,79 @@
+[
+  {
+    "id": "opus",
+    "name": "Opus",
+    "display_name": "Opus 总舵主",
+    "role": "Chief Architect",
+    "zone": "Town Hall",
+    "pos": [820, 215],
+    "sheet": "res://assets/characters/opus-sheet.png",
+    "agent_kind": "real-agent",
+    "launcher_candidates": ["D:\\devtools\\cc.cmd", "D:\\devtools\\claude.cmd"]
+  },
+  {
+    "id": "pixelcat",
+    "name": "PixelCat",
+    "display_name": "像素猫 PixelCat",
+    "role": "Builder",
+    "zone": "Skill Workshop",
+    "pos": [650, 455],
+    "sheet": "res://assets/characters/pixelcat-sheet.png",
+    "agent_kind": "real-agent",
+    "launcher_candidates": ["D:\\devtools\\pixelcat.cmd"]
+  },
+  {
+    "id": "codex",
+    "name": "Codex",
+    "display_name": "Codex 协调官",
+    "role": "Coordinator",
+    "zone": "Central Plaza",
+    "pos": [790, 490],
+    "sheet": "res://assets/characters/codex-sheet.png",
+    "agent_kind": "real-agent",
+    "launcher_candidates": ["D:\\devtools\\codex.cmd"]
+  },
+  {
+    "id": "sonnet",
+    "name": "Sonnet",
+    "display_name": "Sonnet 审查员",
+    "role": "Reviewer",
+    "zone": "Memory Library",
+    "pos": [405, 460],
+    "sheet": "res://assets/characters/sonnet-sheet.png",
+    "agent_kind": "real-agent",
+    "launcher_candidates": ["D:\\devtools\\claude.cmd"]
+  },
+  {
+    "id": "haiku",
+    "name": "Haiku",
+    "display_name": "Haiku 闪电侠",
+    "role": "Runner",
+    "zone": "Agent Homes",
+    "pos": [610, 660],
+    "sheet": "res://assets/characters/haiku-sheet.png",
+    "agent_kind": "real-agent",
+    "launcher_candidates": ["D:\\devtools\\claude.cmd"]
+  },
+  {
+    "id": "deepseek",
+    "name": "DeepSeek",
+    "display_name": "鲸鱼 DeepSeek",
+    "role": "Bulk Worker",
+    "zone": "Resource Market",
+    "pos": [985, 665],
+    "sheet": "res://assets/characters/deepseek-sheet.png",
+    "agent_kind": "real-agent",
+    "launcher_candidates": ["D:\\devtools\\deepseek.cmd"]
+  },
+  {
+    "id": "aris",
+    "name": "ARIS",
+    "display_name": "ARIS 科研框架",
+    "role": "Research Frame",
+    "zone": "Knowledge Tower",
+    "pos": [1090, 430],
+    "sheet": "res://assets/characters/aris-sheet.png",
+    "agent_kind": "framework-agent",
+    "launcher_candidates": ["D:\\devtools\\aris.cmd"]
+  }
+]

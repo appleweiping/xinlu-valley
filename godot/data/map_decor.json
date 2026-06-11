@@ -1,0 +1,91 @@
+[
+  {
+    "id": "central-plaza-name",
+    "name": "Central Plaza",
+    "kind": "plaza-label",
+    "pos": [650, 380],
+    "size": [270, 92],
+    "color": "#d9c08c",
+    "alpha": 0.42,
+    "visible_label": false,
+    "action": "plaza_overview",
+    "description": "The warm town center for quests, agents, portals, and safe local-work routes."
+  },
+  {
+    "id": "fountain",
+    "name": "Memory Fountain",
+    "kind": "fountain",
+    "pos": [750, 408],
+    "size": [74, 74],
+    "color": "#7dbbe8",
+    "alpha": 0.62,
+    "action": "show_badges",
+    "description": "Shows local progression: badges, companions, daily routes, mastery, and NPC chains."
+  },
+  {
+    "id": "quest-board",
+    "name": "Quest Board",
+    "kind": "notice-board",
+    "pos": [708, 446],
+    "size": [160, 30],
+    "color": "#fff3d8",
+    "alpha": 0.86,
+    "action": "load_quests",
+    "description": "Refreshes registry-backed local-work quests."
+  },
+  {
+    "id": "daily-route-sign",
+    "name": "Daily Routes",
+    "kind": "route-sign",
+    "pos": [702, 484],
+    "size": [150, 30],
+    "color": "#f0b6c7",
+    "alpha": 0.72,
+    "action": "load_daily_routes",
+    "description": "Loads today's safe local-work route cards."
+  },
+  {
+    "id": "district-portal",
+    "name": "Portal",
+    "kind": "portal",
+    "pos": [912, 410],
+    "size": [96, 42],
+    "color": "#dcd6f7",
+    "alpha": 0.72,
+    "action": "district:developer-row",
+    "description": "Moves the player and camera to Developer Row only."
+  },
+  {
+    "id": "agent-gate",
+    "name": "Agent Gate",
+    "kind": "agent-gate",
+    "pos": [570, 435],
+    "size": [94, 38],
+    "color": "#d9a441",
+    "alpha": 0.58,
+    "action": "select_agent:codex",
+    "description": "Selects Codex as a resident coordinator without launching any agent runner."
+  },
+  {
+    "id": "code-path",
+    "name": "Code Path",
+    "kind": "path-sign",
+    "pos": [1000, 530],
+    "size": [112, 30],
+    "color": "#b8d8ff",
+    "alpha": 0.66,
+    "action": "select_building:code-workshop",
+    "description": "Selects Code Workshop for bounded local Git project work."
+  },
+  {
+    "id": "memory-crystal",
+    "name": "Memory Crystal",
+    "kind": "crystal",
+    "pos": [463, 388],
+    "size": [110, 34],
+    "color": "#dcd6f7",
+    "alpha": 0.7,
+    "action": "select_building:memory-library",
+    "description": "Selects Memory Library for shared-memory shelves and project-local proposals."
+  }
+]

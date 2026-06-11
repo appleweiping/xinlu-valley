@@ -1,0 +1,57 @@
+[
+  {
+    "id": "deepseek-chat",
+    "name": "DeepSeek Chat",
+    "provider": "deepseek",
+    "role": "current dialogue provider",
+    "key_env": "DEEPSEEK_API_KEY",
+    "base_url_env": "DEEPSEEK_BASE_URL",
+    "default_base_url": "https://api.deepseek.com",
+    "models": ["deepseek-chat"],
+    "safety": "no-secret-display"
+  },
+  {
+    "id": "openai-compatible",
+    "name": "OpenAI Compatible Gateway",
+    "provider": "openai-compatible",
+    "role": "future model/tool gateway",
+    "key_env": "OPENAI_API_KEY",
+    "base_url_env": "OPENAI_BASE_URL",
+    "default_base_url": "https://api.openai.com",
+    "models": ["gpt-5.5", "gpt-5.1", "gpt-4.1"],
+    "safety": "no-secret-display"
+  },
+  {
+    "id": "anthropic-compatible",
+    "name": "Anthropic Compatible Gateway",
+    "provider": "anthropic",
+    "role": "future reviewer/agent gateway",
+    "key_env": "ANTHROPIC_API_KEY",
+    "base_url_env": "ANTHROPIC_BASE_URL",
+    "default_base_url": "https://api.anthropic.com",
+    "models": ["claude-sonnet", "claude-opus"],
+    "safety": "no-secret-display"
+  },
+  {
+    "id": "gemini-compatible",
+    "name": "Gemini Compatible Gateway",
+    "provider": "google",
+    "role": "future multimodal/research gateway",
+    "key_env": "GEMINI_API_KEY",
+    "base_url_env": "GEMINI_BASE_URL",
+    "default_base_url": "https://generativelanguage.googleapis.com",
+    "models": ["gemini-pro", "gemini-flash"],
+    "safety": "no-secret-display"
+  },
+  {
+    "id": "local-openai-proxy",
+    "name": "Local OpenAI-style Proxy",
+    "provider": "local-proxy",
+    "role": "multi-hop local API gateway",
+    "key_env": "LOCAL_OPENAI_API_KEY",
+    "base_url_env": "LOCAL_OPENAI_BASE_URL",
+    "default_base_url": "http://127.0.0.1:8001/v1",
+    "models": ["configured-by-proxy"],
+    "safety": "no-secret-display"
+  }
+]

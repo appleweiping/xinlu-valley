@@ -1,0 +1,133 @@
+[
+  {
+    "id": "permission-secret-audit",
+    "name": "Permission Hall Secret Audit",
+    "category": "safety",
+    "version": "0.1.0",
+    "owner_building": "permission-hall",
+    "safety": "read-only-no-secret-audit",
+    "activation_mode": "review-plan-required",
+    "permissions": [
+      "read project-local env examples",
+      "read project-local generated caches",
+      "read project-local dispatch and log files",
+      "return counts and line numbers only"
+    ],
+    "files": [
+      "backend/main.py",
+      "godot/scripts/Main.gd",
+      "tools/verify-smoke.ps1"
+    ],
+    "endpoints": [
+      "/api/permissions/secret-audit",
+      "/api/permissions/overview"
+    ],
+    "verification": [
+      "python -m py_compile backend/main.py",
+      "powershell -ExecutionPolicy Bypass -File tools/verify-smoke.ps1",
+      "Godot headless startup",
+      "visual capture for Permission Hall"
+    ],
+    "rollback": [
+      "Remove only the secret-audit endpoint, UI button, and docs from the implementation diff after review.",
+      "Do not delete generated user workspace files unless explicitly requested."
+    ]
+  },
+  {
+    "id": "town-workflow-routes",
+    "name": "Town Workflow Routes",
+    "category": "progression",
+    "version": "0.1.0",
+    "owner_building": "town-hall",
+    "safety": "read-only-route-registry-local-save-progress",
+    "activation_mode": "review-plan-required",
+    "permissions": [
+      "read workflow route registry",
+      "read building capability atlas",
+      "write local Godot player route progress only"
+    ],
+    "files": [
+      "godot/data/workflow_routes.json",
+      "backend/main.py",
+      "godot/scripts/Main.gd"
+    ],
+    "endpoints": [
+      "/api/town/workflow-routes",
+      "/api/town/workflow-routes/{route_id}",
+      "/api/player/collection-codex"
+    ],
+    "verification": [
+      "registry health includes workflow-routes",
+      "smoke verifies route details and Town Hall embedding",
+      "Godot headless startup"
+    ],
+    "rollback": [
+      "Remove route controls and route registry entries introduced by the implementation slice only."
+    ]
+  },
+  {
+    "id": "agent-runner-gate",
+    "name": "Agent Runner Gate",
+    "category": "agent-ops",
+    "version": "0.1.0",
+    "owner_building": "agent-hub",
+    "safety": "confirm-required-external-runner-gate",
+    "activation_mode": "confirmation-required",
+    "permissions": [
+      "read known D:/devtools launcher metadata",
+      "write project-local runner dispatch packages",
+      "queue external runner launch only after RUN_AGENT_RUNNER"
+    ],
+    "files": [
+      "backend/main.py",
+      "godot/scripts/Main.gd",
+      "workspace/agent-runner-dispatches"
+    ],
+    "endpoints": [
+      "/api/agent-runners/readiness",
+      "/api/agent-runners/dispatch-preview",
+      "/api/agent-runners/launch-jobs"
+    ],
+    "verification": [
+      "smoke verifies readiness, dispatch preview, and missing-confirmation launch gate",
+      "launcher and output previews are secret-redacted"
+    ],
+    "rollback": [
+      "Cancel queued project-local jobs only through the backend cancel endpoint.",
+      "Do not kill external processes."
+    ]
+  },
+  {
+    "id": "plugin-manifest-system",
+    "name": "Plugin Manifest System",
+    "category": "extension",
+    "version": "0.1.0",
+    "owner_building": "plugin-registry",
+    "safety": "read-only-manifest-audit-activation-plan-only",
+    "activation_mode": "review-plan-required",
+    "permissions": [
+      "read typed plugin manifests",
+      "read extension candidate inventory",
+      "write project-local activation review plans"
+    ],
+    "files": [
+      "godot/data/plugin_manifests.json",
+      "backend/main.py",
+      "godot/scripts/Main.gd",
+      "workspace/plugin-drafts"
+    ],
+    "endpoints": [
+      "/api/plugin-registry/overview",
+      "/api/plugin-registry/manifests",
+      "/api/plugin-registry/activation-plans"
+    ],
+    "verification": [
+      "registry health includes plugin-manifests",
+      "smoke verifies manifest catalog and confirmation-required activation plan",
+      "Godot headless startup"
+    ],
+    "rollback": [
+      "Remove only manifest-system entries and activation-plan UI from the implementation diff after review."
+    ]
+  }
+]

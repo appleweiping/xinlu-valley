@@ -1,0 +1,178 @@
+[
+  {
+    "id": "research-to-paper-trace",
+    "title": "Research To Paper Trace",
+    "purpose": "Turn a local research question into an audit-ready paper/work-note trail.",
+    "district_id": "research-quarter",
+    "recommended_companion": "aris",
+    "safety": "read-only-research-plus-project-local-notes",
+    "expected_artifacts": [
+      "Research Hall project log",
+      "Paper Reading Room note",
+      "Research Data Center provenance note",
+      "Memory Library proposal"
+    ],
+    "steps": [
+      {
+        "id": "research-board",
+        "building_id": "research-hall",
+        "label": "Open a real research project board",
+        "action_hint": "Use Research Projects, then Project Detail or Research Log.",
+        "capability_refs": ["research project boards", "research logs", "safe research agent briefs"]
+      },
+      {
+        "id": "paper-note",
+        "building_id": "paper-reading-room",
+        "label": "Capture paper evidence",
+        "action_hint": "Use Papers and Read Note, or queue bounded PDF Extract.",
+        "capability_refs": ["paper/reference map", "citation-audit notes", "bounded async PDF text extraction"]
+      },
+      {
+        "id": "data-provenance",
+        "building_id": "research-data-center",
+        "label": "Record dataset/result provenance",
+        "action_hint": "Use Data Center and Data Note for local provenance prompts.",
+        "capability_refs": ["research data provenance", "local audit notes"]
+      },
+      {
+        "id": "memory-proposal",
+        "building_id": "memory-library",
+        "label": "Draft a shared-memory update",
+        "action_hint": "Use Memory Shelves, Detail, and Proposal before any promotion.",
+        "capability_refs": ["long-term memory browse", "reviewed memory proposals"]
+      }
+    ]
+  },
+  {
+    "id": "code-to-release-handoff",
+    "title": "Code To Release Handoff",
+    "purpose": "Move from local repository understanding to safe verification and release notes.",
+    "district_id": "developer-row",
+    "recommended_companion": "codex",
+    "safety": "drafts-and-confirm-required-checks",
+    "expected_artifacts": [
+      "Code Workshop context pack or patch plan",
+      "Terminal/project verification log",
+      "GitHub Harbor handoff draft",
+      "Version Release Plaza readiness report"
+    ],
+    "steps": [
+      {
+        "id": "repo-context",
+        "building_id": "code-workshop",
+        "label": "Select a local repository",
+        "action_hint": "Use Code Projects, Explain Code, Context Pack, or Patch Plan.",
+        "capability_refs": ["Git project discovery", "context packs", "patch plans", "confirm-required verification jobs"]
+      },
+      {
+        "id": "verification",
+        "building_id": "terminal-control",
+        "label": "Inspect or run allowlisted checks",
+        "action_hint": "Use Terminal Jobs for command posture, or Code Workshop Run Check for project checks.",
+        "capability_refs": ["command previews", "confirm-required local checks", "bounded stdout/stderr logs"]
+      },
+      {
+        "id": "github-draft",
+        "building_id": "github-harbor",
+        "label": "Prepare GitHub handoff",
+        "action_hint": "Use Harbor Repos, GH Status, and Harbor Draft without publishing.",
+        "capability_refs": ["repo/remotes/branches/commits/tags", "read-only GitHub metadata", "PR/issue/release handoff drafts"]
+      },
+      {
+        "id": "release-report",
+        "building_id": "version-release-plaza",
+        "label": "Write release readiness evidence",
+        "action_hint": "Use Release, Rel Checklist, and Rel Report.",
+        "capability_refs": ["release readiness checks", "checklist drafts", "readiness reports"]
+      }
+    ]
+  },
+  {
+    "id": "memory-knowledge-maintenance",
+    "title": "Memory Knowledge Maintenance",
+    "purpose": "Keep project knowledge discoverable without mutating source folders.",
+    "district_id": "central-plaza",
+    "recommended_companion": "sonnet",
+    "safety": "read-only-indexes-plus-reviewed-local-drafts",
+    "expected_artifacts": [
+      "Knowledge Tower search result",
+      "File Vault tag or organize proposal",
+      "Memory proposal",
+      "Settings registry health review"
+    ],
+    "steps": [
+      {
+        "id": "knowledge-search",
+        "building_id": "knowledge-tower",
+        "label": "Search cached knowledge",
+        "action_hint": "Use Knowledge Index, Search Wiki, and Open Knowledge.",
+        "capability_refs": ["cached knowledge search", "bounded document preview", "async index refresh"]
+      },
+      {
+        "id": "file-context",
+        "building_id": "file-vault",
+        "label": "Find and tag a useful local artifact",
+        "action_hint": "Use File Roots/Search Files, Preview File, Tag File, or Organize Plan.",
+        "capability_refs": ["lazy folder browsing", "bounded file preview", "cached file search", "project-local tags"]
+      },
+      {
+        "id": "memory-update",
+        "building_id": "memory-library",
+        "label": "Draft reviewed memory",
+        "action_hint": "Use Proposal first; Promote remains confirmation-gated.",
+        "capability_refs": ["bounded memory preview", "reviewed memory proposals", "confirm-required shared-memory promotion"]
+      },
+      {
+        "id": "registry-check",
+        "building_id": "settings-center",
+        "label": "Check registry health",
+        "action_hint": "Use Registry Health to validate JSON shape without edits.",
+        "capability_refs": ["registry inventory", "schema health"]
+      }
+    ]
+  },
+  {
+    "id": "agent-ops-loop",
+    "title": "Agent Ops Loop",
+    "purpose": "Coordinate safe local agent tasks, tools, logs, and rollback-aware monitoring.",
+    "district_id": "central-plaza",
+    "recommended_companion": "codex",
+    "safety": "safe-local-agent-queue-and-read-only-monitoring",
+    "expected_artifacts": [
+      "Agent task result",
+      "Agent tool invocation log",
+      "System Monitor job/event evidence",
+      "Permission Hall receipt review"
+    ],
+    "steps": [
+      {
+        "id": "agent-roster",
+        "building_id": "agent-hub",
+        "label": "Review agents and queue safe work",
+        "action_hint": "Use Agent Roster, Agent Tasks, Tool Catalog, or Agent Chat.",
+        "capability_refs": ["agent roster", "safe task briefs", "registered tool invocations", "local agent chat sessions"]
+      },
+      {
+        "id": "task-board",
+        "building_id": "task-board",
+        "label": "Route a real task into agent context",
+        "action_hint": "Use Task Board, Open Task, and Task Agent.",
+        "capability_refs": ["local task cards", "task status updates", "task agent briefs"]
+      },
+      {
+        "id": "system-monitor",
+        "building_id": "system-monitor",
+        "label": "Watch jobs, events, and logs",
+        "action_hint": "Use Job Queue, Job Events, Open Job Log, and Event Log.",
+        "capability_refs": ["service health", "job queue", "job event polling", "persistent job log detail"]
+      },
+      {
+        "id": "permission-review",
+        "building_id": "permission-hall",
+        "label": "Inspect safety receipts",
+        "action_hint": "Use Permissions to review recent writes, commands, model tests, tasks, and tools.",
+        "capability_refs": ["safety classes", "confirmation gates", "receipt ledger"]
+      }
+    ]
+  }
+]

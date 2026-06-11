@@ -1,0 +1,97 @@
+[
+  {
+    "id": "orient-memory-library",
+    "title": "Memory Library Orientation",
+    "chapter": "Chapter 1: Wake the Town",
+    "giver": "Sonnet",
+    "target_building": "memory-library",
+    "summary_template": "Inspect shared memory: {memory_decisions} decisions, {memory_facts} facts, {memory_lessons} lessons.",
+    "reward": "Memory Lens",
+    "badge_id": "memory-lens",
+    "collection": "Town Tools",
+    "next_hint": "Use the lens to decide which shared memory should become an in-game reference shelf next.",
+    "steps": [
+      {"id": "accept", "label": "Accept Sonnet's orientation request"},
+      {"id": "enter_room", "label": "Enter the Memory Library reading room"},
+      {"id": "review_shelves", "label": "Review the memory shelves"},
+      {"id": "scan", "label": "Run the safe read-only scan"}
+    ],
+    "safety": "read-only"
+  },
+  {
+    "id": "map-local-files",
+    "title": "Map the File Vault",
+    "chapter": "Chapter 1: Wake the Town",
+    "giver": "Codex",
+    "target_building": "file-vault",
+    "summary_template": "Survey {workspace_file_vault_count} allowlisted work roots without opening or modifying files.",
+    "reward": "Vault Key",
+    "badge_id": "vault-key",
+    "collection": "Town Tools",
+    "next_hint": "Turn one file root into a navigable project cabinet.",
+    "steps": [
+      {"id": "accept", "label": "Accept Codex's file mapping request"},
+      {"id": "enter_room", "label": "Enter the File Vault"},
+      {"id": "review_shelves", "label": "Review the root cabinets"},
+      {"id": "scan", "label": "Run the safe read-only scan"}
+    ],
+    "safety": "read-only"
+  },
+  {
+    "id": "survey-skills",
+    "title": "Survey the Skill Workshop",
+    "chapter": "Chapter 1: Wake the Town",
+    "giver": "PixelCat",
+    "target_building": "skill-workshop",
+    "summary_template": "Review the local skill library: {skill_count} skills across {skill_categories} categories.",
+    "reward": "Skill Charm",
+    "badge_id": "skill-charm",
+    "collection": "Town Tools",
+    "next_hint": "Equip skills as agent abilities in future quest chains.",
+    "steps": [
+      {"id": "accept", "label": "Accept PixelCat's workshop survey"},
+      {"id": "enter_room", "label": "Enter the Skill Workshop"},
+      {"id": "review_shelves", "label": "Review the skill racks"},
+      {"id": "scan", "label": "Run the safe read-only scan"}
+    ],
+    "safety": "read-only"
+  },
+  {
+    "id": "research-brief",
+    "title": "Research Hall Briefing",
+    "chapter": "Chapter 1: Wake the Town",
+    "giver": "ARIS",
+    "target_building": "research-hall",
+    "summary_template": "Review active research project status files from shared memory and {workspace_project_count} project-browser roots.",
+    "reward": "Research Compass",
+    "badge_id": "research-compass",
+    "collection": "Research Kit",
+    "next_hint": "Convert one active research project into a multi-step ARIS quest.",
+    "steps": [
+      {"id": "accept", "label": "Accept ARIS's research briefing"},
+      {"id": "enter_room", "label": "Enter the Research Hall"},
+      {"id": "review_shelves", "label": "Review active project boards"},
+      {"id": "scan", "label": "Run the safe read-only scan"}
+    ],
+    "safety": "read-only"
+  },
+  {
+    "id": "agent-hub-check",
+    "title": "Agent Hub Check",
+    "chapter": "Chapter 1: Wake the Town",
+    "giver": "Codex",
+    "target_building": "agent-hub",
+    "summary_template": "Check local agent mailbox files and dispatch draft readiness.",
+    "reward": "Coordination Badge",
+    "badge_id": "coordination-badge",
+    "collection": "Agent Ops",
+    "next_hint": "Use mailbox status to unlock multi-agent dispatch rooms.",
+    "steps": [
+      {"id": "accept", "label": "Accept Codex's hub check"},
+      {"id": "enter_room", "label": "Enter the Agent Hub"},
+      {"id": "review_shelves", "label": "Review mailbox signal lamps"},
+      {"id": "scan", "label": "Run the safe read-only scan"}
+    ],
+    "safety": "read-only"
+  }
+]

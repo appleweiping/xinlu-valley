@@ -1,0 +1,598 @@
+[
+  {
+    "id": "file-vault",
+    "title": "Vault Index Room",
+    "floor_label": "stone aisle: cabinet -> preview desk -> tag ledger",
+    "ambient": "Warm archive lamps, labelled D-drive cabinets, and a small Codex desk for safe file work.",
+    "stations": [
+      {"id": "npc", "label": "Codex Desk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "roots", "label": "File Roots", "action": "file_roots", "role": "primary", "x": 182, "y": 28, "w": 120, "h": 44, "color": "#d9a441"},
+      {"id": "preview", "label": "Preview Desk", "action": "preview_file", "role": "safe-read", "x": 326, "y": 28, "w": 120, "h": 44, "color": "#7dbbe8"},
+      {"id": "tag", "label": "Tag Ledger", "action": "tag_file", "role": "project-local-write", "x": 456, "y": 28, "w": 92, "h": 44, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Research cabinet", "x": 58, "y": 116},
+      {"label": "Game dev cabinet", "x": 202, "y": 116},
+      {"label": "Knowledgebase cabinet", "x": 346, "y": 116}
+    ]
+  },
+  {
+    "id": "research-hall",
+    "title": "Evidence Scribe Dome",
+    "floor_label": "paper trail: project board -> evidence board -> local log",
+    "ambient": "Glass-dome research desks with status scrolls, project boards, and ARIS evidence seals.",
+    "stations": [
+      {"id": "npc", "label": "ARIS Desk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "projects", "label": "Project Boards", "action": "research_projects", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "detail", "label": "Evidence Board", "action": "project_detail", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "log", "label": "Research Log", "action": "research_log", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Status scrolls", "x": 62, "y": 116},
+      {"label": "Experiment map", "x": 214, "y": 116},
+      {"label": "Citation tray", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "code-workshop",
+    "title": "Code Explain Forge",
+    "floor_label": "gear path: repo shelf -> explanation desk -> patch-plan anvil",
+    "ambient": "Brass gears, blue code screens, and Codex's bench for safe selected-repo explanation and planning.",
+    "stations": [
+      {"id": "npc", "label": "Codex Bench", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "repos", "label": "Code Projects", "action": "code_projects", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "explain", "label": "Explain Code", "action": "explain_code", "role": "safe-read-agent-task", "x": 316, "y": 24, "w": 104, "h": 48, "color": "#7dbbe8"},
+      {"id": "check", "label": "Run Check", "action": "run_check", "role": "confirm-required-command", "x": 430, "y": 24, "w": 92, "h": 48, "color": "#d9a441"},
+      {"id": "plan", "label": "Patch Plan", "action": "patch_plan", "role": "project-local-write", "x": 462, "y": 112, "w": 92, "h": 44, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Git crates", "x": 62, "y": 116},
+      {"label": "Code scrolls", "x": 214, "y": 116},
+      {"label": "Test lanterns", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "agent-hub",
+    "title": "Agent Guild Hall",
+    "floor_label": "guild route: roster counter -> companion desk -> event board",
+    "ambient": "Adventure-guild woodwork with agent badges, task boards, and a safe tool counter.",
+    "stations": [
+      {"id": "npc", "label": "Guild Clerk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "roster", "label": "Roster", "action": "agent_roster", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "companion", "label": "Recruit", "action": "recruit_agent", "role": "local-save", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "events", "label": "Events", "action": "agent_events", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Task board", "x": 62, "y": 116},
+      {"label": "Tool counter", "x": 214, "y": 116},
+      {"label": "Badge rack", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "testing-arena",
+    "title": "Proof Lantern Arena",
+    "floor_label": "proof lane: evidence table -> plan desk -> safe scan",
+    "ambient": "Soft arena mats, smoke-script scrolls, screenshot boards, and verification lanterns.",
+    "stations": [
+      {"id": "npc", "label": "Verifier", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Evidence", "action": "testing_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "plan", "label": "Test Plan", "action": "test_plan", "role": "project-local-write", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "scan", "label": "Safe Scan", "action": "scan", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Smoke scrolls", "x": 62, "y": 116},
+      {"label": "Screenshot board", "x": 214, "y": 116},
+      {"label": "Log lanterns", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "memory-library",
+    "title": "Memory Archivist Hall",
+    "floor_label": "shelf route: memory index -> note preview -> proposal desk",
+    "ambient": "Floating cards, warm archive lamps, and Sonnet's desk for reviewed shared-memory care.",
+    "stations": [
+      {"id": "npc", "label": "Sonnet Desk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "index", "label": "Memory Index", "action": "memory_index", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "detail", "label": "Note Preview", "action": "memory_detail", "role": "bounded-preview", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "proposal", "label": "Proposal", "action": "memory_proposal", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Decision shelf", "x": 62, "y": 116},
+      {"label": "Fact lanterns", "x": 214, "y": 116},
+      {"label": "Session cards", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "knowledge-tower",
+    "title": "Crystal Index Tower",
+    "floor_label": "index path: roots -> cached search -> document preview",
+    "ambient": "Glowing book stacks, crystal indexes, and bounded previews from allowlisted knowledge roots.",
+    "stations": [
+      {"id": "npc", "label": "Index Guide", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "index", "label": "Index", "action": "knowledge_index", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "search", "label": "Search", "action": "knowledge_search", "role": "cached-search", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "detail", "label": "Preview", "action": "knowledge_detail", "role": "bounded-preview", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Root crystals", "x": 62, "y": 116},
+      {"label": "Search cards", "x": 214, "y": 116},
+      {"label": "Preview lectern", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "github-harbor",
+    "title": "Release Harbor Dock",
+    "floor_label": "dock route: repo crates -> GitHub signal -> handoff desk",
+    "ambient": "Branch lanes, commit crates, release boats, and local drafts before any publishing action.",
+    "stations": [
+      {"id": "npc", "label": "Harbor Master", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "repos", "label": "Repos", "action": "harbor_repos", "role": "git-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "github", "label": "GH Status", "action": "harbor_github", "role": "github-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "Draft", "action": "harbor_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Commit crates", "x": 62, "y": 116},
+      {"label": "Branch ropes", "x": 214, "y": 116},
+      {"label": "Release boat", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "terminal-control",
+    "title": "Command Lantern Room",
+    "floor_label": "control lane: command catalog -> confirmation seal -> evidence log",
+    "ambient": "Glowing consoles, log screens, and confirm-required command seals instead of a raw shell.",
+    "stations": [
+      {"id": "npc", "label": "Keeper", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "catalog", "label": "Catalog", "action": "terminal_commands", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "run", "label": "Preview", "action": "terminal_run", "role": "confirm-required", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "log", "label": "Log", "action": "terminal_log", "role": "bounded-log", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Command slate", "x": 62, "y": 116},
+      {"label": "Confirm seal", "x": 214, "y": 116},
+      {"label": "Log lanterns", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "model-market",
+    "title": "Model Gateway Bazaar",
+    "floor_label": "market lane: gateway status -> profile stalls -> dry-run test",
+    "ambient": "Friendly model stalls, sealed key chests, and no-secret API route signs.",
+    "stations": [
+      {"id": "npc", "label": "Model Broker", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "status", "label": "Gateway", "action": "model_status", "role": "no-secret-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "profiles", "label": "Profiles", "action": "model_profiles", "role": "registry-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "test", "label": "Test", "action": "model_test", "role": "dry-run-report", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Route signs", "x": 62, "y": 116},
+      {"label": "Key vault", "x": 214, "y": 116},
+      {"label": "Profile stalls", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "paper-reading-room",
+    "title": "Citation Reading Alcove",
+    "floor_label": "reading path: paper map -> reading note -> bounded PDF report",
+    "ambient": "Paper scrolls, citation trays, and bounded extraction reports for claim grounding.",
+    "stations": [
+      {"id": "npc", "label": "ARIS Desk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Paper Map", "action": "paper_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "note", "label": "Note", "action": "paper_note", "role": "project-local-write", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "extract", "label": "PDF Extract", "action": "paper_extract", "role": "bounded-job", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "PDF shelf", "x": 62, "y": 116},
+      {"label": "BibTeX tray", "x": 214, "y": 116},
+      {"label": "Claim board", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "download-station",
+    "title": "Download Intake Depot",
+    "floor_label": "depot route: roots -> triage table -> intake draft",
+    "ambient": "Warm cargo lamps, file crates, route labels, and sealed intake slips for recent downloads.",
+    "stations": [
+      {"id": "npc", "label": "Depot Clerk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Depot Roots", "action": "download_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "triage", "label": "Triage", "action": "download_triage", "role": "bounded-hash-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "intake", "label": "Intake Note", "action": "download_intake", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Download crates", "x": 62, "y": 116},
+      {"label": "Risk labels", "x": 214, "y": 116},
+      {"label": "Route stamps", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "backup-station",
+    "title": "Restore Map Greenhouse",
+    "floor_label": "backup path: source map -> restore check -> plan draft",
+    "ambient": "Leafy backup shelves, checksum sprouts, and restore-plan drafting tables.",
+    "stations": [
+      {"id": "npc", "label": "Keeper", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Source Map", "action": "backup_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "integrity", "label": "Restore Check", "action": "backup_integrity", "role": "bounded-hash-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "plan", "label": "Plan Draft", "action": "backup_plan", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Source shelves", "x": 62, "y": 116},
+      {"label": "Hash leaves", "x": 214, "y": 116},
+      {"label": "Target pots", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "inspiration-station",
+    "title": "Idea Lantern Conservatory",
+    "floor_label": "idea path: signals -> nearby drafts -> inspiration note",
+    "ambient": "Soft lanterns, visual reference ribbons, and a quiet desk for turning sparks into local notes.",
+    "stations": [
+      {"id": "npc", "label": "Muse", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Idea Signals", "action": "inspiration_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "drafts", "label": "Draft Shelf", "action": "inspiration_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "note", "label": "Idea Note", "action": "inspiration_note", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Reference ribbons", "x": 62, "y": 116},
+      {"label": "Spark jars", "x": 214, "y": 116},
+      {"label": "Draft basket", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "local-office-center",
+    "title": "Office Follow-Up Parlor",
+    "floor_label": "office path: company map -> document shelf -> follow-up note",
+    "ambient": "Soft office lamps, company folders, and a gentle follow-up desk for real local office work.",
+    "stations": [
+      {"id": "npc", "label": "Office Steward", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Office Map", "action": "office_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "shelf", "label": "Doc Shelf", "action": "office_overview", "role": "bounded-preview", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "note", "label": "Office Note", "action": "office_note", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Company folders", "x": 62, "y": 116},
+      {"label": "Follow-up tray", "x": 214, "y": 116},
+      {"label": "Memo lamp", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "schedule-plan-center",
+    "title": "Timebox Clock Garden",
+    "floor_label": "planning path: signals -> timebox board -> schedule draft",
+    "ambient": "Clock flowers, PLAN scrolls, and calm route boards for turning work signals into local schedules.",
+    "stations": [
+      {"id": "npc", "label": "Timekeeper", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Plan Signals", "action": "schedule_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "timebox", "label": "Timeboxes", "action": "schedule_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "Schedule", "action": "schedule_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "PLAN scrolls", "x": 62, "y": 116},
+      {"label": "Task clocks", "x": 214, "y": 116},
+      {"label": "Route cards", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "learning-training-grounds",
+    "title": "Skill Practice Grove",
+    "floor_label": "training path: skill map -> practice track -> learning plan",
+    "ambient": "Practice banners, skill cards, and a friendly training desk for local learning plans.",
+    "stations": [
+      {"id": "npc", "label": "Coach", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Skill Map", "action": "learning_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "track", "label": "Practice", "action": "learning_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "plan", "label": "Learn Plan", "action": "learning_plan", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Skill cards", "x": 62, "y": 116},
+      {"label": "Practice flags", "x": 214, "y": 116},
+      {"label": "Plan bench", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "language-learning-area",
+    "title": "Phrase Garden Classroom",
+    "floor_label": "language path: language map -> phrase cards -> practice note",
+    "ambient": "Painted phrase cards, translation ribbons, and a warm practice desk for local language notes.",
+    "stations": [
+      {"id": "npc", "label": "Phrase Tutor", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Lang Map", "action": "language_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "cards", "label": "Phrase Cards", "action": "language_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "practice", "label": "Practice", "action": "language_practice", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Phrase cards", "x": 62, "y": 116},
+      {"label": "UI labels", "x": 214, "y": 116},
+      {"label": "Practice bell", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "research-data-center",
+    "title": "Data Provenance Lab",
+    "floor_label": "data path: artifact map -> provenance board -> audit note",
+    "ambient": "Data cabinets, figure screens, checkpoint jars, and provenance notes before any experiment claim.",
+    "stations": [
+      {"id": "npc", "label": "Data Scribe", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Data Map", "action": "research_data_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "artifacts", "label": "Artifacts", "action": "research_data_overview", "role": "bounded-scan", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "note", "label": "Data Note", "action": "research_data_note", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Result tables", "x": 62, "y": 116},
+      {"label": "Figure frames", "x": 214, "y": 116},
+      {"label": "Run logs", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "version-release-plaza",
+    "title": "Release Checklist Plaza",
+    "floor_label": "release path: readiness gates -> checklist -> proof report",
+    "ambient": "Ribboned release gates, screenshot stands, smoke-test lanterns, and local checklist desks.",
+    "stations": [
+      {"id": "npc", "label": "Release Herald", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Readiness", "action": "release_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "checklist", "label": "Checklist", "action": "release_checklist", "role": "project-local-write", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "report", "label": "Rel Report", "action": "release_report", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Smoke lanterns", "x": 62, "y": 116},
+      {"label": "Screenshot stand", "x": 214, "y": 116},
+      {"label": "Git ribbon", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "system-monitor",
+    "title": "System Lantern Observatory",
+    "floor_label": "operations path: services -> job queue -> event timeline",
+    "ambient": "Brass service lanterns, quiet job wheels, and a ribboned event telescope for read-only observability.",
+    "stations": [
+      {"id": "npc", "label": "System Keeper", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Services", "action": "system_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "jobs", "label": "Job Queue", "action": "system_jobs", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "events", "label": "Events", "action": "system_events", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Service lanterns", "x": 62, "y": 116},
+      {"label": "Job wheels", "x": 214, "y": 116},
+      {"label": "Event telescope", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "permission-hall",
+    "title": "Safety Seal Hall",
+    "floor_label": "safety path: permission map -> secret audit -> receipt review",
+    "ambient": "Wax seals, policy ledgers, and covered audit mirrors that count risky shapes without displaying secrets.",
+    "stations": [
+      {"id": "npc", "label": "Gate Archivist", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Policy Map", "action": "permission_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "audit", "label": "Secret Audit", "action": "permission_secret_audit", "role": "bounded-scan", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "receipts", "label": "Receipts", "action": "permission_overview", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Policy ledger", "x": 62, "y": 116},
+      {"label": "Covered mirrors", "x": 214, "y": 116},
+      {"label": "Receipt seals", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "settings-center",
+    "title": "Registry Clockwork Office",
+    "floor_label": "config path: registry map -> schema health -> settings draft",
+    "ambient": "Clockwork registries, launcher shelves, and draft desks for proposing changes without applying them.",
+    "stations": [
+      {"id": "npc", "label": "Registry Clerk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Registry Map", "action": "settings_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "health", "label": "Health", "action": "registry_health", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "Draft", "action": "settings_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Registry gears", "x": 62, "y": 116},
+      {"label": "Schema gauges", "x": 214, "y": 116},
+      {"label": "Draft desk", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "task-board",
+    "title": "Quest Ledger Boardwalk",
+    "floor_label": "task path: local ledger -> task card -> bounded preview",
+    "ambient": "Pinned quest cards, wax status flags, and agent brief ribbons for turning local work into playable tasks.",
+    "stations": [
+      {"id": "npc", "label": "Quest Clerk", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Ledger", "action": "task_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "create", "label": "Task Card", "action": "task_create", "role": "project-local-write", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "detail", "label": "Preview", "action": "task_detail", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Pinned cards", "x": 62, "y": 116},
+      {"label": "Status flags", "x": 214, "y": 116},
+      {"label": "Agent ribbons", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "writing-studio",
+    "title": "Moonlit Writing Atelier",
+    "floor_label": "writing path: document shelf -> draft desk -> memory receipt",
+    "ambient": "Warm lamps, parchment shelves, and a soft draft table for local Markdown writing without overwriting docs.",
+    "stations": [
+      {"id": "npc", "label": "Ink Scribe", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Doc Shelf", "action": "writing_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "draft", "label": "Draft", "action": "writing_draft", "role": "project-local-write", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "review", "label": "Drafts", "action": "writing_overview", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Parchment shelf", "x": 62, "y": 116},
+      {"label": "Ink lamp", "x": 214, "y": 116},
+      {"label": "Draft table", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "automation-factory",
+    "title": "Clockwork Automation Mill",
+    "floor_label": "automation path: script catalog -> scheduler snapshot -> blueprint draft",
+    "ambient": "Turning gears, safe-script crates, and scheduler gauges for designing automations without activating them.",
+    "stations": [
+      {"id": "npc", "label": "Gearwright", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "catalog", "label": "Scripts", "action": "automation_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "scheduler", "label": "Scheduler", "action": "automation_scheduler", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "Blueprint", "action": "automation_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Safe-script crates", "x": 62, "y": 116},
+      {"label": "Scheduler gauges", "x": 214, "y": 116},
+      {"label": "Blueprint press", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "bug-clinic",
+    "title": "Diagnostic Remedy Clinic",
+    "floor_label": "debug path: diagnostics -> failed evidence -> bug report",
+    "ambient": "Soft red signal lamps, log pillows, and careful diagnosis desks for turning failures into repair notes.",
+    "stations": [
+      {"id": "npc", "label": "Remedy Nurse", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Diagnostics", "action": "bug_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "signals", "label": "Signals", "action": "bug_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "report", "label": "Bug Note", "action": "bug_report", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Signal lamps", "x": 62, "y": 116},
+      {"label": "Failed logs", "x": 214, "y": 116},
+      {"label": "Repair notes", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "project-management-hall",
+    "title": "Portfolio Compass Hall",
+    "floor_label": "portfolio path: project map -> research boards -> project brief",
+    "ambient": "Compass tables, portfolio banners, and research board shelves for choosing safe next work.",
+    "stations": [
+      {"id": "npc", "label": "Portfolio Steward", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Projects", "action": "project_management_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "research", "label": "Boards", "action": "project_management_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "brief", "label": "Brief", "action": "project_brief", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Compass table", "x": 62, "y": 116},
+      {"label": "Research boards", "x": 214, "y": 116},
+      {"label": "Brief scrolls", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "asset-gallery",
+    "title": "Storybook Asset Gallery",
+    "floor_label": "visual path: asset shelves -> inspection lens -> curation note",
+    "ambient": "Painted asset shelves, visual-baseline cards, and a gentle inspection lens for traceable art production.",
+    "stations": [
+      {"id": "npc", "label": "Gallery Curator", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Shelves", "action": "asset_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "inspect", "label": "Inspect", "action": "asset_inspect", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "note", "label": "Art Note", "action": "asset_note", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Style cards", "x": 62, "y": 116},
+      {"label": "Inspection lens", "x": 214, "y": 116},
+      {"label": "Curation shelf", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "skill-workshop",
+    "title": "Skill Lantern Workshop",
+    "floor_label": "skill path: local skills -> workflow categories -> safe scan",
+    "ambient": "Lantern-lit workbenches, workflow cards, and skill shelves from local agent resources.",
+    "stations": [
+      {"id": "npc", "label": "Skill Keeper", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Skills", "action": "skill_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "categories", "label": "Categories", "action": "skill_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "scan", "label": "Scan", "action": "skill_scan", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Workflow cards", "x": 62, "y": 116},
+      {"label": "Skill shelves", "x": 214, "y": 116},
+      {"label": "Practice bench", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "devtools-lab",
+    "title": "Devtools Gear Lab",
+    "floor_label": "tool path: local CLIs -> launcher paths -> safe scan",
+    "ambient": "Gear racks, command labels, and D-drive launcher shelves for read-only tool discovery.",
+    "stations": [
+      {"id": "npc", "label": "Toolwright", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "CLIs", "action": "devtools_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "paths", "label": "Paths", "action": "devtools_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "scan", "label": "Scan", "action": "devtools_scan", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "CLI gears", "x": 62, "y": 116},
+      {"label": "Launcher shelf", "x": 214, "y": 116},
+      {"label": "Tool labels", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "town-hall",
+    "title": "Town Charter Hall",
+    "floor_label": "governance path: capability atlas -> workflow routes -> route detail",
+    "ambient": "Warm charter scrolls, building maps, and route ribbons that explain how real workflows connect.",
+    "stations": [
+      {"id": "npc", "label": "Town Archivist", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "atlas", "label": "Atlas", "action": "town_capability", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "routes", "label": "Routes", "action": "town_workflows", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "detail", "label": "Detail", "action": "town_capability", "role": "safe-read", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Charter scrolls", "x": 62, "y": 116},
+      {"label": "Building map", "x": 214, "y": 116},
+      {"label": "Route ribbons", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "plugin-registry",
+    "title": "Extension Rune Registry",
+    "floor_label": "extension path: registry map -> typed manifests -> proposal draft",
+    "ambient": "Rune-stamped manifests, extension crates, and activation seals for safe plugin planning.",
+    "stations": [
+      {"id": "npc", "label": "Rune Registrar", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Registry", "action": "plugin_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "manifests", "label": "Manifests", "action": "plugin_manifests", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "Proposal", "action": "plugin_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Manifest runes", "x": 62, "y": 116},
+      {"label": "Extension crates", "x": 214, "y": 116},
+      {"label": "Activation seals", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "goal-tower",
+    "title": "Milestone Star Tower",
+    "floor_label": "goal path: PLAN signals -> milestone map -> goal draft",
+    "ambient": "Star charts, milestone bells, and long-view scrolls for turning project direction into local goals.",
+    "stations": [
+      {"id": "npc", "label": "Goal Oracle", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Goals", "action": "goal_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "signals", "label": "Signals", "action": "goal_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "Draft", "action": "goal_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Star charts", "x": 62, "y": 116},
+      {"label": "Milestone bells", "x": 214, "y": 116},
+      {"label": "Goal scrolls", "x": 366, "y": 116}
+    ]
+  },
+  {
+    "id": "temporary-draft-box",
+    "title": "Scratch Note Mailbox",
+    "floor_label": "draft path: draft shelves -> scratch note -> triage later",
+    "ambient": "Soft paper pockets, temporary labels, and a small unsorted-note desk for ideas before routing.",
+    "stations": [
+      {"id": "npc", "label": "Draft Courier", "action": "enter_room", "role": "npc", "x": 34, "y": 36, "w": 118, "h": 54, "color": "#8b5e34"},
+      {"id": "overview", "label": "Shelves", "action": "temp_drafts_overview", "role": "safe-read", "x": 178, "y": 24, "w": 124, "h": 48, "color": "#d9a441"},
+      {"id": "review", "label": "Scratch", "action": "temp_drafts_overview", "role": "safe-read", "x": 326, "y": 24, "w": 124, "h": 48, "color": "#7dbbe8"},
+      {"id": "draft", "label": "New Note", "action": "temp_draft", "role": "project-local-write", "x": 462, "y": 24, "w": 92, "h": 48, "color": "#f0b6c7"}
+    ],
+    "props": [
+      {"label": "Paper pockets", "x": 62, "y": 116},
+      {"label": "Temp labels", "x": 214, "y": 116},
+      {"label": "Triage tray", "x": 366, "y": 116}
+    ]
+  }
+]
