@@ -179,7 +179,7 @@ function Landing() {
         <button className="wood-btn" onClick={() => setLang(lang === "zh" ? "en" : "zh")}>
           {lang === "zh" ? "EN" : "中文"}
         </button>
-        <a className="wood-btn" style={{ textDecoration: "none" }} href="https://github.com/appleweiping/pixel-ai-town" target="_blank" rel="noreferrer">
+        <a className="wood-btn" style={{ textDecoration: "none" }} href="https://github.com/appleweiping/xinlu-valley" target="_blank" rel="noreferrer">
           GitHub
         </a>
       </div>
@@ -253,7 +253,7 @@ function Landing() {
           {lang === "zh" ? "原始资产包不随仓库分发；本站为非商业作品集演示。" : "Raw packs are not redistributed in the repo; this site is a non-commercial portfolio demo."}
         </div>
         <div>
-          新路谷物语 Xinlu Valley · <a href="https://github.com/appleweiping/pixel-ai-town">appleweiping/pixel-ai-town</a> · 2026
+          新路谷物语 Xinlu Valley · <a href="https://github.com/appleweiping/xinlu-valley">appleweiping/pixel-ai-town</a> · 2026
         </div>
       </footer>
     </div>
