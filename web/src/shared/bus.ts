@@ -21,6 +21,8 @@ export type BusEvents = {
   "fish:caught": { text: string; level: string };
   "almanac:open": undefined;
   "ach:unlocked": { name: string };
+  "touch:interact": undefined;
+  "signal:received": { from: string; to: string; summary: string };
 };
 
 type Handler<T> = (payload: T) => void;

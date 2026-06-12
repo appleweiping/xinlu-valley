@@ -169,7 +169,8 @@ const ROADMAP: { zh: string; en: string; date: string; done: boolean; descZh: st
   { zh: "v3 · 星露谷式 Web 重生", en: "v3 · Stardew-style web rebirth", date: "2026-06", done: true, descZh: "迁居 D:\\Company；真像素美术；八位居民各有专属物种；浏览器即点即玩；agentmemory 修复加固。", descEn: "Moved to D:\\Company; true pixel art; eight residents with unique species; instant browser play; agentmemory hardened." },
   { zh: "v4 · 室内与活水", en: "v4 · Interiors & Living Data", date: "2026-06", done: true, descZh: "六个可进入室内（书架长廊/锻造间/状态大厅/卧室存档）；作物=真实任务双向联动；NPC 日程与 A* 寻路；对话桥可提问；全 CC0 音频；存档系统。", descEn: "Six enterable interiors (stacks, forge, status hall, bedroom saves); crops bound to real tasks; NPC schedules & A* pathfinding; ask-the-agent dialogue; CC0 audio; save system." },
   { zh: "v5 · 矿洞与季节", en: "v5 · Mines & Seasons", date: "2026-06", done: true, descZh: "三层技术债矿洞（矿石=真实 TODO/FIXME 与 git 热点）；日志钓鱼时机条（ERROR=金鱼王）；四季调色与降雪；GitHub 发布日=丰收节烟花；十枚成就+年鉴图鉴；存档 v2。", descEn: "Three-level tech-debt mines (ore = real TODO/FIXME & git hotspots); log-fishing timing bar (ERROR = king fish); seasonal palettes & snowfall; GitHub release day = festival fireworks; ten achievements + almanac; save v2." },
-  { zh: "v6 · 远行与同行（下一个大版本）", en: "v6 · Mobile & Spectate (next)", date: "排队中", done: false, descZh: "移动端虚拟摇杆与触控、PWA 离线、只读观战分享链接、agentmemory 信号实时可视化——agent 接单瞬间 NPC 跑向公告板。", descEn: "Mobile joystick & touch, PWA offline, read-only spectate links, live agentmemory signals — NPCs dash to the notice board the moment an agent takes a job." },
+  { zh: "v6 · 远行与同行", en: "v6 · Mobile & Spectate", date: "2026-06", done: true, descZh: "虚拟摇杆+触控按钮三场景全接入；PWA 可装桌面离线玩；?spectate=1 只读观战+一键分享；agentmemory 信号实时可视化——新信号一到，NPC 立刻跑向公告板。", descEn: "Virtual joystick & touch buttons across all scenes; installable offline PWA; read-only spectate links with one-click share; live agentmemory signals — NPCs dash to the notice board as messages land." },
+  { zh: "v7 · 活水加深（下一个大版本）", en: "v7 · Living Integrations (next)", date: "排队中", done: false, descZh: "记忆入库→图书馆烟囱冒烟；git 新提交→代码工场庆祝粒子；天气系统雨天自动浇水；NPC 串门闲聊；对话接单生成农场任务。", descEn: "New memories puff the library chimney; fresh commits burst confetti over the Code Works; weather with rain-watered crops; NPC small talk; take quests via dialogue." },
 ];
 
 function Landing() {
@@ -188,10 +189,25 @@ function Landing() {
 
       <header className="l-hero">
         <Stars />
-        <div style={{ fontSize: 14, letterSpacing: "0.3em", opacity: 0.8 }}>Newroad Valley · v3</div>
+        <div style={{ fontSize: 14, letterSpacing: "0.3em", opacity: 0.8 }}>Newroad Valley · v6</div>
         <h1>新路谷物语</h1>
         <div className="sub">{t.tag} — {t.sub}</div>
-        <a className="wood-btn l-cta" href="/play.html">{t.cta}</a>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <a className="wood-btn l-cta" href="/play.html">{t.cta}</a>
+          <button
+            className="wood-btn l-cta"
+            style={{ background: "linear-gradient(180deg,#cdb4f0,#9b7ed6)" }}
+            onClick={() => {
+              const url = `${window.location.origin}/play.html?spectate=1`;
+              void navigator.clipboard?.writeText(url).then(
+                () => window.alert(lang === "zh" ? `观战链接已复制：\n${url}` : `Spectate link copied:\n${url}`),
+                () => window.prompt(lang === "zh" ? "复制这个观战链接：" : "Copy this spectate link:", url),
+              );
+            }}
+          >
+            {lang === "zh" ? "👀 分享小镇" : "👀 Share the town"}
+          </button>
+        </div>
         <div className="l-marquee">
           <div className="l-stat"><b>8</b><span>{lang === "zh" ? "agent 居民" : "agent residents"}</span></div>
           <div className="l-stat"><b>10</b><span>{lang === "zh" ? "工作建筑" : "working buildings"}</span></div>
@@ -263,3 +279,8 @@ function Landing() {
 }
 
 createRoot(document.getElementById("root")!).render(<Landing />);
+
+// PWA: production only — a dev service worker would fight vite's HMR
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  void navigator.serviceWorker.register("/sw.js");
+}

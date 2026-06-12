@@ -571,6 +571,34 @@ def festival() -> dict:
     return {"latest": None, "today": False}
 
 
+@router.get("/signals")
+def town_signals(limit: int = 8) -> dict:
+    """Recent multi-agent signals relayed from agentmemory (read-only).
+    The town shows them live: the receiving NPC runs to the notice board.
+    Content is trimmed; this endpoint only ever serves localhost."""
+    try:
+        r = httpx.get(
+            f"{AGENTMEMORY}/agentmemory/signals",
+            params={"agentId": "all", "limit": str(max(1, min(limit, 20)))},
+            timeout=5.0,
+        )
+        r.raise_for_status()
+        raw = r.json().get("signals", [])
+    except Exception:
+        return {"signals": []}
+    out = []
+    for s in raw:
+        out.append({
+            "id": str(s.get("id", "")),
+            "from": str(s.get("from", "")).replace("agent:", ""),
+            "to": str(s.get("to", "")).replace("agent:", ""),
+            "summary": str(s.get("content", ""))[:120],
+            "type": str(s.get("type", "info")),
+            "at": str(s.get("createdAt", "")),
+        })
+    return {"signals": out}
+
+
 # ----------------------------------------------------------------- e2e smoke
 REPORT_FILE = PROJECT_ROOT / "workspace" / "v4-report.jsonl"
 SHOTS_DIR = PROJECT_ROOT / "workspace" / "v4-shots"

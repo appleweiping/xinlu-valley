@@ -36,4 +36,9 @@ audio.attach(game);
 if (audio.muted) game.sound.mute = true;
 void maybeRunV4Test();
 
+// PWA: production only — a dev service worker would fight vite's HMR
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  void navigator.serviceWorker.register("/sw.js");
+}
+
 createRoot(document.getElementById("ui-root")!).render(createElement(GameUI));

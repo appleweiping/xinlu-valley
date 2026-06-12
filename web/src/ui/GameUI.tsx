@@ -3,10 +3,12 @@ import { bus } from "@/shared/bus";
 import { BUILDINGS } from "@/data/town";
 import { audio } from "@/game/audio";
 import { loadSave } from "@/shared/save";
+import { SPECTATE } from "@/shared/flags";
 import { useUI } from "./store";
 import { DialogueBox } from "./DialogueBox";
 import { BuildingPanel } from "./BuildingPanel";
 import { Hud } from "./Hud";
+import { TouchControls } from "./TouchControls";
 import "./pixel.css";
 
 function PlantDialog() {
@@ -107,10 +109,12 @@ function FishingBar() {
       if (e.key === "Escape") cancel();
     };
     window.addEventListener("keydown", onKey);
+    const offTouch = bus.on("touch:interact", () => stop()); // touch E button reels in too
     return () => {
       active.current = false;
       cancelAnimationFrame(raf.current);
       window.removeEventListener("keydown", onKey);
+      offTouch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fishing]);
@@ -267,6 +271,11 @@ export function GameUI() {
       bus.on("clock:tick", (c) => setClock(c)),
       bus.on("mode:detected", ({ live }) => setLive(live)),
       bus.on("farm:plant-request", ({ cell }) => {
+        if (SPECTATE) {
+          bus.emit("toast", { text: "👀 观战模式为只读 · spectate is read-only" });
+          bus.emit("panel:closed", undefined); // unlock the scene
+          return;
+        }
         audio.click();
         setPlantCell(cell);
       }),
@@ -292,6 +301,7 @@ export function GameUI() {
       <PlantDialog />
       <FishingBar />
       <Almanac />
+      <TouchControls />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { bus } from "@/shared/bus";
 import { getData } from "@/shared/api";
 import { audio } from "@/game/audio";
+import { touchState } from "@/shared/touch";
 
 const T = 16;
 const W = 15;
@@ -65,6 +66,7 @@ export class MineScene extends Phaser.Scene {
   private leaving = false;
   private oresPool: Ore[] = [];
   private uiLock = false;
+  private touchInteract = false;
 
   constructor() {
     super("mine");
@@ -91,6 +93,11 @@ export class MineScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.wasd = this.input.keyboard!.addKeys("W,A,S,D,E") as MineScene["wasd"];
+    // scene restarts per level — unhook on shutdown or listeners pile up
+    const offTouch = bus.on("touch:interact", () => {
+      if (this.scene.isActive()) this.touchInteract = true;
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, offTouch);
 
     this.hint = this.add
       .text(this.cameras.main.width / 2, this.cameras.main.height - 8, "", {
@@ -208,6 +215,10 @@ export class MineScene extends Phaser.Scene {
       else if (this.cursors.right.isDown || this.wasd.D.isDown) vx = 1;
       if (this.cursors.up.isDown || this.wasd.W.isDown) vy = -1;
       else if (this.cursors.down.isDown || this.wasd.S.isDown) vy = 1;
+      if (vx === 0 && vy === 0 && touchState.active) {
+        vx = touchState.vx;
+        vy = touchState.vy;
+      }
     }
     if (vx !== 0 || vy !== 0) this.moveTarget = null;
     else if (this.moveTarget && !this.uiLock) {
@@ -268,7 +279,9 @@ export class MineScene extends Phaser.Scene {
     }
     this.hint.setText(this.uiLock ? "" : hint);
 
-    if (Phaser.Input.Keyboard.JustDown(this.wasd.E) && !this.uiLock) {
+    const touchE = this.touchInteract;
+    this.touchInteract = false;
+    if ((Phaser.Input.Keyboard.JustDown(this.wasd.E) || touchE) && !this.uiLock) {
       if (target) {
         this.hitNode(target);
       } else if (onLadder) {

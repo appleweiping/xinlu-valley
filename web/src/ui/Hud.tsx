@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { audio } from "@/game/audio";
+import { SPECTATE } from "@/shared/flags";
+import { isTouchDevice } from "@/shared/touch";
 import { useUI } from "./store";
 
 export function Hud() {
@@ -32,6 +34,12 @@ export function Hud() {
           >
             {live ? (lang === "zh" ? "● 联机" : "● LIVE") : lang === "zh" ? "○ 演示" : "○ DEMO"}
           </span>
+          {SPECTATE && (
+            <span className="pixel-chip" style={{ background: "#e3d6f0", borderColor: "#8a6fb0" }}
+              title={lang === "zh" ? "只读观战链接" : "read-only spectate link"}>
+              👀 {lang === "zh" ? "观战" : "WATCH"}
+            </span>
+          )}
           <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }} onClick={() => setLang(lang === "zh" ? "en" : "zh")}>
             {lang === "zh" ? "EN" : "中"}
           </button>
@@ -45,14 +53,16 @@ export function Hud() {
           </button>
         </div>
       </div>
-      <div
-        className="wood-panel"
-        style={{ position: "absolute", bottom: 12, left: 12, padding: "6px 12px", fontSize: 12, pointerEvents: "auto", maxWidth: 280 }}
-      >
-        {useUI.getState().lang === "zh"
-          ? "WASD/方向键移动 · 点击地面行走 · 拖拽平移 · 滚轮缩放 · E 互动 · F 回到角色"
-          : "WASD/arrows move · click to walk · drag to pan · wheel to zoom · E interact · F refocus"}
-      </div>
+      {!isTouchDevice() && (
+        <div
+          className="wood-panel"
+          style={{ position: "absolute", bottom: 12, left: 12, padding: "6px 12px", fontSize: 12, pointerEvents: "auto", maxWidth: 280 }}
+        >
+          {useUI.getState().lang === "zh"
+            ? "WASD/方向键移动 · 点击地面行走 · 拖拽平移 · 滚轮缩放 · E 互动 · F 回到角色"
+            : "WASD/arrows move · click to walk · drag to pan · wheel to zoom · E interact · F refocus"}
+        </div>
+      )}
     </>
   );
 }

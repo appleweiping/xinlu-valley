@@ -8,6 +8,7 @@
  */
 import type Phaser from "phaser";
 import { bus } from "@/shared/bus";
+import { touchState } from "@/shared/touch";
 
 const BASE = "http://127.0.0.1:8000";
 
@@ -202,6 +203,51 @@ export async function maybeRunV4Test(): Promise<void> {
   await report("season", {
     season: (t as unknown as { currentSeason: string }).currentSeason,
   }, true);
+
+  // --- v6: virtual joystick drives the player ---------------------------------
+  const px0 = (t as unknown as { player: { x: number } }).player.x;
+  touchState.active = true;
+  touchState.vx = 1;
+  touchState.vy = 0;
+  await sleep(700);
+  touchState.active = false;
+  touchState.vx = 0;
+  await sleep(200);
+  const px1 = (t as unknown as { player: { x: number } }).player.x;
+  await report("touch-sim", { moved: Math.round(px1 - px0), ok: px1 - px0 > 8 });
+
+  // --- v6: a multi-agent signal sends an NPC to the notice board ---------------
+  const tAny = t as unknown as {
+    onSignals(s: { id: string; from: string; to: string; summary: string }[]): void;
+    npcs: { def: { id: string }; state: string }[];
+  };
+  tAny.onSignals([{ id: "v6-test-sig", from: "cc", to: "haiku", summary: "哨兵测试信号：请到公告板集合" }]);
+  await sleep(900);
+  const haiku = tAny.npcs.find((n) => n.def.id === "haiku");
+  await report("signal-npc", { haikuState: haiku?.state ?? "?", reacted: haiku?.state === "path" }, true);
+
+  // --- v6: pwa artifacts served ------------------------------------------------
+  let manifestOk = false;
+  let swOk = false;
+  try { manifestOk = (await fetch("/manifest.webmanifest")).ok; } catch { /* absent */ }
+  try { swOk = (await fetch("/sw.js")).ok; } catch { /* absent */ }
+  await report("pwa", { manifestOk, swOk });
+
+  // --- v6: spectate flag isolates a read-only view ------------------------------
+  const frame = document.createElement("iframe");
+  frame.style.cssText = "position:absolute;left:-9999px;width:480px;height:320px;";
+  frame.src = "/play.html?spectate=1";
+  document.body.appendChild(frame);
+  let spectateFlag = false;
+  for (let i = 0; i < 28; i++) {
+    await sleep(500);
+    try {
+      const flags = (frame.contentWindow as unknown as { __flags?: { spectate?: boolean } })?.__flags;
+      if (flags?.spectate === true) { spectateFlag = true; break; }
+    } catch { /* cross-origin can't happen, same origin */ }
+  }
+  frame.remove();
+  await report("spectate", { flag: spectateFlag });
 
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";

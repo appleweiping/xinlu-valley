@@ -20,6 +20,12 @@ export function currentMode(): Mode {
 
 export async function detectMode(): Promise<Mode> {
   if (detected) return mode;
+  // Spectate links are read-only by contract: always demo data, no probe.
+  if (new URLSearchParams(window.location.search).has("spectate")) {
+    mode = "demo";
+    detected = true;
+    return mode;
+  }
   // Public deployments can never reach a loopback bridge (the browser blocks
   // private-network requests from https origins) — skip the probe entirely.
   const host = window.location.hostname;

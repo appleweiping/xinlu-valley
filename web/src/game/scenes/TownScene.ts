@@ -7,6 +7,17 @@ import { bus } from "@/shared/bus";
 import { audio, AUDIO_FILES } from "@/game/audio";
 import { currentMode, getData, postData } from "@/shared/api";
 import { loadSave, writeSave, type DemoCrop } from "@/shared/save";
+import { touchState } from "@/shared/touch";
+
+/** a multi-agent signal as the town sees it (bridge /api/town/signals) */
+interface TownSignal {
+  id: string;
+  from: string;
+  to: string;
+  summary: string;
+  type?: string;
+  at?: string;
+}
 
 const WATER_FRAMES = 4;
 const DAY_MINUTES = 24 * 60;
@@ -117,6 +128,11 @@ export class TownScene extends Phaser.Scene {
   private festivalDecor: Phaser.GameObjects.GameObject[] = [];
   private lastFirework = 0;
   private mineZone!: Phaser.Geom.Rectangle;
+  // ---- v6 state
+  private touchInteract = false; // armed by the touch E button, consumed per frame
+  private seenSignals = new Set<string>();
+  private signalsPrimed = false; // first batch is history — observe, don't react
+  private demoSignalTick = 0;
 
   constructor() {
     super("town");
@@ -160,6 +176,9 @@ export class TownScene extends Phaser.Scene {
     this.time.addEvent({ delay: 260, loop: true, callback: () => this.cycleWater() });
     this.time.addEvent({ delay: 1000, loop: true, callback: () => this.tickClock() });
     this.time.addEvent({ delay: 60000, loop: true, callback: () => this.autosave() });
+    // v6: multi-agent signals — live polls the bridge, demo replays samples
+    this.time.addEvent({ delay: 30000, loop: true, callback: () => void this.pollSignals() });
+    void this.pollSignals();
 
     // audio loads in the background AFTER the world is playable — a stalled
     // or missing sound file must never block entering the town
@@ -517,6 +536,66 @@ export class TownScene extends Phaser.Scene {
     bus.on("fishing:result", ({ quality }) => {
       void this.resolveCatch(quality);
     });
+    bus.on("touch:interact", () => {
+      if (this.scene.isActive()) this.touchInteract = true;
+    });
+  }
+
+  // ------------------------------------------------------------- v6 signals
+  /** Poll multi-agent signals. LIVE reads the bridge (agentmemory relay);
+   * DEMO replays one sample per tick so visitors still see the town react. */
+  private async pollSignals(): Promise<void> {
+    try {
+      const d = await getData<{ signals: TownSignal[] }>("/api/town/signals", "signals.json");
+      let sigs = d.signals ?? [];
+      if (currentMode() !== "live") {
+        if (!this.signalsPrimed) {
+          this.signalsPrimed = true; // demo has no history to swallow
+          return;
+        }
+        if (sigs.length === 0) return;
+        const pick = sigs[this.demoSignalTick % sigs.length];
+        this.demoSignalTick += 1;
+        sigs = [{ ...pick, id: `${pick.id}-replay-${this.demoSignalTick}` }];
+      }
+      this.onSignals(sigs);
+    } catch {
+      /* bridge offline — town just stays quiet */
+    }
+  }
+
+  /** Ingest a batch of signals; exposed for the e2e harness. */
+  onSignals(sigs: TownSignal[]): void {
+    for (const s of sigs) {
+      if (!s.id || this.seenSignals.has(s.id)) continue;
+      this.seenSignals.add(s.id);
+      if (this.signalsPrimed) this.reactToSignal(s);
+    }
+    this.signalsPrimed = true;
+  }
+
+  /** The receiver dashes to the plaza notice board and waves. */
+  private reactToSignal(s: TownSignal): void {
+    const n =
+      this.npcs.find((x) => x.def.id === s.to) ??
+      this.npcs.find((x) => x.def.id === "fable") ??
+      this.npcs[0];
+    bus.emit("signal:received", { from: s.from, to: s.to, summary: s.summary });
+    bus.emit("toast", { text: `📨 信号 ${s.from} → ${s.to === "all" ? "全镇" : s.to}：${s.summary.slice(0, 48)}` });
+    if (!n || n.state === "inside" || n.state === "talk") return;
+    const np = findPath(
+      this.collide,
+      Math.floor(n.sprite.x / TILE), Math.floor(n.sprite.y / TILE),
+      29, 20, // just below the plaza notice board
+    );
+    if (np && np.length > 0) {
+      n.path = np;
+      n.pathIdx = 0;
+      n.state = "path";
+      (n as Npc & { after?: unknown }).after = undefined;
+      n.emote.setVisible(true);
+      n.emote.play("emote-alert");
+    }
   }
 
   /** click-to-walk: straight line when clear, A* around obstacles otherwise */
@@ -960,6 +1039,10 @@ export class TownScene extends Phaser.Scene {
       else if (this.cursors.right.isDown || this.wasd.D.isDown) vx = 1;
       if (this.cursors.up.isDown || this.wasd.W.isDown) vy = -1;
       else if (this.cursors.down.isDown || this.wasd.S.isDown) vy = 1;
+      if (vx === 0 && vy === 0 && touchState.active) {
+        vx = touchState.vx; // analog joystick merges in like a key-pair
+        vy = touchState.vy;
+      }
     }
     if (vx !== 0 || vy !== 0) {
       this.moveTarget = null;
@@ -1007,7 +1090,9 @@ export class TownScene extends Phaser.Scene {
       this.following = true;
       this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     }
-    if (Phaser.Input.Keyboard.JustDown(this.wasd.E) && !this.uiLock && this.time.now > this.actionCooldown) {
+    const touchE = this.touchInteract;
+    this.touchInteract = false;
+    if ((Phaser.Input.Keyboard.JustDown(this.wasd.E) || touchE) && !this.uiLock && this.time.now > this.actionCooldown) {
       this.actionCooldown = this.time.now + 350;
       // 1) farm action
       const cell = this.nearestFarmCell();
