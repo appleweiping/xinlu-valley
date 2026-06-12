@@ -30,6 +30,9 @@ export type BusEvents = {
   "ship:add": { index: number };
   "ship:all": undefined;
   "museum:donate": { kind: "ore" | "fish"; index: number };
+  "tutorial:step": { step: number; total: number; textZh: string; textEn: string };
+  "tutorial:skip": undefined;
+  "settings:zoom": { zoom: number };
 };
 
 type Handler<T> = (payload: T) => void;

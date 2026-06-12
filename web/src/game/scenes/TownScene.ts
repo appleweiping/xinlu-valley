@@ -152,6 +152,8 @@ export class TownScene extends Phaser.Scene {
   private chitchatAt = new Map<string, number>(); // pair key -> next allowed time
   private nextChitchatScan = 0;
   private bubbles: Phaser.GameObjects.Text[] = [];
+  // ---- v9 state
+  private tutorialStep = 1; // 1..5, 99 = done
 
   constructor() {
     super("town");
@@ -176,6 +178,7 @@ export class TownScene extends Phaser.Scene {
       this.canLevel = save.canLevel ?? 1;
       this.museum = save.museum ?? { ores: [], fish: [] };
       this.decor = save.decor ?? [];
+      this.tutorialStep = save.tutorialStep ?? 1;
     }
 
     this.buildGround();
@@ -209,6 +212,8 @@ export class TownScene extends Phaser.Scene {
     this.time.addEvent({ delay: 45000, loop: true, callback: () => void this.pollPulse() });
     void this.pollPulse();
     this.rollWeather();
+    // v9: surface the onboarding quest once the UI has mounted
+    this.time.delayedCall(1600, () => this.emitTutorial());
 
     // audio loads in the background AFTER the world is playable — a stalled
     // or missing sound file must never block entering the town
@@ -564,6 +569,7 @@ export class TownScene extends Phaser.Scene {
     bus.on("ore:collected", ({ title, kind, repo }) => {
       this.ores.push(`[${kind}] ${repo}: ${title}`);
       this.inventory.push({ kind: "ore", name: `[${kind}] ${title}`.slice(0, 60) });
+      this.tutorialHook("ore");
       this.points += kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1;
       bus.emit("toast", { text: `⛏ 采得债务矿石：${title.slice(0, 36)}（建设点 +${kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1}）` });
       this.checkAchievements();
@@ -594,6 +600,47 @@ export class TownScene extends Phaser.Scene {
     });
     bus.on("shop:buy", ({ itemId }) => this.buyShopItem(itemId));
     bus.on("museum:donate", ({ kind, index }) => this.donate(kind, index));
+    bus.on("settings:zoom", ({ zoom }) => {
+      this.cameras.main.setZoom(Math.max(2, Math.min(4, zoom)));
+    });
+    bus.on("tutorial:skip", () => {
+      if (this.tutorialStep >= 99) return;
+      this.tutorialStep = 99;
+      bus.emit("tutorial:step", { step: 99, total: 5, textZh: "", textEn: "" });
+      this.autosave();
+    });
+  }
+
+  // ------------------------------------------------------------ v9 tutorial
+  private static readonly TUTORIAL_STEPS: Record<number, [string, string]> = {
+    1: ["去广场公告板旁找狐狸 Fable 聊聊", "Find Fable the fox by the notice board"],
+    2: ["在农场种下一株任务（走近田垄按 E）", "Plant a task at the farm (press E)"],
+    3: ["走进记忆图书馆逛逛", "Step inside the Memory Library"],
+    4: ["去农场南侧的矿洞敲一块矿石", "Crack an ore node in the mines"],
+    5: ["回去找 Fable 领开镇礼包", "Return to Fable for your welcome gift"],
+  };
+
+  private emitTutorial(): void {
+    if (this.tutorialStep >= 99) return;
+    const s = TownScene.TUTORIAL_STEPS[this.tutorialStep];
+    if (s) bus.emit("tutorial:step", { step: this.tutorialStep, total: 5, textZh: s[0], textEn: s[1] });
+  }
+
+  /** Onboarding advances on real play events; exposed for the harness. */
+  tutorialHook(evt: string): void {
+    const need: Record<number, string> = { 1: "talk-fable", 2: "plant", 3: "library", 4: "ore", 5: "talk-fable" };
+    if (this.tutorialStep >= 99 || need[this.tutorialStep] !== evt) return;
+    if (this.tutorialStep >= 5) {
+      this.tutorialStep = 99;
+      this.points += 10;
+      bus.emit("tutorial:step", { step: 99, total: 5, textZh: "", textEn: "" });
+      bus.emit("toast", { text: "🎁 开镇礼包：建设点 +10！山谷由你掌舵了" });
+      this.grantAch("tutorial1", "新镇长上任（完成引导）");
+    } else {
+      this.tutorialStep += 1;
+      this.emitTutorial();
+    }
+    this.autosave();
   }
 
   // ------------------------------------------------------------- v6 signals
@@ -1032,12 +1079,14 @@ export class TownScene extends Phaser.Scene {
       duty.kind === "building" ? `on duty at the ${BUILDINGS.find((b) => b.id === duty.id)?.nameEn ?? "town"}` :
       "out and about";
     bus.emit("npc:talk", { agentId, activityZh, activityEn });
+    if (agentId === "fable") this.tutorialHook("talk-fable");
   }
 
   private enterBuilding(id: string): void {
     if (this.uiLock) return;
     const b = BUILDINGS.find((bb) => bb.id === id);
     if (!b) return;
+    if (id === "memory-library") this.tutorialHook("library");
     const interior = INTERIOR_BY_BUILDING.get(id);
     if (!interior) {
       this.uiLock = true;
@@ -1142,6 +1191,7 @@ export class TownScene extends Phaser.Scene {
     }
     audio.plant();
     bus.emit("toast", { text: `种下任务：${title}` });
+    this.tutorialHook("plant");
     this.autosave();
   }
 
@@ -1207,6 +1257,7 @@ export class TownScene extends Phaser.Scene {
       canLevel: this.canLevel,
       museum: this.museum,
       decor: this.decor,
+      tutorialStep: this.tutorialStep,
     });
   }
 

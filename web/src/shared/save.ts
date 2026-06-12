@@ -46,6 +46,8 @@ export interface SaveData {
   museum: { ores: string[]; fish: string[] };
   /** v8: purchased decorations placed in town */
   decor: { id: string; tx: number; ty: number }[];
+  /** v9: onboarding progress (1..5, 99 = done) */
+  tutorialStep: number;
 }
 
 const KEY = "nrv-save-v1";
@@ -61,6 +63,7 @@ const DEFAULTS = {
   canLevel: 1 as const,
   museum: { ores: [] as string[], fish: [] as string[] },
   decor: [] as { id: string; tx: number; ty: number }[],
+  tutorialStep: 1,
 };
 
 export function loadSave(): SaveData | null {

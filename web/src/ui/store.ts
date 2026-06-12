@@ -14,6 +14,7 @@ interface UIState {
   almanac: boolean;
   almanacTab: string;
   stamina: number;
+  settings: boolean;
   clock: { day: number; hour: number; minute: number; season: string; weather?: string };
   setLang(l: Lang): void;
   setLive(v: boolean): void;
@@ -28,6 +29,7 @@ interface UIState {
   setAlmanac(v: boolean): void;
   setAlmanacTab(t: string): void;
   setStamina(v: number): void;
+  setSettings(v: boolean): void;
 }
 
 export const useUI = create<UIState>((set) => ({
@@ -42,6 +44,7 @@ export const useUI = create<UIState>((set) => ({
   almanac: false,
   almanacTab: "bag",
   stamina: 100,
+  settings: false,
   clock: { day: 1, hour: 8, minute: 0, season: "春" },
   setLang: (lang) => set({ lang }),
   setLive: (live) => set({ live }),
@@ -56,4 +59,5 @@ export const useUI = create<UIState>((set) => ({
   setAlmanac: (almanac) => set({ almanac }),
   setAlmanacTab: (almanacTab) => set({ almanacTab }),
   setStamina: (stamina) => set({ stamina }),
+  setSettings: (settings) => set({ settings }),
 }));

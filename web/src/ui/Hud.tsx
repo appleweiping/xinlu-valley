@@ -5,7 +5,7 @@ import { isTouchDevice } from "@/shared/touch";
 import { useUI } from "./store";
 
 export function Hud() {
-  const { clock, live, lang, setLang, setAlmanac, setAlmanacTab, stamina } = useUI();
+  const { clock, live, lang, setLang, setAlmanac, setAlmanacTab, setSettings, stamina } = useUI();
   const [muted, setMuted] = useState(audio.muted);
   const toggleMute = () => {
     const m = !muted;
@@ -55,6 +55,10 @@ export function Hud() {
           <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }}
             onClick={() => { setAlmanacTab("bag"); setAlmanac(true); }} title="背包">
             🎒
+          </button>
+          <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }}
+            onClick={() => setSettings(true)} title={lang === "zh" ? "设置" : "Settings"}>
+            ⚙
           </button>
         </div>
         <div style={{ marginTop: 6 }} title={`体力 ${stamina}/100`}>

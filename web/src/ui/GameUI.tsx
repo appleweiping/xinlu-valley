@@ -329,6 +329,83 @@ function Almanac() {
   );
 }
 
+/** v9: onboarding quest tracker — Fable's 5-step welcome tour */
+function TutorialBanner() {
+  const { lang } = useUI();
+  const [t, setT] = useState<{ step: number; total: number; textZh: string; textEn: string } | null>(null);
+  useEffect(() => bus.on("tutorial:step", (p) => setT(p.step >= 99 ? null : p)), []);
+  if (!t) return null;
+  return (
+    <div
+      className="wood-panel fade-in"
+      style={{ position: "absolute", top: 12, left: 12, padding: "7px 12px", fontSize: 12.5, pointerEvents: "none", maxWidth: 290 }}
+    >
+      🧭 {lang === "zh" ? `新手任务 ${t.step}/${t.total}：${t.textZh}` : `Quest ${t.step}/${t.total}: ${t.textEn}`}
+    </div>
+  );
+}
+
+/** v9: settings — volume, language, zoom, tutorial reset */
+function SettingsDialog() {
+  const { settings, setSettings, lang, setLang } = useUI();
+  const [vol, setVol] = useState(() => Math.round(audio.volume * 100));
+  if (!settings) return null;
+  const close = () => {
+    setSettings(false);
+    bus.emit("panel:closed", undefined);
+  };
+  return (
+    <div
+      className="fade-in"
+      style={{
+        position: "absolute", inset: 0, background: "rgba(20,14,28,0.45)",
+        display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "auto",
+      }}
+      onClick={close}
+    >
+      <div className="wood-panel" style={{ width: "min(420px, 92vw)" }} onClick={(e) => e.stopPropagation()}>
+        <div className="wood-title">
+          <span>⚙ {lang === "zh" ? "设置" : "Settings"}</span>
+          <button className="wood-btn" onClick={close}>✕</button>
+        </div>
+        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
+          <label style={{ fontSize: 13 }}>
+            🔊 {lang === "zh" ? "音量" : "Volume"} · {vol}%
+            <input
+              type="range" min={0} max={100} value={vol}
+              style={{ width: "100%", accentColor: "#5cb83a" }}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setVol(v);
+                audio.setVolume(v / 100);
+              }}
+            />
+          </label>
+          <div style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            🌐 {lang === "zh" ? "语言" : "Language"}
+            <button className="wood-btn" style={{ fontSize: 12, opacity: lang === "zh" ? 1 : 0.55 }} onClick={() => setLang("zh")}>中文</button>
+            <button className="wood-btn" style={{ fontSize: 12, opacity: lang === "en" ? 1 : 0.55 }} onClick={() => setLang("en")}>English</button>
+          </div>
+          <div style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            🔍 {lang === "zh" ? "像素缩放" : "Pixel zoom"}
+            {[2, 3, 4].map((z) => (
+              <button key={z} className="wood-btn" style={{ fontSize: 12 }} onClick={() => bus.emit("settings:zoom", { zoom: z })}>
+                {z}×
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            🧭 {lang === "zh" ? "新手引导" : "Onboarding"}
+            <button className="wood-btn" style={{ fontSize: 12 }} onClick={() => { bus.emit("tutorial:skip", undefined); close(); }}>
+              {lang === "zh" ? "跳过引导" : "Skip the tour"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Toast() {
   const { toast } = useUI();
   if (!toast) return null;
@@ -398,6 +475,8 @@ export function GameUI() {
       <PlantDialog />
       <FishingBar />
       <Almanac />
+      <TutorialBanner />
+      <SettingsDialog />
       <TouchControls />
     </div>
   );

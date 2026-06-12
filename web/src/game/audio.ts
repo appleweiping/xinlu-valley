@@ -31,6 +31,10 @@ class Audio {
   private bgmStarted = false;
   private lastStep = 0;
   muted = localStorage.getItem("nrv-muted") === "1";
+  private master = (() => {
+    const v = Number(localStorage.getItem("nrv-volume"));
+    return Number.isFinite(v) && localStorage.getItem("nrv-volume") !== null ? Math.max(0, Math.min(1, v)) : 1;
+  })();
 
   attach(game: Phaser.Game): void {
     this.game = game;
@@ -52,7 +56,7 @@ class Audio {
   private play(key: string, volume: number): void {
     if (this.muted || !this.game || !this.has(key)) return;
     try {
-      this.game.sound.play(key, { volume });
+      this.game.sound.play(key, { volume: volume * this.master });
     } catch {
       /* locked audio context etc. — stay silent */
     }
@@ -61,7 +65,7 @@ class Audio {
   startBgm(): void {
     if (this.bgmStarted || this.muted || !this.game || !this.has(KEYS.bgm)) return;
     try {
-      this.game.sound.play(KEYS.bgm, { loop: true, volume: 0.35 });
+      this.game.sound.play(KEYS.bgm, { loop: true, volume: 0.35 * this.master });
       this.bgmStarted = true;
     } catch {
       /* retry on next gesture */
@@ -74,6 +78,30 @@ class Audio {
     if (!this.game) return;
     this.game.sound.mute = m;
     if (!m) this.startBgm();
+  }
+
+  /** master volume 0..1 (persisted; multiplies every per-clip volume) */
+  get volume(): number {
+    return this.master;
+  }
+
+  setVolume(v: number): void {
+    this.master = Math.max(0, Math.min(1, v));
+    localStorage.setItem("nrv-volume", String(this.master));
+    // best-effort manager-level set too (running bgm reacts immediately)
+    try {
+      if (this.game) this.game.sound.volume = this.master;
+    } catch {
+      /* some sound managers ignore this — per-clip multiply still applies */
+    }
+  }
+
+  applySavedVolume(): void {
+    try {
+      if (this.game) this.game.sound.volume = this.master;
+    } catch {
+      /* per-clip multiply still applies */
+    }
   }
 
   step(): void {

@@ -34,6 +34,7 @@ const game = new Phaser.Game({
 (window as unknown as Record<string, unknown>).__game = game;
 audio.attach(game);
 if (audio.muted) game.sound.mute = true;
+audio.applySavedVolume();
 void maybeRunV4Test();
 
 // PWA: production only — a dev service worker would fight vite's HMR

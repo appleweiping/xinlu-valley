@@ -340,6 +340,32 @@ export async function maybeRunV4Test(): Promise<void> {
   const save8c = JSON.parse(localStorage.getItem("nrv-save-v1") ?? "{}") as { museum?: { ores?: string[] } };
   await report("museum", { ores: save8c.museum?.ores?.length ?? 0, ok: (save8c.museum?.ores?.length ?? 0) >= 1 });
 
+  // --- v9: onboarding chain completes with the welcome gift ---------------------
+  const t9 = t as unknown as { tutorialHook(e: string): void; tutorialStep: number; points: number };
+  const p9 = t9.points;
+  for (const evt of ["talk-fable", "plant", "library", "ore", "talk-fable"]) t9.tutorialHook(evt);
+  await sleep(600);
+  await report("tutorial", {
+    step: t9.tutorialStep,
+    gift: t9.points - p9,
+    ok: t9.tutorialStep === 99 && t9.points - p9 === 10,
+  }, true);
+
+  // --- v9: settings drive audio volume + camera zoom -----------------------------
+  const { audio: audioMod } = await import("@/game/audio");
+  audioMod.setVolume(0.5);
+  bus.emit("settings:zoom", { zoom: 2 });
+  await sleep(400);
+  const zoom9 = (t as unknown as { cameras: { main: { zoom: number } } }).cameras.main.zoom;
+  await report("settings", {
+    volume: audioMod.volume,
+    persisted: localStorage.getItem("nrv-volume"),
+    zoom: zoom9,
+    ok: Math.abs(audioMod.volume - 0.5) < 0.01 && zoom9 === 2,
+  }, true);
+  bus.emit("settings:zoom", { zoom: 3 });
+  audioMod.setVolume(1);
+
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";
   try {
