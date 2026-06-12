@@ -21,6 +21,7 @@ export function Hud() {
         style={{ position: "absolute", top: 12, right: 12, padding: "8px 14px", pointerEvents: "auto", textAlign: "center" }}
       >
         <div style={{ fontSize: 14, fontWeight: 700 }}>
+          {clock.weather === "rain" ? "🌧 " : clock.weather === "fog" ? "🌫 " : "☀ "}
           {lang === "zh" ? `${clock.season} · 第 ${clock.day} 天` : `${clock.season} · Day ${clock.day}`}
         </div>
         <div style={{ fontSize: 20, fontWeight: 800, color: "var(--wood-dark)" }}>

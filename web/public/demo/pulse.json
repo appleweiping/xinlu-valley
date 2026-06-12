@@ -1,0 +1,8 @@
+{
+  "memoryCount": 442,
+  "commits": [
+    { "repo": "demo-town", "hash": "a1b2c3d", "msg": "feat: 给广场加了喷泉动画", "at": 1765500000 },
+    { "repo": "demo-app", "hash": "e4f5a6b", "msg": "fix: 修复夜间模式的对比度", "at": 1765490000 },
+    { "repo": "demo-docs", "hash": "c7d8e9f", "msg": "docs: 补全部署手册第三章", "at": 1765480000 }
+  ]
+}

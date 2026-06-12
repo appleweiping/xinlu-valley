@@ -3,6 +3,7 @@ import { AGENTS } from "@/data/town";
 import { bus } from "@/shared/bus";
 import { postData } from "@/shared/api";
 import { audio } from "@/game/audio";
+import { SPECTATE } from "@/shared/flags";
 import { useUI } from "./store";
 
 /** Stardew-style bottom dialogue: portrait + wooden frame + typewriter text.
@@ -122,8 +123,23 @@ export function DialogueBox() {
                 {lang === "zh" ? agent.roleZh : agent.role}
               </span>
             </strong>
-            <span style={{ fontSize: 11, opacity: 0.65 }}>
-              {Math.min(lineIdx + 1, lines.length)}/{lines.length}
+            <span style={{ fontSize: 11, opacity: 0.85, display: "flex", gap: 8, alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
+              {!SPECTATE && (
+                <button
+                  className="wood-btn"
+                  style={{ fontSize: 11, padding: "2px 10px", background: "linear-gradient(180deg,#9be564,#5cb83a)" }}
+                  title={lang === "zh" ? "接下这位居民的一单委托，种进农场" : "Take a quest from this resident"}
+                  onClick={() => {
+                    audio.click();
+                    if (agent) bus.emit("quest:take", { agentId: agent.id });
+                    closeDialogue();
+                    bus.emit("dialogue:closed", undefined);
+                  }}
+                >
+                  {lang === "zh" ? "🌱 接单" : "🌱 Quest"}
+                </button>
+              )}
+              <span style={{ opacity: 0.65 }}>{Math.min(lineIdx + 1, lines.length)}/{lines.length}</span>
             </span>
           </div>
           <p className={done && !waiting ? "" : "typewriter-cursor"} style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.7, minHeight: 48 }}>

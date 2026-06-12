@@ -133,6 +133,17 @@ export class TownScene extends Phaser.Scene {
   private seenSignals = new Set<string>();
   private signalsPrimed = false; // first batch is history — observe, don't react
   private demoSignalTick = 0;
+  // ---- v7 state
+  private weather: "sunny" | "rain" | "fog" = "sunny";
+  private weatherDay = 0; // which day the current weather was rolled for
+  private rain: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
+  private fogOverlay: Phaser.GameObjects.Rectangle | null = null;
+  private lastMemoryCount = -1;
+  private lastCommits = new Map<string, string>();
+  private pulsePrimed = false;
+  private chitchatAt = new Map<string, number>(); // pair key -> next allowed time
+  private nextChitchatScan = 0;
+  private bubbles: Phaser.GameObjects.Text[] = [];
 
   constructor() {
     super("town");
@@ -179,6 +190,10 @@ export class TownScene extends Phaser.Scene {
     // v6: multi-agent signals — live polls the bridge, demo replays samples
     this.time.addEvent({ delay: 30000, loop: true, callback: () => void this.pollSignals() });
     void this.pollSignals();
+    // v7: the town heartbeat (memory count + git commits) and weather
+    this.time.addEvent({ delay: 45000, loop: true, callback: () => void this.pollPulse() });
+    void this.pollPulse();
+    this.rollWeather();
 
     // audio loads in the background AFTER the world is playable — a stalled
     // or missing sound file must never block entering the town
@@ -441,10 +456,11 @@ export class TownScene extends Phaser.Scene {
       this.clockMin -= DAY_MINUTES;
       this.day += 1;
     }
+    if (this.day !== this.weatherDay) this.rollWeather(); // new morning, new sky
     const hour = Math.floor(this.clockMin / 60);
     const minute = Math.floor(this.clockMin % 60);
     const season = ["春", "夏", "秋", "冬"][Math.floor(((this.day - 1) % 28) / 7)];
-    bus.emit("clock:tick", { day: this.day, hour, minute, season });
+    bus.emit("clock:tick", { day: this.day, hour, minute, season, weather: this.weather });
     if (season !== this.currentSeason) this.applySeason(season);
     this.fireworksTick();
     this.checkAchievements();
@@ -539,6 +555,9 @@ export class TownScene extends Phaser.Scene {
     bus.on("touch:interact", () => {
       if (this.scene.isActive()) this.touchInteract = true;
     });
+    bus.on("quest:take", ({ agentId }) => {
+      void this.takeQuest(agentId);
+    });
   }
 
   // ------------------------------------------------------------- v6 signals
@@ -596,6 +615,226 @@ export class TownScene extends Phaser.Scene {
       n.emote.setVisible(true);
       n.emote.play("emote-alert");
     }
+  }
+
+  // -------------------------------------------------------------- v7 pulse
+  private ensureDotTexture(): void {
+    if (this.textures.exists("snowdot")) return;
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(0, 0, 2, 2);
+    g.generateTexture("snowdot", 2, 2);
+    g.destroy();
+  }
+
+  private async pollPulse(): Promise<void> {
+    try {
+      const d = await getData<{ memoryCount: number; commits: { repo: string; hash: string; msg: string }[] }>(
+        "/api/town/pulse", "pulse.json",
+      );
+      this.onPulse(d);
+    } catch {
+      /* bridge offline — no heartbeat this round */
+    }
+  }
+
+  /** Ingest a heartbeat; first call only records the baseline. */
+  onPulse(d: { memoryCount: number; commits: { repo: string; hash: string; msg: string }[] }): void {
+    const primed = this.pulsePrimed;
+    this.pulsePrimed = true;
+    if (typeof d.memoryCount === "number" && d.memoryCount >= 0) {
+      if (primed && this.lastMemoryCount >= 0 && d.memoryCount > this.lastMemoryCount) {
+        this.reactMemoryGrowth(d.memoryCount - this.lastMemoryCount);
+      }
+      this.lastMemoryCount = d.memoryCount;
+    }
+    for (const c of d.commits ?? []) {
+      const prev = this.lastCommits.get(c.repo);
+      if (primed && prev && prev !== c.hash) this.reactCommit(c.repo, c.msg);
+      this.lastCommits.set(c.repo, c.hash);
+    }
+  }
+
+  /** new memories shelved -> the library chimney puffs and Sonnet beams */
+  private reactMemoryGrowth(n: number): void {
+    const lib = BUILDINGS.find((b) => b.id === "memory-library");
+    if (lib) this.puffSmoke((lib.tx + 1.3) * TILE, (lib.ty + 0.5) * TILE);
+    const sonnet = this.npcs.find((x) => x.def.id === "sonnet");
+    if (sonnet && sonnet.sprite.visible) {
+      sonnet.emote.setVisible(true);
+      sonnet.emote.play("emote-alert");
+    }
+    bus.emit("toast", { text: `📚 图书馆上架了 ${n} 本新记忆，烟囱冒烟啦` });
+  }
+
+  /** a fresh commit -> confetti over the code workshop */
+  private reactCommit(repo: string, msg: string): void {
+    const shop = BUILDINGS.find((b) => b.id === "code-workshop");
+    if (shop) this.burstConfetti((shop.tx + 2) * TILE, (shop.ty + 0.6) * TILE);
+    bus.emit("toast", { text: `🔨 ${repo} 收成新提交：${msg.slice(0, 40)}` });
+  }
+
+  private puffSmoke(x: number, y: number): void {
+    this.ensureDotTexture();
+    const e = this.add.particles(x, y, "snowdot", {
+      speedY: { min: -18, max: -9 }, speedX: { min: -4, max: 4 },
+      scale: { start: 1.6, end: 3.4 }, alpha: { start: 0.5, end: 0 },
+      tint: 0xbdb6ae, lifespan: 2600, frequency: 140, quantity: 1,
+    }).setDepth(19000);
+    this.time.delayedCall(9000, () => e.destroy());
+  }
+
+  private burstConfetti(x: number, y: number): void {
+    this.ensureDotTexture();
+    const e = this.add.particles(x, y, "snowdot", {
+      speed: { min: 26, max: 80 }, angle: { min: 200, max: 340 },
+      gravityY: 70, scale: { start: 1.5, end: 0.4 },
+      tint: [0xff8a8a, 0xffd27a, 0x9be564, 0x9fd6ff, 0xc99bff],
+      lifespan: 1500, emitting: false,
+    }).setDepth(19000);
+    e.explode(30, 0, 0);
+    this.time.delayedCall(1800, () => e.destroy());
+  }
+
+  // ------------------------------------------------------------ v7 weather
+  /** roll the day's weather — deterministic per day so reloads agree */
+  private rollWeather(): void {
+    this.weatherDay = this.day;
+    const season = ["春", "夏", "秋", "冬"][Math.floor(((this.day - 1) % 28) / 7)];
+    const r = (Math.sin(this.day * 127.1) * 43758.5453) % 1;
+    const roll = Math.abs(r);
+    const rainChance = season === "夏" ? 0.32 : season === "春" ? 0.25 : 0.16;
+    const fogChance = season === "秋" ? 0.22 : season === "冬" ? 0.18 : 0.07;
+    this.setWeather(roll < rainChance ? "rain" : roll < rainChance + fogChance ? "fog" : "sunny");
+  }
+
+  /** apply weather visuals; rainy mornings water every crop once */
+  setWeather(w: "sunny" | "rain" | "fog"): void {
+    this.weather = w;
+    this.rain?.destroy();
+    this.rain = null;
+    this.fogOverlay?.destroy();
+    this.fogOverlay = null;
+    const cam = this.cameras.main;
+    if (w === "rain") {
+      this.ensureDotTexture();
+      this.rain = this.add.particles(0, 0, "snowdot", {
+        x: { min: 0, max: cam.width }, y: -8,
+        speedY: { min: 210, max: 280 }, speedX: { min: -32, max: -16 },
+        scale: { start: 1.1, end: 0.7 }, alpha: { start: 0.5, end: 0.12 },
+        tint: 0x9fc8ef, lifespan: 2400, frequency: 9, quantity: 2,
+      }).setScrollFactor(0).setDepth(19500);
+      void this.rainWaterCrops();
+    } else if (w === "fog") {
+      this.fogOverlay = this.add.rectangle(0, 0, cam.width, cam.height, 0xcfd8dd, 0.16)
+        .setOrigin(0).setScrollFactor(0).setDepth(19400);
+    }
+  }
+
+  private async rainWaterCrops(): Promise<void> {
+    let watered = 0;
+    for (const c of [...this.crops.values()]) {
+      if (c.progress >= 1 && c.progress < 4) {
+        await this.waterCrop(c, true);
+        watered += 1;
+      }
+    }
+    if (watered > 0) bus.emit("toast", { text: `🌧 雨水替你浇了 ${watered} 株作物` });
+  }
+
+  // ----------------------------------------------------------- v7 chitchat
+  private static readonly CHITCHAT: Record<string, string[]> = {
+    opus: ["市政厅的报表又厚了三页。", "今晚的月色适合写规划。"],
+    codex: ["刚合了一个 PR，神清气爽。", "测试全绿的感觉真好。"],
+    sonnet: ["新书今天就上架。", "记忆要常整理才不积灰。"],
+    haiku: ["风从河面来。", "今天的云走得很快。"],
+    deepseek: ["我在想一个很深的问题。", "推理到第七层了。"],
+    aris: ["实验数据有了新眉目。", "看板上又多了一张卡。"],
+    pixelcat: ["像素要一颗一颗地点。", "喵——配色灵感来了！"],
+    fable: ["这故事值得写进镇志。", "听说矿洞里有新矿石？"],
+  };
+
+  /** every few seconds, let one nearby pair stop for a two-line exchange */
+  private maybeChitchat(time: number): void {
+    if (time < this.nextChitchatScan) return;
+    this.nextChitchatScan = time + 5000;
+    const out = this.npcs.filter((n) => (n.state === "idle" || n.state === "walk") && n.sprite.visible);
+    for (let i = 0; i < out.length; i++) {
+      for (let j = i + 1; j < out.length; j++) {
+        const a = out[i];
+        const b = out[j];
+        if (Phaser.Math.Distance.Between(a.sprite.x, a.sprite.y, b.sprite.x, b.sprite.y) > TILE * 2.2) continue;
+        const key = [a.def.id, b.def.id].sort().join("|");
+        if (time < (this.chitchatAt.get(key) ?? 0)) continue;
+        this.chitchatAt.set(key, time + 90000);
+        this.chitchat(a, b);
+        return; // one pair per scan keeps the plaza cozy
+      }
+    }
+  }
+
+  /** a small two-line exchange; exposed for the harness */
+  chitchat(a: Npc, b: Npc): void {
+    a.state = "talk";
+    b.state = "talk";
+    a.target = null;
+    b.target = null;
+    const lineOf = (id: string, alt: number) => {
+      const pool = TownScene.CHITCHAT[id] ?? ["今天也辛苦啦。"];
+      return pool[(this.day + alt) % pool.length];
+    };
+    this.bubble(a, lineOf(a.def.id, 0), 0);
+    this.bubble(b, lineOf(b.def.id, 1), 2300);
+    this.time.delayedCall(4800, () => {
+      if (a.state === "talk") a.state = "idle";
+      if (b.state === "talk") b.state = "idle";
+    });
+  }
+
+  private bubble(n: Npc, text: string, delay: number): void {
+    this.time.delayedCall(delay, () => {
+      if (!n.sprite.visible) return;
+      const t = this.add.text(n.sprite.x, n.sprite.y - 30, text, {
+        fontFamily: "'Microsoft YaHei', sans-serif", fontSize: "9px",
+        color: "#3b2a18", backgroundColor: "#f7eeddee",
+        padding: { x: 4, y: 2 }, resolution: 3,
+      }).setOrigin(0.5, 1).setDepth(19600);
+      this.bubbles.push(t);
+      this.tweens.add({ targets: t, y: t.y - 6, duration: 2100 });
+      this.time.delayedCall(2250, () => t.destroy());
+    });
+  }
+
+  // -------------------------------------------------------------- v7 quest
+  private static readonly QUESTS: Record<string, string[]> = {
+    opus: ["梳理本周运营报表", "把镇志目录补全"],
+    codex: ["清理一张积压 PR", "给工具链补一个冒烟测试"],
+    sonnet: ["整理 3 条旧记忆的标签", "归档上月的会话书"],
+    haiku: ["写一段今晨速报", "巡河一圈记录水位"],
+    deepseek: ["推演难题的第三种解法", "复盘昨天的推理链"],
+    aris: ["更新研究看板一张卡", "记录一次实验眉目"],
+    pixelcat: ["画一枚 16px 新图标", "给工坊出一版配色"],
+    fable: ["采写一位居民的小传", "把矿洞传说写成两段"],
+  };
+
+  /** dialogue "接单" -> a quest crop lands in the first free farm cell */
+  async takeQuest(agentId: string): Promise<void> {
+    const pool = TownScene.QUESTS[agentId] ?? ["帮小镇做一件小事"];
+    const title = `${agentId} 委托：${pool[(this.day + this.crops.size) % pool.length]}`;
+    let cell = -1;
+    const cells = FARM.w * FARM.h / 4; // plots are sparse — probe a sane range
+    for (let i = 0; i < cells; i++) {
+      if (!this.crops.has(i)) {
+        cell = i;
+        break;
+      }
+    }
+    if (cell < 0) {
+      bus.emit("toast", { text: "🌾 田里满了，先收一茬再来接单吧" });
+      return;
+    }
+    await this.plantCrop(cell, title);
+    bus.emit("toast", { text: `🌱 已接下委托：${title.slice(0, 42)}` });
   }
 
   /** click-to-walk: straight line when clear, A* around obstacles otherwise */
@@ -758,7 +997,7 @@ export class TownScene extends Phaser.Scene {
     this.autosave();
   }
 
-  private async waterCrop(crop: Crop): Promise<void> {
+  private async waterCrop(crop: Crop, silent = false): Promise<void> {
     if (crop.progress >= 4) return;
     crop.progress += 1;
     if (currentMode() === "live" && crop.taskId) {
@@ -768,8 +1007,10 @@ export class TownScene extends Phaser.Scene {
       if (d) d.progress = crop.progress;
     }
     this.setCrop(crop);
-    audio.water();
-    bus.emit("toast", { text: `浇水：${crop.title}（${crop.progress}/4）` });
+    if (!silent) {
+      audio.water();
+      bus.emit("toast", { text: `浇水：${crop.title}（${crop.progress}/4）` });
+    }
     this.autosave();
   }
 
@@ -989,6 +1230,7 @@ export class TownScene extends Phaser.Scene {
   update(time: number): void {
     this.updatePlayer();
     this.updateNpcs(time);
+    this.maybeChitchat(time);
     this.updateHint();
   }
 

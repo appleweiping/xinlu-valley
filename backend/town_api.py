@@ -599,6 +599,46 @@ def town_signals(limit: int = 8) -> dict:
     return {"signals": out}
 
 
+@router.get("/pulse")
+def town_pulse() -> dict:
+    """The town's heartbeat: total memory count + newest commit per repo.
+    One endpoint so the game runs a single poller; cheap on purpose
+    (count query + `git log -1` on the three most recent repos)."""
+    memory_count = -1
+    try:
+        r = httpx.get(f"{AGENTMEMORY}/agentmemory/memories", params={"count": "true"}, timeout=4.0)
+        if r.status_code == 200:
+            d = r.json()
+            memory_count = int(d.get("count", d.get("total", -1)))
+    except Exception:
+        pass
+
+    commits: list[dict] = []
+    try:
+        if COMPANY_ROOT.exists():
+            repos = [p for p in COMPANY_ROOT.iterdir() if (p / ".git").exists()]
+            repos.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+            for repo in repos[:3]:
+                try:
+                    out = subprocess.run(
+                        ["git", "-C", str(repo), "log", "-1", "--format=%h|%s|%ct"],
+                        capture_output=True, text=True, timeout=3,
+                    ).stdout.strip()
+                    if out:
+                        h, msg, ct = (out.split("|", 2) + ["", ""])[:3]
+                        commits.append({
+                            "repo": repo.name,
+                            "hash": h,
+                            "msg": msg[:80],
+                            "at": int(ct) if ct.isdigit() else 0,
+                        })
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    return {"memoryCount": memory_count, "commits": commits}
+
+
 # ----------------------------------------------------------------- e2e smoke
 REPORT_FILE = PROJECT_ROOT / "workspace" / "v4-report.jsonl"
 SHOTS_DIR = PROJECT_ROOT / "workspace" / "v4-shots"

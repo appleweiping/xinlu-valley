@@ -249,6 +249,55 @@ export async function maybeRunV4Test(): Promise<void> {
   frame.remove();
   await report("spectate", { flag: spectateFlag });
 
+  // --- v7: heartbeat reactions (memory growth + new commit) --------------------
+  const tPulse = t as unknown as {
+    onPulse(d: { memoryCount: number; commits: { repo: string; hash: string; msg: string }[] }): void;
+    pulsePrimed: boolean;
+    lastMemoryCount: number;
+  };
+  tPulse.onPulse({ memoryCount: 100, commits: [{ repo: "test-repo", hash: "aaa1111", msg: "baseline" }] });
+  await sleep(300);
+  tPulse.onPulse({ memoryCount: 101, commits: [{ repo: "test-repo", hash: "bbb2222", msg: "feat: 哨兵提交" }] });
+  await sleep(800);
+  await report("pulse-react", {
+    primed: tPulse.pulsePrimed,
+    memoryCount: tPulse.lastMemoryCount,
+    ok: tPulse.lastMemoryCount === 101,
+  }, true);
+
+  // --- v7: weather drives visuals + auto-watering ------------------------------
+  const tw = t as unknown as { setWeather(w: string): void; weather: string; rain: unknown };
+  tw.setWeather("rain");
+  await sleep(700);
+  await report("weather", { weather: tw.weather, rainEmitter: !!tw.rain, ok: tw.weather === "rain" && !!tw.rain }, true);
+  tw.setWeather("sunny");
+
+  // --- v7: two residents stop for a chat ---------------------------------------
+  const tc = t as unknown as {
+    chitchat(a: unknown, b: unknown): void;
+    npcs: { def: { id: string }; state: string; sprite: { visible: boolean } }[];
+    bubbles: unknown[];
+  };
+  const pair = tc.npcs.filter((n) => n.sprite.visible).slice(0, 2);
+  let chatOk = false;
+  if (pair.length === 2) {
+    tc.chitchat(pair[0], pair[1]);
+    await sleep(900);
+    chatOk = pair[0].state === "talk" && tc.bubbles.length > 0;
+    await sleep(4200); // let them finish so later steps see idle npcs
+  }
+  await report("chitchat", { ok: chatOk, pair: pair.map((p) => p.def.id) }, true);
+
+  // --- v7: take a quest via the dialogue ---------------------------------------
+  const cropsBefore = t.crops.size;
+  bus.emit("quest:take", { agentId: "sonnet" });
+  await sleep(1500);
+  await report("quest-take", {
+    before: cropsBefore,
+    after: t.crops.size,
+    ok: t.crops.size > cropsBefore,
+  }, true);
+
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";
   try {

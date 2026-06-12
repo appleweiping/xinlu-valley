@@ -7,7 +7,7 @@ export type BusEvents = {
   "building:hover": { buildingId: string | null };
   "dialogue:closed": undefined;
   "panel:closed": undefined;
-  "clock:tick": { day: number; hour: number; minute: number; season: string };
+  "clock:tick": { day: number; hour: number; minute: number; season: string; weather: string };
   "mode:detected": { live: boolean };
   "player:moved": { tx: number; ty: number };
   "toast": { text: string };
@@ -23,6 +23,7 @@ export type BusEvents = {
   "ach:unlocked": { name: string };
   "touch:interact": undefined;
   "signal:received": { from: string; to: string; summary: string };
+  "quest:take": { agentId: string };
 };
 
 type Handler<T> = (payload: T) => void;

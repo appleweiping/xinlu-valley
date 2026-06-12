@@ -12,7 +12,7 @@ interface UIState {
   toast: string | null;
   fishing: boolean;
   almanac: boolean;
-  clock: { day: number; hour: number; minute: number; season: string };
+  clock: { day: number; hour: number; minute: number; season: string; weather?: string };
   setLang(l: Lang): void;
   setLive(v: boolean): void;
   openDialogue(agentId: string, activity?: { zh: string; en: string } | null): void;
