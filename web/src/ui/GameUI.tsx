@@ -5,6 +5,7 @@ import { audio } from "@/game/audio";
 import { loadSave, activeSlot, setActiveSlot, slotSummary, exportSave, importSave } from "@/shared/save";
 import { getData } from "@/shared/api";
 import { SPECTATE } from "@/shared/flags";
+import { reducedMotion, setReducedMotion } from "@/shared/motion";
 import { useUI } from "./store";
 import { DialogueBox } from "./DialogueBox";
 import { BuildingPanel } from "./BuildingPanel";
@@ -525,6 +526,7 @@ function TutorialBanner() {
 function SettingsDialog() {
   const { settings, setSettings, lang, setLang } = useUI();
   const [vol, setVol] = useState(() => Math.round(audio.volume * 100));
+  const [calm, setCalm] = useState(reducedMotion);
   if (!settings) return null;
   const close = () => {
     setSettings(false);
@@ -569,6 +571,21 @@ function SettingsDialog() {
                 {z}×
               </button>
             ))}
+          </div>
+          <div style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+            🕊 {lang === "zh" ? "减少动效（雪/雨/烟花等粒子）" : "Reduced motion (snow/rain/fireworks)"}
+            <button
+              className="wood-btn"
+              style={{ fontSize: 12, background: calm ? "linear-gradient(180deg,#9be564,#5cb83a)" : undefined }}
+              onClick={() => {
+                const next = !calm;
+                setCalm(next);
+                setReducedMotion(next);
+                bus.emit("toast", { text: next ? (lang === "zh" ? "🕊 已开启减少动效（新粒子不再生成）" : "🕊 Reduced motion on") : lang === "zh" ? "✨ 动效已恢复" : "✨ Motion restored" });
+              }}
+            >
+              {calm ? (lang === "zh" ? "已开启" : "On") : lang === "zh" ? "已关闭" : "Off"}
+            </button>
           </div>
           <div style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
             🧭 {lang === "zh" ? "新手引导" : "Onboarding"}

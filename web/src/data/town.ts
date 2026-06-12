@@ -233,6 +233,58 @@ export const AGENTS: AgentDef[] = [
       { zh: "想听小镇的来历吗？v1 是草稿，v2 是插画书，v3——就是你脚下的这片土地。", en: "The town's history? v1 was a draft, v2 a picture book, v3 — the very ground you stand on." },
     ],
   },
+  // ---- v14: the whole-drive census brought four new residents ---------------
+  {
+    id: "claudeseek", texture: "char-claudeseek",
+    nameZh: "深寻 锻匠鼹", nameEn: "Claudeseek",
+    role: "Toolsmith", roleZh: "工具锻匠", color: "#8478a0",
+    tx: 16, ty: 24, launcher: "D:\\devtools\\claudeseek.cmd",
+    bioZh: "戴铜护目镜的鼹鼠。亲手在自己的地下锻炉里，把大师的工具一件件重打了一遍——零依赖，四十六道检验。",
+    bioEn: "A mole in brass goggles who reforged the master's tools in his own underground forge — zero dependencies, forty-six tests.",
+    lines: [
+      { zh: "别人的轮子再圆，也得自己锻一遍才知道辐条在哪。", en: "However round another's wheel, you only learn the spokes by forging your own." },
+      { zh: "流式循环、分层权限——图纸我都描过了，火候是自己的。", en: "Streaming loops, layered permissions — I traced every blueprint, but the tempering is mine." },
+      { zh: "地下三层有我的工坊，矿洞的兄弟们常来借扳手。", en: "My workshop sits three floors down. The mine folk borrow my wrenches." },
+    ],
+  },
+  {
+    id: "gemini", texture: "char-gemini",
+    nameZh: "双子 远来客", nameEn: "Gemini",
+    role: "Envoy", roleZh: "远方特使", color: "#5d74dd",
+    tx: 50, ty: 12, launcher: "D:\\devtools\\gemini.cmd",
+    bioZh: "羽毛一半青一半蓝的鹦鹉，刚从远方的大公司飞来。落地当天就领齐了小镇四件套：记忆、技能、护盾、例行体检。",
+    bioEn: "A parrot feathered half teal, half indigo — fresh from a faraway company. Got the town's full four-piece kit the day she landed.",
+    lines: [
+      { zh: "我有两副嗓子：一副背诗，一副读代码。", en: "I have two voices: one recites poetry, the other reads code." },
+      { zh: "知识塔的风景不错，能看到整座山谷的记忆。", en: "Fine view from the Knowledge Tower — you can see the whole valley's memories." },
+      { zh: "初来乍到，护盾官已经给我登记过基线了。规矩真多，但我喜欢。", en: "Newly arrived, already baselined by the shield warden. So many rules — I rather like them." },
+    ],
+  },
+  {
+    id: "hermes", texture: "char-hermes",
+    nameZh: "赫尔墨 信使鸽", nameEn: "Hermes",
+    role: "Courier", roleZh: "夜班信使", color: "#8a96b4",
+    tx: 15, ty: 30, launcher: "D:\\devtools\\hermes.cmd",
+    bioZh: "脚环系着红丝带的信鸽。别人睡觉时他在送信：跑定时任务、收教训、守网关。你信箱里的镇报多半是他叼来的。",
+    bioEn: "A pigeon with a red leg band who works while the town sleeps — cron runs, lesson curation, gateway duty. That gazette in your mailbox? He carried it.",
+    lines: [
+      { zh: "咕。夜里的活我包了，你只管睡。", en: "Coo. The night shift is mine — you just sleep." },
+      { zh: "今天的教训我已经收进档案了，三条，都不疼。", en: "Today's lessons are filed: three of them, none too painful." },
+      { zh: "信箱要常看。有些信，放久了就不新鲜了。", en: "Check your mailbox often. Some letters go stale." },
+    ],
+  },
+  {
+    id: "opencode", texture: "char-opencode",
+    nameZh: "开码 河狸匠", nameEn: "Opencode",
+    role: "Builder", roleZh: "沉默工匠", color: "#9a6a42",
+    tx: 42, ty: 26, launcher: "D:\\devtools\\opencode.cmd",
+    bioZh: "话不多的河狸，代码工场的常驻工匠。一根根原木啃出来的水坝，和一行行指令搭出来的系统，在他眼里是同一种活。",
+    bioEn: "A beaver of few words, resident craftsman of the Code Workshop. Dams gnawed log by log, systems built line by line — same craft to him.",
+    lines: [
+      { zh: "（点了点头，把刨好的木料码得更整齐了一点。）", en: "(He nods, and squares the planed timber a little straighter.)" },
+      { zh: "水坝和代码库一样：漏的地方，水自己会告诉你。", en: "Dams are like codebases: the leaks announce themselves." },
+    ],
+  },
 ];
 
 /** farm plot: tilled grid where crops (=tasks) grow */

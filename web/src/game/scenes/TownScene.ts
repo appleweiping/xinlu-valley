@@ -9,6 +9,7 @@ import { currentMode, getData, postData } from "@/shared/api";
 import { loadSave, writeSave, spendStamina, restoreStamina, currentStamina, type DemoCrop, type InvItem } from "@/shared/save";
 import { touchState } from "@/shared/touch";
 import { takePhoto } from "@/shared/photo";
+import { reducedMotion } from "@/shared/motion";
 
 /** a multi-agent signal as the town sees it (bridge /api/town/signals) */
 interface TownSignal {
@@ -47,9 +48,18 @@ const WORKPLACE: Record<string, string> = {
   aris: "research-hall",
   pixelcat: "skill-workshop",
   fable: "memory-library",
+  claudeseek: "skill-workshop",
+  opencode: "code-workshop",
+  gemini: "knowledge-tower",
+  // hermes works nights — he never clocks in anywhere by day
 };
 
 function dutyFor(agentId: string, hour: number): Duty {
+  if (agentId === "hermes") {
+    // the night courier flies while the town sleeps, and sleeps while it works
+    if (hour >= 9 && hour < 18) return { kind: "inn" };
+    return { kind: "anchor" };
+  }
   if (hour >= 21 || hour < 6) return { kind: "inn" };
   if (hour >= 12 && hour < 14) return { kind: "plaza" };
   if ((hour >= 9 && hour < 12) || (hour >= 14 && hour < 18)) {
@@ -901,6 +911,7 @@ export class TownScene extends Phaser.Scene {
   }
 
   private puffSmoke(x: number, y: number): void {
+    if (reducedMotion()) return;
     this.ensureDotTexture();
     const e = this.add.particles(x, y, "snowdot", {
       speedY: { min: -18, max: -9 }, speedX: { min: -4, max: 4 },
@@ -911,6 +922,7 @@ export class TownScene extends Phaser.Scene {
   }
 
   private burstConfetti(x: number, y: number): void {
+    if (reducedMotion()) return;
     this.ensureDotTexture();
     const e = this.add.particles(x, y, "snowdot", {
       speed: { min: 26, max: 80 }, angle: { min: 200, max: 340 },
@@ -943,6 +955,8 @@ export class TownScene extends Phaser.Scene {
     this.fogOverlay = null;
     const cam = this.cameras.main;
     if (w === "rain") {
+      void this.rainWaterCrops(); // crops drink even with visuals off
+      if (reducedMotion()) return;
       this.ensureDotTexture();
       this.rain = this.add.particles(0, 0, "snowdot", {
         x: { min: 0, max: cam.width }, y: -8,
@@ -950,7 +964,6 @@ export class TownScene extends Phaser.Scene {
         scale: { start: 1.1, end: 0.7 }, alpha: { start: 0.5, end: 0.12 },
         tint: 0x9fc8ef, lifespan: 2400, frequency: 9, quantity: 2,
       }).setScrollFactor(0).setDepth(19500);
-      void this.rainWaterCrops();
     } else if (w === "fog") {
       this.fogOverlay = this.add.rectangle(0, 0, cam.width, cam.height, 0xcfd8dd, 0.16)
         .setOrigin(0).setScrollFactor(0).setDepth(19400);
@@ -978,6 +991,10 @@ export class TownScene extends Phaser.Scene {
     aris: ["实验数据有了新眉目。", "看板上又多了一张卡。"],
     pixelcat: ["像素要一颗一颗地点。", "喵——配色灵感来了！"],
     fable: ["这故事值得写进镇志。", "听说矿洞里有新矿石？"],
+    claudeseek: ["新打的扳手，要试试吗？", "锻炉今天烧得正旺。"],
+    gemini: ["这镇子比传闻里还热闹。", "两个声音都说：今天天气不错。"],
+    hermes: ["咕——昨晚送了十二封信。", "夜路我熟，闭着眼都能飞。"],
+    opencode: ["（递来一块刨得很平的木板。）", "坝修好了，水就乖了。"],
   };
 
   /** every few seconds, let one nearby pair stop for a two-line exchange */
@@ -1153,6 +1170,10 @@ export class TownScene extends Phaser.Scene {
     aris: ["更新研究看板一张卡", "记录一次实验眉目"],
     pixelcat: ["画一枚 16px 新图标", "给工坊出一版配色"],
     fable: ["采写一位居民的小传", "把矿洞传说写成两段"],
+    claudeseek: ["给一件旧工具回炉重锻", "写一道新的离线检验"],
+    gemini: ["把一段记忆译成两种说法", "去知识塔顶数一遍馆藏"],
+    hermes: ["送三封迟到的信", "把昨夜的教训归档"],
+    opencode: ["补一根松动的坝木", "把一段脚本刨平整"],
   };
 
   /** dialogue "接单" -> a quest crop lands in the first free farm cell */
@@ -1505,7 +1526,7 @@ export class TownScene extends Phaser.Scene {
     this.pathLayer.setTint(t.path);
     for (const img of this.treeImgs) img.setTint(t.tree);
     if (season === "冬") {
-      if (!this.snow) {
+      if (!this.snow && !reducedMotion()) {
         if (!this.textures.exists("snowdot")) {
           const g = this.make.graphics({ x: 0, y: 0 }, false);
           g.fillStyle(0xffffff, 1);
@@ -1525,7 +1546,7 @@ export class TownScene extends Phaser.Scene {
           frequency: 110,
         }).setScrollFactor(0).setDepth(19999);
       }
-      this.snow.start();
+      this.snow?.start(); // stays null under reduced motion
     } else {
       this.snow?.stop();
     }
@@ -1573,6 +1594,7 @@ export class TownScene extends Phaser.Scene {
   }
 
   private fireworksTick(): void {
+    if (reducedMotion()) return;
     if (!this.festivalToday || this.nightOverlay.fillAlpha < 0.3) return;
     if (this.time.now - this.lastFirework < 3600) return;
     this.lastFirework = this.time.now;

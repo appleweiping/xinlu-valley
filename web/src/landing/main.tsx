@@ -177,7 +177,7 @@ const ROADMAP: { zh: string; en: string; date: string; done: boolean; descZh: st
   { zh: "v11 · 日历与邮局", en: "v11 · Calendar & Mail", date: "2026-06", done: true, descZh: "HUD 一点开 28 日季历；家门口像素信箱收真实 agent 来信与今晨镇报（首封夹邮票心意）；每季第 4 天小节日各带加成；Haiku 每日运势掷签影响鱼线。", descEn: "A 28-day calendar off the HUD clock; a pixel mailbox of real agent letters and a morning gazette; four little festivals with real perks; Haiku's deterministic fortune sways the line." },
   { zh: "v12 · 深矿与矿车", en: "v12 · Deep Mines & Minecart", date: "2026-06", done: true, descZh: "矿洞扩到 6 层；4 层起黑暗降临、矿灯只照脚边一圈；深层矿脉=最久未动的依赖清单（mtime+git 年龄双信号）；矿车一键回地面；矿底宝箱 +15 建设点与两枚成就。", descEn: "Six mine levels; darkness from floor 4 with a lamp-lit circle; deep veins are your oldest dependency manifests (mtime + git age); a minecart ride home; a one-per-save treasure chest at the bottom." },
   { zh: "v13 · 存档与影像", en: "v13 · Saves & Photo", date: "2026-06", done: true, descZh: "3 个存档位无缝切换；存档一键导出/导入（带校验）；P 键木框明信片照相模式；统计册十项生涯总览+建设点称号。", descEn: "Three save slots; one-click save export/import with validation; a wood-framed postcard photo mode on P; a ten-line lifetime stats page with earned titles." },
-  { zh: "v14 · 终章打磨（下一个大版本）", en: "v14 · Grand Polish (next)", date: "排队中", done: false, descZh: "可访问性与减少动效选项；性能与监听泄漏巡检；itch.io 发布包；十连升总结 Release。", descEn: "Accessibility & reduced-motion; perf and listener-leak sweep; an itch.io bundle; the ten-release grand finale." },
+  { zh: "v14 · 终章打磨 + 全盘感知（十连升收官）", en: "v14 · Grand Polish & Whole-Drive Awareness (finale)", date: "2026-06", done: true, descZh: "全盘勘察落地：四位新居民入镇（深寻锻匠鼹/双子鹦鹉/赫尔墨信使鸽/开码河狸），桥的四条管线扩到全 D 盘 14 个仓库；减少动效选项；监听泄漏审计零发现；itch.io 包脚本——十个大版本至此收官。", descEn: "The whole-drive census lands: four new residents (Claudeseek the mole, Gemini the parrot, Hermes the pigeon, Opencode the beaver) and all four bridge pipelines widened to 14 repos across the D drive; reduced motion; a clean listener audit; an itch.io bundle — capping ten major releases." },
 ];
 
 function Landing() {
@@ -216,7 +216,7 @@ function Landing() {
           </button>
         </div>
         <div className="l-marquee">
-          <div className="l-stat"><b>8</b><span>{lang === "zh" ? "agent 居民" : "agent residents"}</span></div>
+          <div className="l-stat"><b>12</b><span>{lang === "zh" ? "agent 居民" : "agent residents"}</span></div>
           <div className="l-stat"><b>10</b><span>{lang === "zh" ? "工作建筑" : "working buildings"}</span></div>
           <div className="l-stat"><b>440+</b><span>{lang === "zh" ? "记忆馆藏" : "memories shelved"}</span></div>
           <div className="l-stat"><b>741</b><span>{lang === "zh" ? "wiki 页面" : "wiki pages"}</span></div>

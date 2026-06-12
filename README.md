@@ -33,7 +33,7 @@ Walk a cozy pixel valley where **work is the world**:
 | 技术债矿洞 The Mines | ore = real TODO/FIXME comments & git hotspots, three levels deep |
 | 河流 The river | fish = recent system logs; an ERROR line is the king fish |
 | 公告板 Notice board | live agentmemory signals — the receiving NPC runs to read them |
-| 8 NPC 居民 | real agents with their own species: Opus(sage) Codex(robot) Sonnet(songbird) Haiku(chick) DeepSeek(whale) ARIS(owl) PixelCat(cat) Fable(fox) |
+| 12 NPC 居民 | real agents with their own species: Opus(sage) Codex(robot) Sonnet(songbird) Haiku(chick) DeepSeek(whale) ARIS(owl) PixelCat(cat) Fable(fox) Claudeseek(mole) Gemini(parrot) Hermes(pigeon) Opencode(beaver) |
 
 ## Features by version
 
@@ -53,6 +53,16 @@ Walk a cozy pixel valley where **work is the world**:
   flowerbeds), stamina, museum donations.
 - **v9 · 打磨与开放** — Fable's onboarding quest chain, settings panel
   (volume/language/zoom), README overhaul, the five-release night finale.
+- **v10 · 博物馆与镇志** — a real museum building rendering donations live,
+  Fable's chronicle of real releases, friendship hearts.
+- **v11 · 日历与邮局** — a 28-day calendar, a mailbox of real agent letters,
+  four little seasonal festivals, Haiku's daily fortune.
+- **v12 · 深矿与矿车** — six mine levels, lamp-lit darkness, sediment veins
+  from your oldest dependency manifests, a minecart, bottom treasure.
+- **v13 · 存档与影像** — three save slots, save export/import, a wood-framed
+  photo mode, lifetime stats with titles.
+- **v14 · 终章打磨** — reduced-motion accessibility, listener-leak sweep,
+  an itch.io bundle script, the ten-release finale.
 
 Two data modes, automatically detected:
 
@@ -128,6 +138,11 @@ run the pipeline to regenerate. This is a non-commercial portfolio project.
 
 | version | name | release |
 | --- | --- | --- |
+| v14 | 终章打磨 Grand Polish | [v14.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v14.0.0) |
+| v13 | 存档与影像 Saves & Photo | [v13.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v13.0.0) |
+| v12 | 深矿与矿车 Deep Mines & Minecart | [v12.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v12.0.0) |
+| v11 | 日历与邮局 Calendar & Mail | [v11.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v11.0.0) |
+| v10 | 博物馆与镇志 Museum & Chronicle | [v10.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v10.0.0) |
 | v9 | 打磨与开放 Polish & Onboarding | [v9.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v9.0.0) |
 | v8 | 玩法纵深 Inventory & Economy | [v8.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v8.0.0) |
 | v7 | 活水加深 Living Integrations | [v7.0.0](https://github.com/appleweiping/newroad-valley/releases/tag/v7.0.0) |
@@ -136,9 +151,10 @@ run the pipeline to regenerate. This is a non-commercial portfolio project.
 | v4.x | 室内与活水 Interiors & Living Data | [v4.1.0](https://github.com/appleweiping/newroad-valley/releases/tag/v4.1.0) |
 | v2 | Godot 绘本时代（已封存） | tag `v2-godot-era` |
 
-v5 → v9 shipped in one autonomous overnight run (2026-06-12), each with a
-full verify → build → deploy → leak-scan → release loop. See
-[ROADMAP.md](ROADMAP.md) for the build log.
+v5 → v9 shipped in one autonomous overnight run, and v10 → v14 in a second
+five-release sprint the same day (2026-06-12) — each version passing a full
+sentinel-verify → review/debug → build → deploy → leak-scan → release loop.
+See [ROADMAP.md](ROADMAP.md) for the build log.
 
 ## Safety rails
 

@@ -197,6 +197,34 @@
     "frameHeight": 48
   },
   {
+    "key": "char-claudeseek",
+    "url": "assets/core/characters/claudeseek.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-gemini",
+    "url": "assets/core/characters/gemini.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-hermes",
+    "url": "assets/core/characters/hermes.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
+    "key": "char-opencode",
+    "url": "assets/core/characters/opencode.png",
+    "type": "spritesheet",
+    "frameWidth": 48,
+    "frameHeight": 48
+  },
+  {
     "key": "bld-town-hall",
     "url": "assets/core/buildings/town-hall.png",
     "type": "image"

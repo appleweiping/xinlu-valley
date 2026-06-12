@@ -76,7 +76,7 @@ export const INTERIORS: InteriorDef[] = [
       { key: F, frame: 14, tx: 1, ty: 7 },   // pink lamp
       { key: F, frame: 31, tx: 11, ty: 7 },  // stool
     ],
-    stations: { pixelcat: { tx: 3, ty: 5 } },
+    stations: { pixelcat: { tx: 3, ty: 5 }, claudeseek: { tx: 9, ty: 5 } },
   },
   {
     id: "town-hall",

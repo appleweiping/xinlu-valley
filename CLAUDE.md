@@ -35,6 +35,12 @@ The v2 Godot era is preserved at git tag `v2-godot-era`.
   through localhost.
 - Memory writes follow `D:\devtools\AGENT-MEMORY-PROTOCOL.md`
   (project: `newroad-valley`, concepts must include `agent:cc`).
+- **Whole-D-drive awareness (user rule, 2026-06-12)**: before EVERY version
+  upgrade, survey the entire D drive — not just `D:\Company`. New agents
+  (e.g. `D:\AGENT_RESOURCE`, `D:\devtools` launchers) become new residents /
+  data sources; new projects (git repos anywhere on D:) feed the Code
+  Workshop / pulse / chronicle / debt pipelines. Reflect discovered changes
+  in the next version's content. `D:\Research` stays names-and-mtimes only.
 
 ## Game data model
 

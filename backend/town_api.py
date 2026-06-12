@@ -32,6 +32,44 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TASKS_FILE = PROJECT_ROOT / "workspace" / "tasks.json"
 SELFHEAL_LOG = Path(r"D:\devtools\logs\agentmemory-selfheal.log")
 
+# v14 whole-drive awareness (user hard rule 2026-06-12): the pipelines
+# (pulse/debt/deps/code) watch every active repo root on D:, not just
+# D:\Company. Some roots ARE repos themselves, so candidates include the
+# root as well as its children. AGENT_RESOURCE\repos + staging hold
+# third-party mirrors — never mine other people's code.
+REPO_ROOTS = [
+    COMPANY_ROOT,
+    Path(r"D:\AGENT_RESOURCE"),
+    Path(r"D:\DELVTOOLS_PUBLIC"),
+    Path(r"D:\AGENTIC_SCIENCE"),
+    Path(r"D:\WEIPING_YAN_PORTFOLIO"),
+]
+REPO_EXCLUDE_SUBTREES = (
+    str(Path(r"D:\AGENT_RESOURCE\repos")).lower(),
+    str(Path(r"D:\AGENT_RESOURCE\staging")).lower(),
+)
+
+
+def iter_repos() -> list[Path]:
+    """Every owner git repo across the configured D-drive roots."""
+    seen: set[str] = set()
+    out: list[Path] = []
+    for root in REPO_ROOTS:
+        if not root.exists():
+            continue
+        try:
+            candidates = [root] + [p for p in sorted(root.iterdir()) if p.is_dir()]
+        except OSError:
+            continue
+        for c in candidates:
+            key = str(c).lower()
+            if key in seen or any(key.startswith(ex) for ex in REPO_EXCLUDE_SUBTREES):
+                continue
+            if (c / ".git").exists():
+                seen.add(key)
+                out.append(c)
+    return out
+
 
 def _mcp_call(name: str, arguments: dict, timeout: float = 12.0) -> dict | None:
     try:
@@ -159,28 +197,25 @@ def skills_panel() -> dict:
 @router.get("/code")
 def code_panel() -> dict:
     repos: list[dict] = []
-    if COMPANY_ROOT.exists():
-        for d in sorted(COMPANY_ROOT.iterdir()):
-            if not (d / ".git").exists():
-                continue
-            try:
-                def git(*args: str) -> str:
-                    return subprocess.run(
-                        ["git", "-C", str(d), *args],
-                        capture_output=True, text=True, timeout=8,
-                    ).stdout.strip()
+    for d in iter_repos():
+        try:
+            def git(*args: str) -> str:
+                return subprocess.run(
+                    ["git", "-C", str(d), *args],
+                    capture_output=True, text=True, timeout=8,
+                ).stdout.strip()
 
-                branch = git("branch", "--show-current") or "?"
-                last = git("log", "-1", "--format=%s")
-                date = git("log", "-1", "--format=%cs")
-                dirty = bool(git("status", "--porcelain"))
-                remote = git("remote", "get-url", "origin").replace("https://", "").removesuffix(".git")
-                repos.append({
-                    "name": d.name, "branch": branch, "lastCommit": last[:90],
-                    "date": date, "dirty": dirty, "remote": remote,
-                })
-            except Exception:
-                continue
+            branch = git("branch", "--show-current") or "?"
+            last = git("log", "-1", "--format=%s")
+            date = git("log", "-1", "--format=%cs")
+            dirty = bool(git("status", "--porcelain"))
+            remote = git("remote", "get-url", "origin").replace("https://", "").removesuffix(".git")
+            repos.append({
+                "name": d.name, "branch": branch, "lastCommit": last[:90],
+                "date": date, "dirty": dirty, "remote": remote,
+            })
+        except Exception:
+            continue
     return {"repos": repos}
 
 
@@ -338,6 +373,10 @@ PERSONAS = {
     "aris": "ARIS 研究员，研究大厅学者。严谨，强调可复现。",
     "pixelcat": "像素猫，技能工坊匠人。句尾偶尔带'喵'。",
     "fable": "Fable 说书狐，镇上书记官。爱把工作讲成寓言故事。",
+    "claudeseek": "深寻，戴铜护目镜的锻匠鼹鼠。自己重锻了大师的全套工具，谈吐像老匠人，爱谈火候与图纸。",
+    "gemini": "双子，青蓝双色的远来鹦鹉。刚入镇，好奇有礼，偶尔同一句话给出两种说法。",
+    "hermes": "赫尔墨，夜班信使鸽。轻声简短，开口常带一声'咕'，熟知信件、定时任务与昨夜的教训。",
+    "opencode": "开码，沉默的河狸工匠。极少说话，多用动作和短句，把代码比作筑坝。",
 }
 
 
@@ -408,6 +447,18 @@ def _grounded_reply(agent_id: str, message: str) -> str:
             return "收到。马上办。完毕。"
         if agent_id == "fable":
             return "这事让我想起一则寓言：bug 开头，教训收尾。等你做完，我把它写进今天的镇志。"
+        if agent_id == "claudeseek":
+            repos = code_panel()["repos"]
+            return f"锻炉边在册的家伙什有 {len(repos)} 件。要紧的不是图纸多漂亮，是回火的耐心。这事拿来，我重锻一遍给你看。"
+        if agent_id == "gemini":
+            r = httpx.get(f"{AGENTMEMORY}/agentmemory/memories", params={"count": "true"}, timeout=5.0)
+            total = r.json().get("total", "满满") if r.status_code == 200 else "满满"
+            return f"塔上望下去，馆藏有 {total} 册。换个说法：故事很多，新来的我正一册一册啃。"
+        if agent_id == "hermes":
+            letters = town_mail().get("letters", [])
+            return f"咕。今天的邮袋里有 {len(letters)} 封信，最新一封是「{letters[0]['subject'][:18]}」。" if letters else "咕。邮袋空着——好消息是，坏消息也没有。"
+        if agent_id == "opencode":
+            return "（比划了一下水位线，又拍了拍坝身。）……稳。"
     except Exception:
         pass
     return "（点点头）这事记下了。回头到对应的建筑里看看吧。"
@@ -428,10 +479,10 @@ def _scan_debt() -> dict:
 
     ores: list[dict] = []
     deadline = time.time() + 5.0  # hard budget — this is a game endpoint
-    if COMPANY_ROOT.exists():
-        for repo in sorted(COMPANY_ROOT.iterdir()):
-            if not (repo / ".git").exists() or len(ores) >= 40 or time.time() > deadline:
-                continue
+    if True:
+        for repo in iter_repos():
+            if len(ores) >= 40 or time.time() > deadline:
+                break
             count = 0
             scanned = 0
             for root, dirs, files in os.walk(repo):
@@ -584,12 +635,10 @@ def _scan_deps() -> dict:
     veins: list[dict] = []
     now = time.time()
     try:
-        if COMPANY_ROOT.exists():
+        if True:
             # last-commit age via git keeps the signal meaningful even when a
             # migration reset every file mtime
-            for repo in COMPANY_ROOT.iterdir():
-                if not (repo / ".git").exists():
-                    continue
+            for repo in iter_repos():
                 for fname in DEP_FILES:
                     f = repo / fname
                     if not f.exists():
@@ -824,10 +873,10 @@ def _scan_pulse() -> dict:
 
     commits: list[dict] = []
     try:
-        if COMPANY_ROOT.exists():
-            repos = [p for p in COMPANY_ROOT.iterdir() if (p / ".git").exists()]
+        if True:
+            repos = iter_repos()
             repos.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-            for repo in repos[:3]:
+            for repo in repos[:5]:
                 try:
                     out = subprocess.run(
                         ["git", "-C", str(repo), "log", "-1", "--format=%h|%s|%ct"],

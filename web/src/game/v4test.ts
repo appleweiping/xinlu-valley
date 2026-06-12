@@ -504,6 +504,40 @@ export async function maybeRunV4Test(): Promise<void> {
   storeHook.getState().setAlmanac(false);
   bus.emit("panel:closed", undefined);
 
+  // --- v14: the census residents moved in -------------------------------------------
+  const NEWCOMERS = ["claudeseek", "gemini", "hermes", "opencode"];
+  const roster = NEWCOMERS.map((id) => ({
+    id,
+    present: t.npcs.some((n) => n.def.id === id),
+    texture: game5.textures.exists(`char-${id}`),
+  }));
+  await report("residents", {
+    count: t.npcs.length,
+    roster,
+    ok: t.npcs.length === 12 && roster.every((r) => r.present && r.texture),
+  }, true);
+
+  // --- v14: the bridge sees repos across the whole D drive --------------------------
+  let repoCount = -1;
+  try {
+    const r = await (await fetch(`${BASE}/api/town/code`)).json() as { repos?: unknown[] };
+    repoCount = r.repos?.length ?? -1;
+  } catch { /* demo mode — informational only */ }
+  await report("multi-root", {
+    repos: repoCount,
+    ok: repoCount === -1 || repoCount >= 10, // company(~7) + 4 new roots
+  });
+
+  // --- v14: reduced motion suppresses decorative particles -------------------------
+  const motion = await import("@/shared/motion");
+  motion.setReducedMotion(true);
+  tw.setWeather("rain");
+  await sleep(500);
+  const rainSuppressed = !(t as unknown as { rain: unknown }).rain;
+  motion.setReducedMotion(false);
+  tw.setWeather("sunny");
+  await report("reduced-motion", { rainSuppressed, ok: rainSuppressed });
+
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";
   try {
