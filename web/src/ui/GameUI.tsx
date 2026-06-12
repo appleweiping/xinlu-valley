@@ -357,6 +357,121 @@ function Almanac() {
   );
 }
 
+interface Letter { id: string; from: string; subject: string; body: string; at: string }
+
+/** v11: the farmhouse mailbox — real agent letters */
+function MailDialog() {
+  const { mailOpen, setMailOpen, lang } = useUI();
+  const [letters, setLetters] = useState<Letter[] | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [, setNonce] = useState(0);
+  useEffect(() => {
+    if (!mailOpen || letters) return;
+    getData<{ letters: Letter[] }>("/api/town/mail", "mail.json")
+      .then((d) => setLetters(d.letters ?? []))
+      .catch(() => setLetters([]));
+  }, [mailOpen, letters]);
+  if (!mailOpen) return null;
+  const read = new Set(loadSave()?.readMail ?? []);
+  const close = () => {
+    setMailOpen(false);
+    setOpenId(null);
+    bus.emit("panel:closed", undefined);
+  };
+  const opened = letters?.find((l) => l.id === openId) ?? null;
+  return (
+    <div className="fade-in" style={{ position: "absolute", inset: 0, background: "rgba(20,14,28,0.45)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "auto" }} onClick={close}>
+      <div className="wood-panel" style={{ width: "min(540px, 94vw)", maxHeight: "78vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+        <div className="wood-title">
+          <span>✉ {lang === "zh" ? "农舍信箱" : "Farmhouse Mailbox"}</span>
+          <button className="wood-btn" onClick={close}>✕</button>
+        </div>
+        <div className="panel-scroll" style={{ padding: 14, overflowY: "auto" }}>
+          {letters === null && <p style={{ opacity: 0.6 }}>{lang === "zh" ? "正在取信……" : "Fetching the post…"}</p>}
+          {letters?.length === 0 && <p style={{ opacity: 0.6 }}>{lang === "zh" ? "信箱空空——明天再来看看。" : "Empty today — check back tomorrow."}</p>}
+          {opened ? (
+            <div>
+              <button className="wood-btn" style={{ fontSize: 11, marginBottom: 10 }} onClick={() => setOpenId(null)}>
+                ← {lang === "zh" ? "返回信堆" : "Back"}
+              </button>
+              <div className="book-card">
+                <h4>{opened.subject}</h4>
+                <p style={{ fontSize: 11, opacity: 0.6, margin: "2px 0 8px" }}>
+                  {lang === "zh" ? "寄自" : "From"} {opened.from} · {opened.at}
+                </p>
+                <p style={{ fontSize: 13, whiteSpace: "pre-wrap", margin: 0 }}>{opened.body}</p>
+              </div>
+            </div>
+          ) : (
+            (letters ?? []).map((l) => (
+              <div key={l.id} className="book-card" style={{ cursor: "pointer", opacity: read.has(l.id) ? 0.65 : 1 }}
+                onClick={() => {
+                  setOpenId(l.id);
+                  if (!read.has(l.id)) {
+                    bus.emit("mail:read", { id: l.id });
+                    setTimeout(() => setNonce((n) => n + 1), 80);
+                  }
+                }}>
+                <h4>{read.has(l.id) ? "📭" : "📬"} {l.subject}</h4>
+                <p style={{ fontSize: 11, opacity: 0.6, margin: "2px 0 0" }}>{l.from} · {l.at}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** v11: the 28-day season calendar */
+function CalendarDialog() {
+  const { calendarOpen, setCalendarOpen, clock, lang } = useUI();
+  if (!calendarOpen) return null;
+  const close = () => {
+    setCalendarOpen(false);
+    bus.emit("panel:closed", undefined);
+  };
+  const today = ((clock.day - 1) % 28) + 1;
+  const SEASONS = ["春", "夏", "秋", "冬"];
+  const SEASON_BG = ["#e3f0d2", "#d2f0e3", "#f0e3c8", "#dde6f0"];
+  const FESTS: Record<number, string> = { 4: "春种节", 11: "夏钓节", 18: "秋收节", 25: "冬雪节" };
+  return (
+    <div className="fade-in" style={{ position: "absolute", inset: 0, background: "rgba(20,14,28,0.45)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "auto" }} onClick={close}>
+      <div className="wood-panel" style={{ width: "min(520px, 94vw)" }} onClick={(e) => e.stopPropagation()}>
+        <div className="wood-title">
+          <span>📅 {lang === "zh" ? `山谷历 · 第 ${clock.day} 天` : `Valley Calendar · Day ${clock.day}`}</span>
+          <button className="wood-btn" onClick={close}>✕</button>
+        </div>
+        <div style={{ padding: 14 }}>
+          {SEASONS.map((s, si) => (
+            <div key={s} style={{ display: "flex", gap: 4, marginBottom: 4, alignItems: "center" }}>
+              <span style={{ width: 22, fontSize: 13, fontWeight: 700 }}>{s}</span>
+              {Array.from({ length: 7 }, (_, di) => {
+                const d = si * 7 + di + 1;
+                const isToday = d === today;
+                const fest = FESTS[d];
+                return (
+                  <div key={d} title={fest ?? ""} style={{
+                    flex: 1, textAlign: "center", padding: "7px 0", borderRadius: 4,
+                    background: SEASON_BG[si], fontSize: 12,
+                    border: isToday ? "3px solid var(--wood-dark)" : "3px solid transparent",
+                    fontWeight: isToday ? 800 : 400,
+                  }}>
+                    {d}{fest ? " 🎏" : ""}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+          <p style={{ fontSize: 11.5, opacity: 0.7, margin: "10px 0 0" }}>
+            {lang === "zh" ? "🎏 每季第 4 天是小节日：春种（省力）· 夏钓（鱼旺）· 秋收（加点）· 冬雪（灯彩）。GitHub 发布日另有丰收节烟花。" : "🎏 Day 4 of each season is a little festival; GitHub release days bring fireworks."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** v9: onboarding quest tracker — Fable's 5-step welcome tour */
 function TutorialBanner() {
   const { lang } = useUI();
@@ -451,7 +566,7 @@ function Toast() {
 }
 
 export function GameUI() {
-  const { openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setFishing, setAlmanac, setAlmanacTab, setStamina } = useUI();
+  const { openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setFishing, setAlmanac, setAlmanacTab, setStamina, setMailOpen, setUnreadMail } = useUI();
 
   useEffect(() => {
     let toastTimer: number | undefined;
@@ -487,6 +602,8 @@ export function GameUI() {
       }),
       bus.on("fishing:start", () => setFishing(true)),
       bus.on("stamina:changed", ({ value }) => setStamina(value)),
+      bus.on("mail:open", () => setMailOpen(true)),
+      bus.on("mail:unread", ({ count }) => setUnreadMail(count)),
       bus.on("almanac:tab", ({ tab }) => {
         setAlmanacTab(tab);
         setAlmanac(true);
@@ -503,7 +620,7 @@ export function GameUI() {
       offs.forEach((off) => off());
       window.clearTimeout(toastTimer);
     };
-  }, [openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setAlmanac, setAlmanacTab, setStamina]);
+  }, [openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setAlmanac, setAlmanacTab, setStamina, setMailOpen, setUnreadMail]);
 
   return (
     <div className="pixel-font" style={{ position: "fixed", inset: 0, pointerEvents: "none" }}>
@@ -514,6 +631,8 @@ export function GameUI() {
       <PlantDialog />
       <FishingBar />
       <Almanac />
+      <MailDialog />
+      <CalendarDialog />
       <TutorialBanner />
       <SettingsDialog />
       <TouchControls />

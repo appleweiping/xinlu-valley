@@ -52,6 +52,10 @@ export interface SaveData {
   hearts: Record<string, number>;
   /** v10: last game-day a talk credited hearts, per resident */
   heartsDay: Record<string, number>;
+  /** v11: letter ids already read */
+  readMail: string[];
+  /** v11: last game-day the first-read stamp gift was granted */
+  mailGiftDay: number;
 }
 
 const KEY = "nrv-save-v1";
@@ -70,6 +74,8 @@ const DEFAULTS = {
   tutorialStep: 1,
   hearts: {} as Record<string, number>,
   heartsDay: {} as Record<string, number>,
+  readMail: [] as string[],
+  mailGiftDay: 0,
 };
 
 export function loadSave(): SaveData | null {

@@ -33,6 +33,9 @@ export type BusEvents = {
   "tutorial:step": { step: number; total: number; textZh: string; textEn: string };
   "tutorial:skip": undefined;
   "settings:zoom": { zoom: number };
+  "mail:open": undefined;
+  "mail:read": { id: string };
+  "mail:unread": { count: number };
 };
 
 type Handler<T> = (payload: T) => void;

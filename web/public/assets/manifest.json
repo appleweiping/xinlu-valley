@@ -356,6 +356,11 @@
     "type": "image"
   },
   {
+    "key": "prop-mailbox",
+    "url": "assets/core/props/mailbox.png",
+    "type": "image"
+  },
+  {
     "key": "prop-shipping-bin",
     "url": "assets/core/props/shipping-bin.png",
     "type": "image"

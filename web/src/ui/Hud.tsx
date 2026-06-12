@@ -5,7 +5,7 @@ import { isTouchDevice } from "@/shared/touch";
 import { useUI } from "./store";
 
 export function Hud() {
-  const { clock, live, lang, setLang, setAlmanac, setAlmanacTab, setSettings, stamina } = useUI();
+  const { clock, live, lang, setLang, setAlmanac, setAlmanacTab, setSettings, setMailOpen, setCalendarOpen, unreadMail, stamina } = useUI();
   const [muted, setMuted] = useState(audio.muted);
   const toggleMute = () => {
     const m = !muted;
@@ -20,9 +20,13 @@ export function Hud() {
         className="wood-panel"
         style={{ position: "absolute", top: 12, right: 12, padding: "8px 14px", pointerEvents: "auto", textAlign: "center" }}
       >
-        <div style={{ fontSize: 14, fontWeight: 700 }}>
+        <div
+          style={{ fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+          title={lang === "zh" ? "打开山谷历" : "Open the calendar"}
+          onClick={() => setCalendarOpen(true)}
+        >
           {clock.weather === "rain" ? "🌧 " : clock.weather === "fog" ? "🌫 " : "☀ "}
-          {lang === "zh" ? `${clock.season} · 第 ${clock.day} 天` : `${clock.season} · Day ${clock.day}`}
+          {lang === "zh" ? `${clock.season} · 第 ${clock.day} 天` : `${clock.season} · Day ${clock.day}`} 📅
         </div>
         <div style={{ fontSize: 20, fontWeight: 800, color: "var(--wood-dark)" }}>
           {hh}:{mm}
@@ -55,6 +59,18 @@ export function Hud() {
           <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }}
             onClick={() => { setAlmanacTab("bag"); setAlmanac(true); }} title="背包">
             🎒
+          </button>
+          <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px", position: "relative" }}
+            onClick={() => setMailOpen(true)} title={lang === "zh" ? "信箱" : "Mailbox"}>
+            ✉
+            {unreadMail > 0 && (
+              <span style={{
+                position: "absolute", top: -6, right: -6, background: "#c95b5b", color: "#fff",
+                borderRadius: "50%", fontSize: 9, minWidth: 14, height: 14, lineHeight: "14px",
+              }}>
+                {unreadMail}
+              </span>
+            )}
           </button>
           <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }}
             onClick={() => setSettings(true)} title={lang === "zh" ? "设置" : "Settings"}>

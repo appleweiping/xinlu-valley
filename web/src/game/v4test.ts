@@ -396,6 +396,42 @@ export async function maybeRunV4Test(): Promise<void> {
   const save10 = JSON.parse(localStorage.getItem("nrv-save-v1") ?? "{}") as { hearts?: Record<string, number> };
   await report("hearts", { sonnet: save10.hearts?.sonnet ?? 0, ok: (save10.hearts?.sonnet ?? 0) >= 3 });
 
+  // --- v11: the mailbox delivers real letters and a stamp gift -------------------
+  let mail: { letters?: { id: string }[] } = {};
+  try { mail = await (await fetch(`${BASE}/api/town/mail`)).json(); } catch { /* bridge down */ }
+  if (!mail.letters) {
+    try { mail = await (await fetch("/demo/mail.json")).json(); } catch { /* none */ }
+  }
+  const firstLetter = mail.letters?.[0];
+  const tMail = t as unknown as { points: number; readLetter(id: string): void };
+  const pMail = tMail.points;
+  if (firstLetter) tMail.readLetter(firstLetter.id);
+  await sleep(400);
+  const save11 = JSON.parse(localStorage.getItem("nrv-save-v1") ?? "{}") as { readMail?: string[] };
+  await report("mail", {
+    letters: mail.letters?.length ?? 0,
+    read: save11.readMail?.length ?? 0,
+    gift: tMail.points - pMail,
+    ok: (mail.letters?.length ?? 0) >= 1 && (save11.readMail?.length ?? 0) >= 1 && tMail.points - pMail === 1,
+  });
+
+  // --- v11: seasonal festivals + fortune are deterministic ------------------------
+  const TS = (t as unknown as { constructor: { seasonalFestivalFor(d: number): string | null; fortuneFor(d: number): { level: string; line: string } } }).constructor;
+  const fests = [4, 11, 18, 25].map((d) => TS.seasonalFestivalFor(d));
+  const fortune = TS.fortuneFor(11);
+  await report("festival-fortune", {
+    fests,
+    fortune,
+    ok: fests.join(",") === "春种节,夏钓节,秋收节,冬雪节" && !!fortune.level && !!fortune.line && TS.seasonalFestivalFor(5) === null,
+  });
+
+  // --- v11: the calendar opens from the HUD clock ---------------------------------
+  const { useUI: storeHook } = await import("@/ui/store");
+  storeHook.getState().setCalendarOpen(true); // same path as the HUD date click
+  await sleep(250);
+  await report("calendar", { open: storeHook.getState().calendarOpen, ok: storeHook.getState().calendarOpen === true });
+  storeHook.getState().setCalendarOpen(false);
+
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";
   try {

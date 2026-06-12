@@ -16,6 +16,9 @@ interface UIState {
   almanacTab: string;
   stamina: number;
   settings: boolean;
+  mailOpen: boolean;
+  calendarOpen: boolean;
+  unreadMail: number;
   clock: { day: number; hour: number; minute: number; season: string; weather?: string };
   setLang(l: Lang): void;
   setLive(v: boolean): void;
@@ -31,6 +34,9 @@ interface UIState {
   setAlmanacTab(t: string): void;
   setStamina(v: number): void;
   setSettings(v: boolean): void;
+  setMailOpen(v: boolean): void;
+  setCalendarOpen(v: boolean): void;
+  setUnreadMail(n: number): void;
 }
 
 export const useUI = create<UIState>((set) => ({
@@ -47,6 +53,9 @@ export const useUI = create<UIState>((set) => ({
   almanacTab: "bag",
   stamina: 100,
   settings: false,
+  mailOpen: false,
+  calendarOpen: false,
+  unreadMail: 0,
   clock: { day: 1, hour: 8, minute: 0, season: "春" },
   setLang: (lang) => set({ lang }),
   setLive: (live) => set({ live }),
@@ -62,4 +71,7 @@ export const useUI = create<UIState>((set) => ({
   setAlmanacTab: (almanacTab) => set({ almanacTab }),
   setStamina: (stamina) => set({ stamina }),
   setSettings: (settings) => set({ settings }),
+  setMailOpen: (mailOpen) => set({ mailOpen }),
+  setCalendarOpen: (calendarOpen) => set({ calendarOpen }),
+  setUnreadMail: (unreadMail) => set({ unreadMail }),
 }));

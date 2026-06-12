@@ -170,6 +170,34 @@ PROPS["ore-node"] = {
     ],
 }
 
+# ---- mailbox (front-yard post) -----------------------------------------------
+PROPS["mailbox"] = {
+    "pal": {
+        "R": _rgba((196, 92, 74)),    # box red
+        "r": _rgba((160, 68, 56)),    # box shade
+        "W": _rgba((240, 230, 210)),  # mail slot card
+        "P": _rgba((118, 80, 48)),    # post
+        "p": _rgba((86, 56, 34)),     # post shade
+        "F": _rgba((232, 196, 96)),   # little flag
+    },
+    "rows": [
+        "...######...",
+        "..#RRRRRR#..",
+        ".#RRRRRRRR#F",
+        ".#RWWWWWWR#F",
+        ".#RRRRRRRR#.",
+        ".#rRRRRRRr#.",
+        "..#rrrrrr#..",
+        "...##PP##...",
+        "....#Pp#....",
+        "....#Pp#....",
+        "....#Pp#....",
+        "....#Pp#....",
+        "...#pPPp#...",
+        "...######...",
+    ],
+}
+
 # ---- shipping bin (farm-edge sales crate) -----------------------------------
 PROPS["shipping-bin"] = {
     "pal": {

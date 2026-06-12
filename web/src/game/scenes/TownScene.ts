@@ -157,6 +157,13 @@ export class TownScene extends Phaser.Scene {
   // ---- v10 state
   private hearts: Record<string, number> = {};
   private heartsDay: Record<string, number> = {};
+  // ---- v11 state
+  private readMail: string[] = [];
+  private mailGiftDay = 0;
+  private mailLetters: { id: string }[] = [];
+  private mailboxTile: [number, number] = [13, 31];
+  private seasonalFest: string | null = null;
+  private seasonalFestDay = 0;
 
   constructor() {
     super("town");
@@ -184,6 +191,8 @@ export class TownScene extends Phaser.Scene {
       this.tutorialStep = save.tutorialStep ?? 1;
       this.hearts = save.hearts ?? {};
       this.heartsDay = save.heartsDay ?? {};
+      this.readMail = save.readMail ?? [];
+      this.mailGiftDay = save.mailGiftDay ?? 0;
     }
 
     this.buildGround();
@@ -192,6 +201,7 @@ export class TownScene extends Phaser.Scene {
     this.buildBuildings();
     this.buildMine();
     this.buildShippingBin();
+    this.buildMailbox();
     for (const d of this.decor) this.spawnDecor(d.id, d.tx, d.ty);
     this.buildPlayer(save?.px, save?.py);
     this.buildNpcs();
@@ -219,6 +229,8 @@ export class TownScene extends Phaser.Scene {
     this.rollWeather();
     // v9: surface the onboarding quest once the UI has mounted
     this.time.delayedCall(1600, () => this.emitTutorial());
+    // v11: morning gazette (after the toast channel is up)
+    this.time.delayedCall(2400, () => this.announceMorning());
 
     // audio loads in the background AFTER the world is playable — a stalled
     // or missing sound file must never block entering the town
@@ -484,6 +496,7 @@ export class TownScene extends Phaser.Scene {
       restoreStamina(100);
     }
     if (this.day !== this.weatherDay) this.rollWeather(); // new morning, new sky
+    if (this.day !== this.seasonalFestDay) this.announceMorning(); // gazette + festivals
     const hour = Math.floor(this.clockMin / 60);
     const minute = Math.floor(this.clockMin % 60);
     const season = ["春", "夏", "秋", "冬"][Math.floor(((this.day - 1) % 28) / 7)];
@@ -614,6 +627,75 @@ export class TownScene extends Phaser.Scene {
       bus.emit("tutorial:step", { step: 99, total: 5, textZh: "", textEn: "" });
       this.autosave();
     });
+    bus.on("mail:read", ({ id }) => this.readLetter(id));
+  }
+
+  // ---------------------------------------------------------------- v11 mail
+  private buildMailbox(): void {
+    const [tx, ty] = this.mailboxTile;
+    this.add.image(tx * TILE + 8, (ty + 1) * TILE, "prop-mailbox")
+      .setOrigin(0.5, 1).setDepth((ty + 1) * TILE);
+    this.collide[ty][tx] = true;
+    this.time.addEvent({ delay: 300000, loop: true, callback: () => void this.pollMail() });
+    void this.pollMail();
+  }
+
+  private async pollMail(): Promise<void> {
+    try {
+      const d = await getData<{ letters: { id: string }[] }>("/api/town/mail", "mail.json");
+      this.mailLetters = d.letters ?? [];
+      const unread = this.mailLetters.filter((l) => !this.readMail.includes(l.id)).length;
+      bus.emit("mail:unread", { count: unread });
+    } catch {
+      /* no post today */
+    }
+  }
+
+  /** mark a letter read; the day's first letter carries a little stamp gift */
+  readLetter(id: string): void {
+    if (this.readMail.includes(id)) return;
+    this.readMail.push(id);
+    if (this.mailGiftDay !== this.day) {
+      this.mailGiftDay = this.day;
+      this.points += 1;
+      bus.emit("toast", { text: "✉ 信封里夹着一枚邮票心意（建设点 +1）" });
+    }
+    const unread = this.mailLetters.filter((l) => !this.readMail.includes(l.id)).length;
+    bus.emit("mail:unread", { count: unread });
+    this.autosave();
+  }
+
+  // ----------------------------------------------------- v11 seasonal + luck
+  /** day 4 of each 7-day season is a little festival */
+  static seasonalFestivalFor(day: number): string | null {
+    const dayInYear = ((day - 1) % 28) + 1;
+    if (dayInYear % 7 !== 4) return null;
+    return ["春种节", "夏钓节", "秋收节", "冬雪节"][Math.floor((dayInYear - 1) / 7)];
+  }
+
+  /** deterministic daily fortune from Haiku — sways the fishing line */
+  static fortuneFor(day: number): { level: string; line: string } {
+    const r = Math.abs(Math.sin(day * 91.7) * 1747.3) % 1;
+    const level = r < 0.2 ? "大吉" : r < 0.6 ? "吉" : "平";
+    const LINES: Record<string, string[]> = {
+      大吉: ["风向正好，鱼群在等你。", "今天敲下的每一镐都会发光。"],
+      吉: ["宜散步，宜浇水，宜和朋友打招呼。", "云走得慢，活儿干得顺。"],
+      平: ["平平稳稳，也是好日子。", "适合整理背包和晒太阳。"],
+    };
+    const pool = LINES[level];
+    return { level, line: pool[day % pool.length] };
+  }
+
+  private announceMorning(): void {
+    this.seasonalFest = TownScene.seasonalFestivalFor(this.day);
+    this.seasonalFestDay = this.day;
+    const f = TownScene.fortuneFor(this.day);
+    if (this.seasonalFest) {
+      this.decorateFestival(this.seasonalFest);
+      bus.emit("toast", { text: `🎏 今天是${this.seasonalFest}！${f.level}·${f.line}` });
+    } else {
+      bus.emit("toast", { text: `🍃 Haiku 晨报：${f.level}·${f.line}` });
+    }
   }
 
   // -------------------------------------------------------------- v10 hearts
@@ -1227,7 +1309,8 @@ export class TownScene extends Phaser.Scene {
 
   private async waterCrop(crop: Crop, silent = false): Promise<void> {
     if (crop.progress >= 4) return;
-    if (!silent && !spendStamina(2)) return; // rain waters for free
+    const cost = this.seasonalFest === "春种节" ? 1 : 2; // festival discount
+    if (!silent && !spendStamina(cost)) return; // rain waters for free
     crop.progress += 1;
     if (currentMode() === "live" && crop.taskId) {
       void postData("/api/town/farm/water", { id: crop.taskId });
@@ -1263,6 +1346,10 @@ export class TownScene extends Phaser.Scene {
     this.inventory.push({ kind: "crop", name: crop.title, variety: crop.variety });
     const questOwner = /^([a-z]+) 委托：/.exec(crop.title)?.[1];
     if (questOwner) this.bumpHearts(questOwner, "harvest");
+    if (this.seasonalFest === "秋收节") {
+      this.points += 1;
+      bus.emit("toast", { text: "🍂 秋收节加成：建设点 +1" });
+    }
     audio.harvest();
     bus.emit("toast", { text: `收获入包：${crop.title} ✅（累计 ${this.harvested}）` });
     this.autosave();
@@ -1292,6 +1379,8 @@ export class TownScene extends Phaser.Scene {
       tutorialStep: this.tutorialStep,
       hearts: this.hearts,
       heartsDay: this.heartsDay,
+      readMail: this.readMail,
+      mailGiftDay: this.mailGiftDay,
     });
   }
 
@@ -1350,8 +1439,11 @@ export class TownScene extends Phaser.Scene {
       return;
     }
     if (!spendStamina(4)) return;
-    // perfect catches bias toward rare (ERROR-grade) fish
-    const pool = this.fishPool.filter((f) => (quality >= 2 ? f.rarity >= 2 : f.rarity <= 2));
+    // perfect catches bias toward rare (ERROR-grade) fish;
+    // the summer fishing festival and a 大吉 fortune lend a hand too
+    const lucky = this.seasonalFest === "夏钓节" || TownScene.fortuneFor(this.day).level === "大吉";
+    const effQ = lucky ? Math.min(2, quality + 1) : quality;
+    const pool = this.fishPool.filter((f) => (effQ >= 2 ? f.rarity >= 2 : f.rarity <= 2));
     const pick = (pool.length ? pool : this.fishPool)[Math.floor(Math.random() * (pool.length || this.fishPool.length))];
     this.fishCaught.push(`[${pick.level}] ${pick.text}`);
     this.inventory.push({ kind: "fish", name: `[${pick.level}] ${pick.text}`.slice(0, 60) });
@@ -1607,6 +1699,14 @@ export class TownScene extends Phaser.Scene {
         this.uiLock = true;
         audio.click();
         bus.emit("almanac:tab", { tab: "ship" });
+        return;
+      }
+      // 2.55) farmhouse mailbox
+      const [mtx, mty] = this.mailboxTile;
+      if (Phaser.Math.Distance.Between(this.player.x, this.player.y, mtx * TILE + 8, mty * TILE + 8) < TILE * 1.8) {
+        this.uiLock = true;
+        audio.page();
+        bus.emit("mail:open", undefined);
         return;
       }
       // 2.6) plaza notice board -> the town chronicle

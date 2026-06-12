@@ -571,6 +571,78 @@ def festival() -> dict:
     return {"latest": None, "today": False}
 
 
+_MAIL_CACHE: dict = {"at": 0.0, "data": None, "busy": False}
+
+
+def _compose_mail() -> dict:
+    letters: list[dict] = []
+    # signals -> letters
+    try:
+        r = httpx.get(
+            f"{AGENTMEMORY}/agentmemory/signals",
+            params={"agentId": "all", "limit": "6"}, timeout=5.0,
+        )
+        if r.status_code == 200:
+            for s in r.json().get("signals", []):
+                frm = str(s.get("from", "")).replace("agent:", "") or "镇公所"
+                content = str(s.get("content", ""))
+                letters.append({
+                    "id": f"sig-{s.get('id', '')}",
+                    "from": frm,
+                    "subject": content[:28] + ("…" if len(content) > 28 else ""),
+                    "body": content[:400],
+                    "at": str(s.get("createdAt", ""))[:10],
+                })
+    except Exception:
+        pass
+    # morning gazette from the pulse
+    try:
+        pulse = town_pulse()
+        mc = pulse.get("memoryCount", -1)
+        commits = pulse.get("commits", [])
+        lines = []
+        if isinstance(mc, int) and mc >= 0:
+            lines.append(f"记忆图书馆现藏 {mc} 册。")
+        for c in commits[:3]:
+            lines.append(f"{c['repo']} 最新收成：{c['msg']}")
+        if lines:
+            letters.append({
+                "id": f"gazette-{datetime.now().strftime('%Y%m%d')}",
+                "from": "haiku",
+                "subject": "今晨镇报",
+                "body": "\n".join(lines),
+                "at": datetime.now().strftime("%Y-%m-%d"),
+            })
+    except Exception:
+        pass
+    return {"letters": letters[:10]}
+
+
+def _refresh_mail() -> None:
+    try:
+        _MAIL_CACHE.update(at=time.time(), data=_compose_mail())
+    finally:
+        _MAIL_CACHE["busy"] = False
+
+
+@router.get("/mail")
+def town_mail() -> dict:
+    """The farmhouse mailbox: agent letters composed from real activity —
+    recent signals become letters, the morning pulse becomes the gazette.
+    Stale-while-revalidate (120s) — composing costs seconds when cold."""
+    import threading
+
+    now = time.time()
+    if _MAIL_CACHE["data"] is not None:
+        if now - _MAIL_CACHE["at"] > 120 and not _MAIL_CACHE["busy"]:
+            _MAIL_CACHE["busy"] = True
+            threading.Thread(target=_refresh_mail, daemon=True).start()
+        return _MAIL_CACHE["data"]
+    data = _compose_mail()
+    _MAIL_CACHE.update(at=now, data=data)
+    return data
+
+
 _CHRONICLE_CACHE: dict = {"at": 0.0, "data": None}
 
 
@@ -658,11 +730,10 @@ def town_signals(limit: int = 8) -> dict:
     return {"signals": out}
 
 
-@router.get("/pulse")
-def town_pulse() -> dict:
-    """The town's heartbeat: total memory count + newest commit per repo.
-    One endpoint so the game runs a single poller; cheap on purpose
-    (count query + `git log -1` on the three most recent repos)."""
+_PULSE_CACHE: dict = {"at": 0.0, "data": None, "busy": False}
+
+
+def _scan_pulse() -> dict:
     memory_count = -1
     try:
         r = httpx.get(f"{AGENTMEMORY}/agentmemory/memories", params={"count": "true"}, timeout=4.0)
@@ -696,6 +767,31 @@ def town_pulse() -> dict:
     except Exception:
         pass
     return {"memoryCount": memory_count, "commits": commits}
+
+
+def _refresh_pulse() -> None:
+    try:
+        _PULSE_CACHE.update(at=time.time(), data=_scan_pulse())
+    finally:
+        _PULSE_CACHE["busy"] = False
+
+
+@router.get("/pulse")
+def town_pulse() -> dict:
+    """The town's heartbeat: total memory count + newest commit per repo.
+    Stale-while-revalidate (45s TTL) — the scan costs seconds under load
+    and would otherwise block the single-threaded bridge."""
+    import threading
+
+    now = time.time()
+    if _PULSE_CACHE["data"] is not None:
+        if now - _PULSE_CACHE["at"] > 45 and not _PULSE_CACHE["busy"]:
+            _PULSE_CACHE["busy"] = True
+            threading.Thread(target=_refresh_pulse, daemon=True).start()
+        return _PULSE_CACHE["data"]
+    data = _scan_pulse()
+    _PULSE_CACHE.update(at=now, data=data)
+    return data
 
 
 # ----------------------------------------------------------------- e2e smoke
