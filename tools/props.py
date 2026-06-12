@@ -170,6 +170,54 @@ PROPS["ore-node"] = {
     ],
 }
 
+# ---- minecart (ride back to daylight) -----------------------------------------
+PROPS["minecart"] = {
+    "pal": {
+        "S": _rgba((120, 112, 126)),  # steel body
+        "s": _rgba((92, 84, 100)),    # steel shade
+        "K": _rgba((52, 46, 62)),     # cavity
+        "W": _rgba((70, 62, 80)),     # wheel
+        "R": _rgba((146, 102, 64)),   # rail wood
+    },
+    "rows": [
+        ".##########.",
+        "#SSSSSSSSSS#",
+        "#SKKKKKKKKs#",
+        "#SKKKKKKKKs#",
+        "#SsKKKKKKss#",
+        "#Ssssssssss#",
+        ".####WW####.",
+        ".#W##..##W#.",
+        ".###....###.",
+        "#RRRRRRRRRR#",
+        ".##########.",
+    ],
+}
+
+# ---- treasure chest (level-6 prize) --------------------------------------------
+PROPS["chest"] = {
+    "pal": {
+        "W": _rgba((146, 102, 64)),   # wood light
+        "w": _rgba((118, 80, 48)),    # wood mid
+        "d": _rgba((86, 56, 34)),     # wood dark
+        "G": _rgba((232, 196, 96)),   # gold trim
+        "g": _rgba((196, 156, 64)),   # gold shade
+    },
+    "rows": [
+        "..##########..",
+        ".#WWWWWWWWWW#.",
+        "#WwwwwwwwwwwW#",
+        "#WwGGGGGGGGwW#",
+        "#wwwwGGwwwwww#",
+        "#wWWWWggWWWWw#",
+        "#wWwwwGGwwwWw#",
+        "#wWwwwggwwwWw#",
+        "#dWWWWWWWWWWd#",
+        "#dGddddddddGd#",
+        ".############.",
+    ],
+}
+
 # ---- mailbox (front-yard post) -----------------------------------------------
 PROPS["mailbox"] = {
     "pal": {

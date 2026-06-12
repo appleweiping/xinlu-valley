@@ -36,6 +36,8 @@ export type BusEvents = {
   "mail:open": undefined;
   "mail:read": { id: string };
   "mail:unread": { count: number };
+  "mine:depth": { level: number };
+  "treasure:claimed": undefined;
 };
 
 type Handler<T> = (payload: T) => void;

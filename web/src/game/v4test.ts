@@ -432,6 +432,35 @@ export async function maybeRunV4Test(): Promise<void> {
   await report("calendar", { open: storeHook.getState().calendarOpen, ok: storeHook.getState().calendarOpen === true });
   storeHook.getState().setCalendarOpen(false);
 
+  // --- v12: deep mine — sediment veins, darkness, minecart, treasure -------------
+  (t as unknown as { enterMine(): void }).enterMine();
+  await sleep(2600);
+  interface DeepMine {
+    level: number; nodes: unknown[]; darkness: unknown;
+    cartTile: unknown; chestTile: unknown;
+    openChest(): void; leave(): void;
+    scene: { restart(d: object): void; isActive(): boolean };
+  }
+  (game5.scene.getScene("mine") as unknown as DeepMine).scene.restart({ level: 6, returnTx: 5, returnTy: 28 });
+  await sleep(3200);
+  const deep = game5.scene.getScene("mine") as unknown as DeepMine;
+  const pts12 = (t as unknown as { points: number }).points;
+  await report("mine-deep", {
+    level: deep.level,
+    veins: deep.nodes.length,
+    dark: !!deep.darkness,
+    cart: !!deep.cartTile,
+    chest: !!deep.chestTile,
+    ok: deep.level === 6 && deep.nodes.length > 0 && !!deep.darkness && !!deep.cartTile && !!deep.chestTile,
+  }, true);
+  deep.openChest();
+  await sleep(900);
+  const pts12b = (t as unknown as { points: number }).points;
+  await report("treasure", { gained: pts12b - pts12, ok: pts12b - pts12 === 15 }, true);
+  deep.leave(); // the cart E-path calls this same exit
+  await sleep(2400);
+  await report("minecart-exit", { townActive: t.scene.isActive() });
+
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";
   try {

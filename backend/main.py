@@ -1100,7 +1100,7 @@ async def check_agentmemory() -> bool:
         async with httpx.AsyncClient(timeout=3.0) as client:
             r = await client.get(f"{AGENTMEMORY_URL}/agentmemory/health")
             return r.status_code == 200
-    except:
+    except Exception:
         return False
 
 
@@ -1171,7 +1171,7 @@ async def get_agent_real_context(agent_id: str) -> str:
             return "Processing batch work. Currently idle, waiting for bulk tasks."
         elif agent_id == "aris":
             return "Monitoring active research projects: PonyRec, ProteinShift, CSATG-EDA, TGL-Rec, TRUCE-Rec."
-    except:
+    except Exception:
         pass
     return "Going about daily routine in the town."
 
@@ -1184,7 +1184,7 @@ def read_skills_summary() -> dict:
         categories = sum(1 for l in lines if l.startswith("## "))
         skills = sum(1 for l in lines if l.startswith("### "))
         return {"count": skills, "categories": categories}
-    except:
+    except Exception:
         return {"count": 0, "categories": 0}
 
 
@@ -1195,7 +1195,7 @@ def read_memory_summary() -> dict:
             category: len(list((SHARED_MEMORY_DIR / category).glob("*.md")))
             for category in MEMORY_CATEGORIES
         }
-    except:
+    except Exception:
         return {category: 0 for category in MEMORY_CATEGORIES}
 
 
@@ -14275,7 +14275,7 @@ async def building_skill_workshop():
             elif line.startswith("### "):
                 skill_name = line[4:].strip()
                 skills_data.append({"name": skill_name, "category": current_category})
-    except:
+    except Exception:
         pass
     summary = read_skills_summary()
     return {"name": "Skill Workshop", "total_skills": summary["count"], "categories": summary["categories"], "skills": skills_data[:30]}
@@ -14334,7 +14334,7 @@ async def building_devtools_lab():
         cmd_files = list(DEVTOOLS_DIR.glob("*.cmd"))
         for f in cmd_files:
             tools.append({"name": f.stem, "path": str(f)})
-    except:
+    except Exception:
         pass
     return {"name": "Devtools Lab", "tools": tools, "count": len(tools)}
 
@@ -15191,7 +15191,7 @@ async def building_town_hall():
         for f in sorted(dec_dir.glob("*.md"), key=lambda x: x.stat().st_mtime, reverse=True)[:5]:
             first_line = f.read_text(encoding="utf-8").split("\n")[0]
             decisions.append({"name": f.stem, "title": first_line.strip("# -")})
-    except:
+    except Exception:
         pass
     atlas = town_capability_atlas()
     workflow_routes = town_workflow_routes()
@@ -15762,7 +15762,7 @@ async def get_tasks():
                 data["local_tasks"] = local_tasks[:30]
                 data["local_task_count"] = len(local_tasks)
                 return data
-    except:
+    except Exception:
         pass
     return {"tasks": local_tasks[:30], "local_task_count": len(local_tasks), "source": "project-local-ledger"}
 

@@ -164,6 +164,9 @@ export class TownScene extends Phaser.Scene {
   private mailboxTile: [number, number] = [13, 31];
   private seasonalFest: string | null = null;
   private seasonalFestDay = 0;
+  // ---- v12 state
+  private deepestLevel = 1;
+  private treasureClaimed = false;
 
   constructor() {
     super("town");
@@ -193,6 +196,8 @@ export class TownScene extends Phaser.Scene {
       this.heartsDay = save.heartsDay ?? {};
       this.readMail = save.readMail ?? [];
       this.mailGiftDay = save.mailGiftDay ?? 0;
+      this.deepestLevel = save.deepestLevel ?? 1;
+      this.treasureClaimed = save.treasureClaimed ?? false;
     }
 
     this.buildGround();
@@ -588,8 +593,16 @@ export class TownScene extends Phaser.Scene {
       this.ores.push(`[${kind}] ${repo}: ${title}`);
       this.inventory.push({ kind: "ore", name: `[${kind}] ${title}`.slice(0, 60) });
       this.tutorialHook("ore");
-      this.points += kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1;
-      bus.emit("toast", { text: `⛏ 采得债务矿石：${title.slice(0, 36)}（建设点 +${kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1}）` });
+      // sediment veins (vein1..3) pay rarity×2; classic debt pays its tier
+      const gained = kind.startsWith("vein")
+        ? (Number(kind.slice(4)) || 1) * 2
+        : kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1;
+      this.points += gained;
+      bus.emit("toast", {
+        text: kind.startsWith("vein")
+          ? `⛏ 挖出沉积矿脉：${title.slice(0, 36)}（建设点 +${gained}）`
+          : `⛏ 采得债务矿石：${title.slice(0, 36)}（建设点 +${gained}）`,
+      });
       this.checkAchievements();
       this.autosave();
     });
@@ -628,6 +641,22 @@ export class TownScene extends Phaser.Scene {
       this.autosave();
     });
     bus.on("mail:read", ({ id }) => this.readLetter(id));
+    bus.on("mine:depth", ({ level }) => {
+      if (level > this.deepestLevel) {
+        this.deepestLevel = level;
+        if (level === 3) bus.emit("toast", { text: "🛤 矿洞三层起停着一辆矿车——回地面再不用爬了" });
+        if (level === 6) this.grantAch("depth6", "矿底寻宝人（抵达第 6 层）");
+        this.autosave();
+      }
+    });
+    bus.on("treasure:claimed", () => {
+      if (this.treasureClaimed) return;
+      this.treasureClaimed = true;
+      this.points += 15;
+      bus.emit("toast", { text: "🎁 矿底宝箱：建设点 +15！这是山谷给深掘者的礼物" });
+      this.grantAch("treasure1", "开启矿底宝箱");
+      this.autosave();
+    });
   }
 
   // ---------------------------------------------------------------- v11 mail
@@ -1381,6 +1410,8 @@ export class TownScene extends Phaser.Scene {
       heartsDay: this.heartsDay,
       readMail: this.readMail,
       mailGiftDay: this.mailGiftDay,
+      deepestLevel: this.deepestLevel,
+      treasureClaimed: this.treasureClaimed,
     });
   }
 

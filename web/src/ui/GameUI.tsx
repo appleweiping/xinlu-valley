@@ -198,6 +198,8 @@ function Almanac() {
     fish1: "第一条日志鱼", fish10: "日志垂钓宗师（鱼×10）",
     week1: "在山谷住满一周", season1: "四季轮转之证", festival1: "赶上了丰收节",
     museum8: "镇立博物馆开馆（馆藏×8）",
+    heart5: "镇上有了好朋友（好感 ≥5）", tutorial1: "新镇长上任（完成引导）",
+    depth6: "矿底寻宝人（抵达第 6 层）", treasure1: "开启矿底宝箱",
   };
   const KIND_ICON: Record<string, string> = { crop: "🌾", ore: "⛏", fish: "🎣" };
   const SHOP_ITEMS = [

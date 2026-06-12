@@ -56,6 +56,10 @@ export interface SaveData {
   readMail: string[];
   /** v11: last game-day the first-read stamp gift was granted */
   mailGiftDay: number;
+  /** v12: deepest mine level reached (unlocks the minecart) */
+  deepestLevel: number;
+  /** v12: the level-6 chest is a one-time prize */
+  treasureClaimed: boolean;
 }
 
 const KEY = "nrv-save-v1";
@@ -76,6 +80,8 @@ const DEFAULTS = {
   heartsDay: {} as Record<string, number>,
   readMail: [] as string[],
   mailGiftDay: 0,
+  deepestLevel: 1,
+  treasureClaimed: false,
 };
 
 export function loadSave(): SaveData | null {

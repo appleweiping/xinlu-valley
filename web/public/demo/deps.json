@@ -1,0 +1,9 @@
+{
+  "veins": [
+    { "id": "demo-app-package-lock.json", "repo": "demo-app", "file": "package-lock.json", "ageDays": 210, "rarity": 3 },
+    { "id": "demo-town-requirements.txt", "repo": "demo-town", "file": "requirements.txt", "ageDays": 145, "rarity": 2 },
+    { "id": "demo-docs-package.json", "repo": "demo-docs", "file": "package.json", "ageDays": 96, "rarity": 2 },
+    { "id": "demo-cli-pyproject.toml", "repo": "demo-cli", "file": "pyproject.toml", "ageDays": 64, "rarity": 1 },
+    { "id": "demo-site-package.json", "repo": "demo-site", "file": "package.json", "ageDays": 38, "rarity": 1 }
+  ]
+}

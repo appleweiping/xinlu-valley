@@ -356,6 +356,16 @@
     "type": "image"
   },
   {
+    "key": "prop-minecart",
+    "url": "assets/core/props/minecart.png",
+    "type": "image"
+  },
+  {
+    "key": "prop-chest",
+    "url": "assets/core/props/chest.png",
+    "type": "image"
+  },
+  {
     "key": "prop-mailbox",
     "url": "assets/core/props/mailbox.png",
     "type": "image"

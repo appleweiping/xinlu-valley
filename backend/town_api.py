@@ -571,6 +571,85 @@ def festival() -> dict:
     return {"latest": None, "today": False}
 
 
+_DEPS_CACHE: dict = {"at": 0.0, "data": None, "busy": False}
+
+DEP_FILES = ("package-lock.json", "package.json", "requirements.txt", "pyproject.toml", "Pipfile.lock")
+
+
+def _scan_deps() -> dict:
+    """Sediment veins: the oldest-untouched dependency manifests around.
+    Pure mtime archaeology — offline, fast, honest. Age is graded relative
+    to the repo set (a freshly-migrated tree still yields its oldest few),
+    with absolute thresholds taking over once real sediment accumulates."""
+    veins: list[dict] = []
+    now = time.time()
+    try:
+        if COMPANY_ROOT.exists():
+            # last-commit age via git keeps the signal meaningful even when a
+            # migration reset every file mtime
+            for repo in COMPANY_ROOT.iterdir():
+                if not (repo / ".git").exists():
+                    continue
+                for fname in DEP_FILES:
+                    f = repo / fname
+                    if not f.exists():
+                        continue
+                    age_days = int((now - f.stat().st_mtime) / 86400)
+                    try:
+                        out = subprocess.run(
+                            ["git", "-C", str(repo), "log", "-1", "--format=%ct", "--", fname],
+                            capture_output=True, text=True, timeout=3,
+                        ).stdout.strip()
+                        if out.isdigit():
+                            age_days = max(age_days, int((now - int(out)) / 86400))
+                    except Exception:
+                        pass
+                    veins.append({
+                        "id": f"{repo.name}-{fname}",
+                        "repo": repo.name,
+                        "file": fname,
+                        "ageDays": age_days,
+                        "rarity": 1,
+                    })
+    except Exception:
+        pass
+    veins.sort(key=lambda v: -v["ageDays"])
+    veins = veins[:12]
+    # rarity: absolute when old enough, else relative (oldest third = rare)
+    for i, v in enumerate(veins):
+        if v["ageDays"] > 180:
+            v["rarity"] = 3
+        elif v["ageDays"] > 90:
+            v["rarity"] = 2
+        else:
+            v["rarity"] = 3 if i < max(1, len(veins) // 4) else 2 if i < len(veins) // 2 else 1
+    return {"veins": veins}
+
+
+def _refresh_deps() -> None:
+    try:
+        _DEPS_CACHE.update(at=time.time(), data=_scan_deps())
+    finally:
+        _DEPS_CACHE["busy"] = False
+
+
+@router.get("/deps")
+def town_deps() -> dict:
+    """Deep-mine veins (levels 4-6): long-untouched dependency manifests.
+    Stale-while-revalidate, 10 min."""
+    import threading
+
+    now = time.time()
+    if _DEPS_CACHE["data"] is not None:
+        if now - _DEPS_CACHE["at"] > 600 and not _DEPS_CACHE["busy"]:
+            _DEPS_CACHE["busy"] = True
+            threading.Thread(target=_refresh_deps, daemon=True).start()
+        return _DEPS_CACHE["data"]
+    data = _scan_deps()
+    _DEPS_CACHE.update(at=now, data=data)
+    return data
+
+
 _MAIL_CACHE: dict = {"at": 0.0, "data": None, "busy": False}
 
 
