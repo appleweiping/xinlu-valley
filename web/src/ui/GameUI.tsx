@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { bus } from "@/shared/bus";
 import { BUILDINGS } from "@/data/town";
 import { audio } from "@/game/audio";
-import { loadSave } from "@/shared/save";
+import { loadSave, activeSlot, setActiveSlot, slotSummary, exportSave, importSave } from "@/shared/save";
 import { getData } from "@/shared/api";
 import { SPECTATE } from "@/shared/flags";
 import { useUI } from "./store";
@@ -222,7 +222,7 @@ function Almanac() {
           <button className="wood-btn" onClick={close}>✕</button>
         </div>
         <div style={{ display: "flex", gap: 5, padding: "10px 14px 0", flexWrap: "wrap" }}>
-          {([["bag", "🎒 背包"], ["ship", "📦 出货"], ["shop", "🛒 商店"], ["museum", "🏛 博物馆"], ["chronicle", "📜 镇志"], ["ach", "🏆 成就"], ["ore", "⛏ 矿石"], ["fish", "🎣 鱼"]] as const).map(([k, label]) => (
+          {([["bag", "🎒 背包"], ["ship", "📦 出货"], ["shop", "🛒 商店"], ["museum", "🏛 博物馆"], ["chronicle", "📜 镇志"], ["stats", "📊 统计"], ["ach", "🏆 成就"], ["ore", "⛏ 矿石"], ["fish", "🎣 鱼"]] as const).map(([k, label]) => (
             <button key={k} className="wood-btn" style={{ fontSize: 11.5, opacity: tab === k ? 1 : 0.6 }} onClick={() => setTab(k)}>
               {label}
             </button>
@@ -328,6 +328,37 @@ function Almanac() {
               ))}
             </div>
           )}
+          {tab === "stats" && (() => {
+            const heartsSum = Object.values(save?.hearts ?? {}).reduce((a, b) => a + b, 0);
+            const achCount = Object.keys(save?.ach ?? {}).length;
+            const museumCount = (save?.museum?.ores ?? []).length + (save?.museum?.fish ?? []).length;
+            const pts = save?.points ?? 0;
+            const title = pts >= 100 ? "镇之柱石" : pts >= 50 ? "山谷之友" : pts >= 20 ? "勤恳镇民" : "新镇民";
+            const rows: [string, string | number][] = [
+              [lang === "zh" ? "在谷天数" : "Days in the valley", save?.day ?? 1],
+              [lang === "zh" ? "累计收获" : "Harvests", save?.harvested ?? 0],
+              [lang === "zh" ? "矿石图鉴" : "Ores collected", (save?.ores ?? []).length],
+              [lang === "zh" ? "鱼图鉴" : "Fish caught", (save?.fish ?? []).length],
+              [lang === "zh" ? "最深矿层" : "Deepest mine level", save?.deepestLevel ?? 1],
+              [lang === "zh" ? "博物馆馆藏" : "Museum pieces", museumCount],
+              [lang === "zh" ? "好感总和" : "Total hearts", heartsSum],
+              [lang === "zh" ? "已读来信" : "Letters read", (save?.readMail ?? []).length],
+              [lang === "zh" ? "成就" : "Achievements", `${achCount}/${Object.keys(ACH_NAMES).length}`],
+              [lang === "zh" ? "建设点" : "Build points", pts],
+            ];
+            return (
+              <div>
+                <div className="book-card" style={{ textAlign: "center" }}>
+                  <h4 style={{ fontSize: 15 }}>🏅 {lang === "zh" ? `当前称号：${title}` : `Title: ${title}`}</h4>
+                </div>
+                {rows.map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "5px 8px", fontSize: 13, borderBottom: "2px dotted rgba(110,80,48,0.25)" }}>
+                    <span>{k}</span><b>{v}</b>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
           {tab === "ach" && (
             <div>
               {Object.entries(ACH_NAMES).map(([id, name]) => (
@@ -543,6 +574,61 @@ function SettingsDialog() {
             🧭 {lang === "zh" ? "新手引导" : "Onboarding"}
             <button className="wood-btn" style={{ fontSize: 12 }} onClick={() => { bus.emit("tutorial:skip", undefined); close(); }}>
               {lang === "zh" ? "跳过引导" : "Skip the tour"}
+            </button>
+          </div>
+          <div style={{ fontSize: 13 }}>
+            💾 {lang === "zh" ? "存档位" : "Save slots"}
+            <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+              {[1, 2, 3].map((n) => {
+                const s = slotSummary(n);
+                const cur = activeSlot() === n;
+                return (
+                  <button
+                    key={n} className="wood-btn"
+                    style={{ flex: 1, fontSize: 11.5, opacity: cur ? 1 : 0.65, borderColor: cur ? "#5cb83a" : undefined }}
+                    title={cur ? (lang === "zh" ? "当前档位" : "active") : lang === "zh" ? "切换后重新进镇" : "switch & reload"}
+                    onClick={() => {
+                      if (activeSlot() === n) return;
+                      setActiveSlot(n);
+                      window.location.reload();
+                    }}
+                  >
+                    {n}{cur ? " ●" : ""}<br />
+                    {s ? (lang === "zh" ? `第${s.day}天·${s.points}点` : `d${s.day}·${s.points}p`) : lang === "zh" ? "空" : "empty"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            📦 {lang === "zh" ? "存档文件" : "Save file"}
+            <button className="wood-btn" style={{ fontSize: 12 }} onClick={() => {
+              const json = exportSave();
+              if (!json) { bus.emit("toast", { text: lang === "zh" ? "当前档位还没有存档" : "Nothing saved yet" }); return; }
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+              a.download = `newroad-valley-slot${activeSlot()}.json`;
+              a.click();
+              URL.revokeObjectURL(a.href);
+            }}>
+              {lang === "zh" ? "导出" : "Export"}
+            </button>
+            <label className="wood-btn" style={{ fontSize: 12, cursor: "pointer" }}>
+              {lang === "zh" ? "导入" : "Import"}
+              <input type="file" accept=".json" style={{ display: "none" }} onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                void f.text().then((txt) => {
+                  if (importSave(txt)) window.location.reload();
+                  else bus.emit("toast", { text: lang === "zh" ? "⚠ 这不是有效的山谷存档" : "⚠ Not a valid valley save" });
+                });
+              }} />
+            </label>
+            <button className="wood-btn" style={{ fontSize: 12 }} onClick={() => {
+              close();
+              setTimeout(() => bus.emit("photo:take", undefined), 250); // let the panel fade first
+            }}>
+              📷 {lang === "zh" ? "拍照" : "Photo"}
             </button>
           </div>
         </div>

@@ -64,6 +64,13 @@ function town(): TownLike | null {
 export async function maybeRunV4Test(): Promise<void> {
   if (!new URLSearchParams(window.location.search).has("v4test")) return;
 
+  // deterministic runs: wipe every save/setting key BEFORE the town scene
+  // loads them (a reused browser profile must not leak prior progress —
+  // one stale save once flipped four steps red with zero code bugs)
+  for (const k of Object.keys(localStorage)) {
+    if (k.startsWith("nrv-")) localStorage.removeItem(k);
+  }
+
   // wait for the town
   for (let i = 0; i < 60 && !town(); i++) await sleep(500);
   const t = town();
@@ -460,6 +467,42 @@ export async function maybeRunV4Test(): Promise<void> {
   deep.leave(); // the cart E-path calls this same exit
   await sleep(2400);
   await report("minecart-exit", { townActive: t.scene.isActive() });
+
+  // --- v13: save slots + export validation ---------------------------------------
+  const saveMod = await import("@/shared/save");
+  localStorage.setItem(saveMod.slotKey(2), JSON.stringify({ version: 3, day: 7, points: 42 }));
+  const sum2 = saveMod.slotSummary(2);
+  const exported = saveMod.exportSave();
+  const exportValid = saveMod.validateSaveJson(exported ?? "");
+  const rejectsJunk = !saveMod.validateSaveJson('{"hello":1}');
+  localStorage.removeItem(saveMod.slotKey(2)); // clean the probe
+  await report("save-slots", {
+    active: saveMod.activeSlot(),
+    slot2: sum2,
+    exportValid,
+    rejectsJunk,
+    ok: saveMod.activeSlot() === 1 && sum2?.day === 7 && exportValid && rejectsJunk,
+  });
+
+  // --- v13: photo mode renders a framed postcard ----------------------------------
+  const { takePhoto } = await import("@/shared/photo");
+  const dataUrl = await takePhoto(game5, { caption: "哨兵测试照", download: false });
+  await report("photo", {
+    bytes: dataUrl.length,
+    ok: dataUrl.startsWith("data:image/png") && dataUrl.length > 20000,
+  });
+
+  // --- v13: the stats page opens ----------------------------------------------------
+  storeHook.getState().setAlmanacTab("stats");
+  storeHook.getState().setAlmanac(true);
+  await sleep(300);
+  await report("stats", {
+    tab: storeHook.getState().almanacTab,
+    open: storeHook.getState().almanac,
+    ok: storeHook.getState().almanacTab === "stats" && storeHook.getState().almanac,
+  }, true);
+  storeHook.getState().setAlmanac(false);
+  bus.emit("panel:closed", undefined);
 
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";

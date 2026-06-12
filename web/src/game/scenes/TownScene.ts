@@ -8,6 +8,7 @@ import { audio, AUDIO_FILES } from "@/game/audio";
 import { currentMode, getData, postData } from "@/shared/api";
 import { loadSave, writeSave, spendStamina, restoreStamina, currentStamina, type DemoCrop, type InvItem } from "@/shared/save";
 import { touchState } from "@/shared/touch";
+import { takePhoto } from "@/shared/photo";
 
 /** a multi-agent signal as the town sees it (bridge /api/town/signals) */
 interface TownSignal {
@@ -90,7 +91,7 @@ export class TownScene extends Phaser.Scene {
   private collide!: boolean[][];
   private player!: Phaser.Physics.Arcade.Sprite;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private wasd!: Record<"W" | "A" | "S" | "D" | "E" | "F", Phaser.Input.Keyboard.Key>;
+  private wasd!: Record<"W" | "A" | "S" | "D" | "E" | "F" | "P", Phaser.Input.Keyboard.Key>;
   private npcs: Npc[] = [];
   private waterTiles: Phaser.Tilemaps.Tile[] = [];
   private waterFrame = 0;
@@ -525,7 +526,7 @@ export class TownScene extends Phaser.Scene {
   // ------------------------------------------------------------------- input
   private bindInput(): void {
     this.cursors = this.input.keyboard!.createCursorKeys();
-    this.wasd = this.input.keyboard!.addKeys("W,A,S,D,E,F") as TownScene["wasd"];
+    this.wasd = this.input.keyboard!.addKeys("W,A,S,D,E,F,P") as TownScene["wasd"];
 
     this.input.on("wheel", (_p: unknown, _o: unknown, _dx: number, dy: number) => {
       const cam = this.cameras.main;
@@ -641,6 +642,10 @@ export class TownScene extends Phaser.Scene {
       this.autosave();
     });
     bus.on("mail:read", ({ id }) => this.readLetter(id));
+    bus.on("photo:take", () => {
+      void takePhoto(this.game, { caption: `Newroad Valley · ${this.currentSeason} 第 ${this.day} 天` })
+        .then(() => bus.emit("toast", { text: "📷 咔嚓——明信片已存进下载夹" }));
+    });
     bus.on("mine:depth", ({ level }) => {
       if (level > this.deepestLevel) {
         this.deepestLevel = level;
@@ -1698,6 +1703,10 @@ export class TownScene extends Phaser.Scene {
     if (this.wasd.F.isDown && !this.following) {
       this.following = true;
       this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.wasd.P) && !this.uiLock) {
+      void takePhoto(this.game, { caption: `Newroad Valley · ${this.currentSeason} 第 ${this.day} 天` })
+        .then(() => bus.emit("toast", { text: "📷 咔嚓——明信片已存进下载夹" }));
     }
     const touchE = this.touchInteract;
     this.touchInteract = false;

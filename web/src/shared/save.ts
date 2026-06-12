@@ -62,7 +62,56 @@ export interface SaveData {
   treasureClaimed: boolean;
 }
 
-const KEY = "nrv-save-v1";
+// ---- v13: three save slots --------------------------------------------------
+const SLOT_PTR = "nrv-active-slot";
+
+export function activeSlot(): number {
+  const n = Number(localStorage.getItem(SLOT_PTR));
+  return n === 2 || n === 3 ? n : 1;
+}
+
+/** slot 1 keeps the legacy key so old saves carry over untouched */
+export function slotKey(n: number): string {
+  return n <= 1 ? "nrv-save-v1" : `nrv-save-slot${n}`;
+}
+
+/** switch the pointer only — callers reload the page to re-init scenes */
+export function setActiveSlot(n: number): void {
+  localStorage.setItem(SLOT_PTR, String(n === 2 || n === 3 ? n : 1));
+}
+
+export function slotSummary(n: number): { day: number; points: number } | null {
+  try {
+    const raw = localStorage.getItem(slotKey(n));
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Partial<SaveData>;
+    return { day: d.day ?? 1, points: d.points ?? 0 };
+  } catch {
+    return null;
+  }
+}
+
+/** current save as a downloadable JSON string */
+export function exportSave(): string | null {
+  return localStorage.getItem(slotKey(activeSlot()));
+}
+
+export function validateSaveJson(json: string): boolean {
+  try {
+    const d = JSON.parse(json) as { version?: number; day?: number };
+    const v = d.version ?? 0;
+    return v >= 1 && v <= 3 && typeof d.day === "number";
+  } catch {
+    return false;
+  }
+}
+
+/** import into the ACTIVE slot; caller reloads on success */
+export function importSave(json: string): boolean {
+  if (!validateSaveJson(json)) return false;
+  localStorage.setItem(slotKey(activeSlot()), json);
+  return true;
+}
 
 const DEFAULTS = {
   ores: [] as string[],
@@ -86,7 +135,7 @@ const DEFAULTS = {
 
 export function loadSave(): SaveData | null {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(slotKey(activeSlot()));
     if (!raw) return null;
     const d = JSON.parse(raw) as Partial<SaveData> & { version?: number };
     const v: number = d.version ?? 0;
@@ -99,7 +148,7 @@ export function loadSave(): SaveData | null {
 
 export function writeSave(d: SaveData): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify(d));
+    localStorage.setItem(slotKey(activeSlot()), JSON.stringify(d));
   } catch {
     /* storage full/denied — ignore */
   }
