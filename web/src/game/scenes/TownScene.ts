@@ -6,7 +6,7 @@ import { INTERIOR_BY_BUILDING } from "@/data/interiors";
 import { bus } from "@/shared/bus";
 import { audio, AUDIO_FILES } from "@/game/audio";
 import { currentMode, getData, postData } from "@/shared/api";
-import { loadSave, writeSave, type DemoCrop } from "@/shared/save";
+import { loadSave, writeSave, spendStamina, restoreStamina, currentStamina, type DemoCrop, type InvItem } from "@/shared/save";
 import { touchState } from "@/shared/touch";
 
 /** a multi-agent signal as the town sees it (bridge /api/town/signals) */
@@ -133,6 +133,14 @@ export class TownScene extends Phaser.Scene {
   private seenSignals = new Set<string>();
   private signalsPrimed = false; // first batch is history — observe, don't react
   private demoSignalTick = 0;
+  // ---- v8 state
+  private inventory: InvItem[] = [];
+  private pendingShip: InvItem[] = [];
+  private canLevel: 1 | 2 = 1;
+  private museum: { ores: string[]; fish: string[] } = { ores: [], fish: [] };
+  private decor: { id: string; tx: number; ty: number }[] = [];
+  private decorSprites: Phaser.GameObjects.Image[] = [];
+  private binTile: [number, number] = [4, 36];
   // ---- v7 state
   private weather: "sunny" | "rain" | "fog" = "sunny";
   private weatherDay = 0; // which day the current weather was rolled for
@@ -163,6 +171,11 @@ export class TownScene extends Phaser.Scene {
       this.fishCaught = save.fish ?? [];
       this.ach = save.ach ?? {};
       this.points = save.points ?? 0;
+      this.inventory = save.inventory ?? [];
+      this.pendingShip = save.pendingShip ?? [];
+      this.canLevel = save.canLevel ?? 1;
+      this.museum = save.museum ?? { ores: [], fish: [] };
+      this.decor = save.decor ?? [];
     }
 
     this.buildGround();
@@ -170,6 +183,8 @@ export class TownScene extends Phaser.Scene {
     this.buildPlaza();
     this.buildBuildings();
     this.buildMine();
+    this.buildShippingBin();
+    for (const d of this.decor) this.spawnDecor(d.id, d.tx, d.ty);
     this.buildPlayer(save?.px, save?.py);
     this.buildNpcs();
     this.buildAnimals();
@@ -455,6 +470,8 @@ export class TownScene extends Phaser.Scene {
     if (this.clockMin >= DAY_MINUTES) {
       this.clockMin -= DAY_MINUTES;
       this.day += 1;
+      this.settleShipping();
+      restoreStamina(100);
     }
     if (this.day !== this.weatherDay) this.rollWeather(); // new morning, new sky
     const hour = Math.floor(this.clockMin / 60);
@@ -535,15 +552,18 @@ export class TownScene extends Phaser.Scene {
     bus.on("sleep:request", () => {
       this.day += 1;
       this.clockMin = 8 * 60;
+      this.settleShipping();
+      restoreStamina(100);
       this.autosave();
       bus.emit("sleep:done", { day: this.day });
-      bus.emit("toast", { text: `第 ${this.day} 天的清晨。存档完成。` });
+      bus.emit("toast", { text: `第 ${this.day} 天的清晨。体力满格，存档完成。` });
     });
     bus.on("farm:plant-confirm", ({ cell, title }) => {
       void this.plantCrop(cell, title);
     });
     bus.on("ore:collected", ({ title, kind, repo }) => {
       this.ores.push(`[${kind}] ${repo}: ${title}`);
+      this.inventory.push({ kind: "ore", name: `[${kind}] ${title}`.slice(0, 60) });
       this.points += kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1;
       bus.emit("toast", { text: `⛏ 采得债务矿石：${title.slice(0, 36)}（建设点 +${kind === "fixme" ? 3 : kind === "hotspot" ? 2 : 1}）` });
       this.checkAchievements();
@@ -558,6 +578,22 @@ export class TownScene extends Phaser.Scene {
     bus.on("quest:take", ({ agentId }) => {
       void this.takeQuest(agentId);
     });
+    bus.on("ship:add", ({ index }) => {
+      const item = this.inventory[index];
+      if (!item) return;
+      this.inventory.splice(index, 1);
+      this.pendingShip.push(item);
+      this.autosave();
+    });
+    bus.on("ship:all", () => {
+      if (this.inventory.length === 0) return;
+      this.pendingShip.push(...this.inventory);
+      this.inventory = [];
+      this.autosave();
+      bus.emit("toast", { text: "📦 全部投入出货箱——清晨结算成建设点" });
+    });
+    bus.on("shop:buy", ({ itemId }) => this.buyShopItem(itemId));
+    bus.on("museum:donate", ({ kind, index }) => this.donate(kind, index));
   }
 
   // ------------------------------------------------------------- v6 signals
@@ -805,6 +841,117 @@ export class TownScene extends Phaser.Scene {
     });
   }
 
+  // ------------------------------------------------------------ v8 economy
+  private buildShippingBin(): void {
+    const [tx, ty] = this.binTile;
+    this.add.image(tx * TILE + 8, (ty + 1) * TILE, "prop-shipping-bin")
+      .setOrigin(0.5, 1).setDepth((ty + 1) * TILE);
+    this.collide[ty][tx] = true;
+  }
+
+  /** morning payout: bin contents become build points */
+  settleShipping(): void {
+    if (this.pendingShip.length === 0) return;
+    const value = (i: InvItem) => (i.kind === "ore" ? 3 : 2);
+    const sum = this.pendingShip.reduce((a, i) => a + value(i), 0);
+    this.points += sum;
+    bus.emit("toast", { text: `📦 清晨结算：${this.pendingShip.length} 件货品 → 建设点 +${sum}（现有 ${this.points}）` });
+    audio.harvest();
+    this.pendingShip = [];
+    this.autosave();
+  }
+
+  private static readonly SHOP: Record<string, { name: string; cost: number }> = {
+    can2: { name: "浇水壶 II（一次浇 3 格）", cost: 20 },
+    lamp: { name: "广场灯串（南广场一盏）", cost: 8 },
+    flower: { name: "南广场花坛（一座）", cost: 6 },
+  };
+
+  private static readonly DECOR_SPOTS: Record<string, [number, number][]> = {
+    lamp: [[31, 23], [33, 23], [31, 25], [33, 25]],
+    flower: [[30, 22], [34, 22], [32, 26], [30, 26]],
+  };
+
+  buyShopItem(itemId: string): void {
+    const item = TownScene.SHOP[itemId];
+    if (!item) return;
+    if (itemId === "can2" && this.canLevel >= 2) {
+      bus.emit("toast", { text: "🛒 浇水壶 II 已经在你手里啦" });
+      return;
+    }
+    const spots = TownScene.DECOR_SPOTS[itemId];
+    const used = spots ? this.decor.filter((d) => d.id === itemId).length : 0;
+    if (spots && used >= spots.length) {
+      bus.emit("toast", { text: "🛒 这种摆件的位置都摆满了" });
+      return;
+    }
+    if (this.points < item.cost) {
+      bus.emit("toast", { text: `🛒 建设点不够（需要 ${item.cost}，现有 ${this.points}）` });
+      return;
+    }
+    this.points -= item.cost;
+    if (itemId === "can2") this.canLevel = 2;
+    if (spots) {
+      const [tx, ty] = spots[used];
+      this.decor.push({ id: itemId, tx, ty });
+      this.spawnDecor(itemId, tx, ty);
+    }
+    audio.harvest();
+    bus.emit("toast", { text: `🛒 已购买：${item.name}（建设点 -${item.cost}）` });
+    this.autosave();
+  }
+
+  private spawnDecor(id: string, tx: number, ty: number): void {
+    if (id === "lamp") {
+      const o = this.add.image(tx * TILE + 8, (ty + 1) * TILE, "decor-lamp")
+        .setOrigin(0.5, 1).setDepth((ty + 1) * TILE);
+      this.collide[ty][tx] = true;
+      const glow = this.add.circle(tx * TILE + 8, ty * TILE - 8, 14, 0xffc966, 0)
+        .setDepth(15000).setBlendMode(Phaser.BlendModes.ADD);
+      this.lampGlows.push(glow);
+      this.decorSprites.push(o);
+    } else {
+      const o = this.add.image(tx * TILE + 8, ty * TILE + 12, "decor-outdoor", 57)
+        .setOrigin(0.5, 1).setDepth(ty * TILE + 12);
+      this.decorSprites.push(o);
+    }
+  }
+
+  /** hang a collected piece on the museum wall (+2 points, once each) */
+  donate(kind: "ore" | "fish", index: number): void {
+    const src = kind === "ore" ? this.ores : this.fishCaught;
+    const item = src[index];
+    if (!item) return;
+    const wall = kind === "ore" ? this.museum.ores : this.museum.fish;
+    if (wall.includes(item)) {
+      bus.emit("toast", { text: "🏛 这件展品已经挂在墙上了" });
+      return;
+    }
+    wall.push(item);
+    this.points += 2;
+    audio.harvest();
+    bus.emit("toast", { text: `🏛 捐赠成功：${item.slice(0, 32)}（建设点 +2）` });
+    if (this.museum.ores.length + this.museum.fish.length >= 8) {
+      this.grantAch("museum8", "镇立博物馆开馆（馆藏×8）");
+    }
+    this.autosave();
+  }
+
+  /** watering can II splashes the next two cells too */
+  private async waterWithCan(crop: Crop): Promise<void> {
+    await this.waterCrop(crop);
+    if (this.canLevel >= 2) {
+      let extra = 0;
+      for (const c of [this.crops.get(crop.cell + 1), this.crops.get(crop.cell + 2)]) {
+        if (c && c.progress < 4) {
+          await this.waterCrop(c, true);
+          extra += 1;
+        }
+      }
+      if (extra > 0) bus.emit("toast", { text: `💧 浇水壶 II 顺手浇了旁边 ${extra} 株` });
+    }
+  }
+
   // -------------------------------------------------------------- v7 quest
   private static readonly QUESTS: Record<string, string[]> = {
     opus: ["梳理本周运营报表", "把镇志目录补全"],
@@ -983,6 +1130,7 @@ export class TownScene extends Phaser.Scene {
   private async plantCrop(cell: number, title: string): Promise<void> {
     this.uiLock = false;
     if (!title.trim()) return;
+    if (!spendStamina(2)) return;
     const variety = CROP_VARIETIES[this.hashTitle(title) % CROP_VARIETIES.length];
     if (currentMode() === "live") {
       const r = await postData<{ id?: string }>("/api/town/farm/plant", { title });
@@ -999,6 +1147,7 @@ export class TownScene extends Phaser.Scene {
 
   private async waterCrop(crop: Crop, silent = false): Promise<void> {
     if (crop.progress >= 4) return;
+    if (!silent && !spendStamina(2)) return; // rain waters for free
     crop.progress += 1;
     if (currentMode() === "live" && crop.taskId) {
       void postData("/api/town/farm/water", { id: crop.taskId });
@@ -1015,6 +1164,7 @@ export class TownScene extends Phaser.Scene {
   }
 
   private async harvestCrop(crop: Crop): Promise<void> {
+    if (!spendStamina(1)) return;
     if (currentMode() === "live" && crop.taskId) {
       void postData("/api/town/farm/harvest", { id: crop.taskId });
     } else {
@@ -1030,15 +1180,16 @@ export class TownScene extends Phaser.Scene {
     });
     this.removeCrop(crop.cell);
     this.harvested += 1;
+    this.inventory.push({ kind: "crop", name: crop.title, variety: crop.variety });
     audio.harvest();
-    bus.emit("toast", { text: `收获：${crop.title} ✅（累计 ${this.harvested}）` });
+    bus.emit("toast", { text: `收获入包：${crop.title} ✅（累计 ${this.harvested}）` });
     this.autosave();
   }
 
   // -------------------------------------------------------------------- save
   private autosave(): void {
     writeSave({
-      version: 2,
+      version: 3,
       day: this.day,
       clockMin: this.clockMin,
       px: this.player.x,
@@ -1050,6 +1201,12 @@ export class TownScene extends Phaser.Scene {
       fish: this.fishCaught,
       ach: this.ach,
       points: this.points,
+      inventory: this.inventory,
+      pendingShip: this.pendingShip,
+      stamina: currentStamina(), // save.ts owns the pool between writes
+      canLevel: this.canLevel,
+      museum: this.museum,
+      decor: this.decor,
     });
   }
 
@@ -1107,10 +1264,12 @@ export class TownScene extends Phaser.Scene {
       bus.emit("toast", { text: "🌊 今天水里很安静" });
       return;
     }
+    if (!spendStamina(4)) return;
     // perfect catches bias toward rare (ERROR-grade) fish
     const pool = this.fishPool.filter((f) => (quality >= 2 ? f.rarity >= 2 : f.rarity <= 2));
     const pick = (pool.length ? pool : this.fishPool)[Math.floor(Math.random() * (pool.length || this.fishPool.length))];
     this.fishCaught.push(`[${pick.level}] ${pick.text}`);
+    this.inventory.push({ kind: "fish", name: `[${pick.level}] ${pick.text}`.slice(0, 60) });
     audio.water();
     const stars = pick.rarity >= 3 ? "★★★" : pick.rarity === 2 ? "★★" : "★";
     bus.emit("toast", { text: `🎣 钓到日志鱼 ${stars}：${pick.text.slice(0, 40)}` });
@@ -1348,13 +1507,21 @@ export class TownScene extends Phaser.Scene {
         if (crop.progress >= 4) {
           void this.harvestCrop(crop);
         } else {
-          void this.waterCrop(crop);
+          void this.waterWithCan(crop);
         }
         return;
       }
       // 2) mine entrance
       if (this.mineZone.contains(this.player.x, this.player.y)) {
         this.enterMine();
+        return;
+      }
+      // 2.5) shipping bin
+      const [btx, bty] = this.binTile;
+      if (Phaser.Math.Distance.Between(this.player.x, this.player.y, btx * TILE + 8, bty * TILE + 8) < TILE * 1.8) {
+        this.uiLock = true;
+        audio.click();
+        bus.emit("almanac:tab", { tab: "ship" });
         return;
       }
       // 3) fishing at the water's edge

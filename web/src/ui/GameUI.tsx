@@ -167,11 +167,16 @@ function FishingBar() {
   );
 }
 
-/** Almanac: achievements + collected ores + caught fish, read from the save. */
+/** The Valley Handbook: bag / shipping / shop / museum / achievements / almanac.
+ * Reads the save fresh each render; actions go through the bus to the scene,
+ * and a local nonce re-renders after each mutation. */
 function Almanac() {
-  const { almanac, setAlmanac, lang } = useUI();
-  const [tab, setTab] = useState<"ach" | "ore" | "fish">("ach");
+  const { almanac, setAlmanac, almanacTab, setAlmanacTab, lang } = useUI();
+  const [, setNonce] = useState(0);
   if (!almanac) return null;
+  const tab = almanacTab;
+  const setTab = setAlmanacTab;
+  const bump = () => setNonce((n) => n + 1);
   const save = loadSave();
   const close = () => {
     setAlmanac(false);
@@ -182,7 +187,14 @@ function Almanac() {
     ore1: "第一块技术债矿石", ore10: "债务清道夫（矿石×10）",
     fish1: "第一条日志鱼", fish10: "日志垂钓宗师（鱼×10）",
     week1: "在山谷住满一周", season1: "四季轮转之证", festival1: "赶上了丰收节",
+    museum8: "镇立博物馆开馆（馆藏×8）",
   };
+  const KIND_ICON: Record<string, string> = { crop: "🌾", ore: "⛏", fish: "🎣" };
+  const SHOP_ITEMS = [
+    { id: "can2", icon: "💧", name: lang === "zh" ? "浇水壶 II（一次浇 3 格）" : "Watering Can II (3 cells)", cost: 20, owned: (save?.canLevel ?? 1) >= 2 },
+    { id: "lamp", icon: "🏮", name: lang === "zh" ? "广场灯串（一盏）" : "Plaza lamp (one)", cost: 8, owned: false },
+    { id: "flower", icon: "🌷", name: lang === "zh" ? "南广场花坛（一座）" : "South-plaza flowerbed", cost: 6, owned: false },
+  ];
   return (
     <div
       className="fade-in"
@@ -192,22 +204,100 @@ function Almanac() {
       }}
       onClick={close}
     >
-      <div className="wood-panel" style={{ width: "min(560px, 94vw)", maxHeight: "80vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+      <div className="wood-panel" style={{ width: "min(620px, 94vw)", maxHeight: "82vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
         <div className="wood-title">
-          <span>📖 {lang === "zh" ? "山谷图鉴" : "Valley Almanac"}</span>
+          <span>📖 {lang === "zh" ? "山谷手册" : "Valley Handbook"}</span>
           <button className="wood-btn" onClick={close}>✕</button>
         </div>
-        <div style={{ display: "flex", gap: 6, padding: "10px 14px 0" }}>
-          {([["ach", "🏆 成就"], ["ore", "⛏ 矿石"], ["fish", "🎣 鱼"]] as const).map(([k, label]) => (
-            <button key={k} className="wood-btn" style={{ fontSize: 12, opacity: tab === k ? 1 : 0.6 }} onClick={() => setTab(k)}>
+        <div style={{ display: "flex", gap: 5, padding: "10px 14px 0", flexWrap: "wrap" }}>
+          {([["bag", "🎒 背包"], ["ship", "📦 出货"], ["shop", "🛒 商店"], ["museum", "🏛 博物馆"], ["ach", "🏆 成就"], ["ore", "⛏ 矿石"], ["fish", "🎣 鱼"]] as const).map(([k, label]) => (
+            <button key={k} className="wood-btn" style={{ fontSize: 11.5, opacity: tab === k ? 1 : 0.6 }} onClick={() => setTab(k)}>
               {label}
             </button>
           ))}
           <span style={{ marginLeft: "auto", fontSize: 12, opacity: 0.7, alignSelf: "center" }}>
-            {lang === "zh" ? `建设点 ${save?.points ?? 0}` : `build points ${save?.points ?? 0}`}
+            {lang === "zh" ? `建设点 ${save?.points ?? 0}` : `pts ${save?.points ?? 0}`}
           </span>
         </div>
         <div className="panel-scroll" style={{ padding: 14, overflowY: "auto" }}>
+          {tab === "bag" && (
+            <div>
+              {(save?.inventory ?? []).length === 0 && (
+                <p style={{ opacity: 0.6 }}>{lang === "zh" ? "背包是空的——收获、挖矿、钓鱼都会入包。" : "Empty bag — harvests, ore and fish land here."}</p>
+              )}
+              {(save?.inventory ?? []).map((it, i) => (
+                <div key={i} className="book-card" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <h4 style={{ flex: 1, margin: 0 }}>{KIND_ICON[it.kind] ?? "❔"} {it.name}</h4>
+                  <button className="wood-btn" style={{ fontSize: 11 }} onClick={() => { bus.emit("ship:add", { index: i }); setTimeout(bump, 80); }}>
+                    {lang === "zh" ? "投入出货箱" : "Ship"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {tab === "ship" && (
+            <div>
+              <p style={{ fontSize: 12.5, opacity: 0.75, marginTop: 0 }}>
+                {lang === "zh" ? "投进箱里的货品，第二天清晨结算成建设点（矿石 3 点，其余 2 点）。" : "Bin contents pay out next morning (ore 3 pts, others 2)."}
+              </p>
+              <button className="wood-btn" style={{ marginBottom: 10 }} onClick={() => { bus.emit("ship:all", undefined); setTimeout(bump, 80); }}>
+                {lang === "zh" ? "📦 背包全部投入" : "📦 Ship everything"}
+              </button>
+              {(save?.pendingShip ?? []).length === 0
+                ? <p style={{ opacity: 0.6 }}>{lang === "zh" ? "箱子是空的。" : "The bin is empty."}</p>
+                : (save?.pendingShip ?? []).map((it, i) => (
+                  <div key={i} className="book-card"><h4>{KIND_ICON[it.kind] ?? "❔"} {it.name}</h4></div>
+                ))}
+            </div>
+          )}
+          {tab === "shop" && (
+            <div>
+              <p style={{ fontSize: 12.5, opacity: 0.75, marginTop: 0 }}>
+                {lang === "zh" ? "建设点换好物——工具进背包，摆件直接装点小镇。" : "Spend build points — tools to your hand, decor straight into town."}
+              </p>
+              {SHOP_ITEMS.map((it) => (
+                <div key={it.id} className="book-card" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <h4 style={{ flex: 1, margin: 0 }}>{it.icon} {it.name}</h4>
+                  <span style={{ fontSize: 12, opacity: 0.7 }}>{it.cost} {lang === "zh" ? "点" : "pts"}</span>
+                  <button
+                    className="wood-btn" style={{ fontSize: 11, opacity: it.owned ? 0.5 : 1 }}
+                    disabled={it.owned}
+                    onClick={() => { bus.emit("shop:buy", { itemId: it.id }); setTimeout(bump, 80); }}
+                  >
+                    {it.owned ? (lang === "zh" ? "已拥有" : "Owned") : lang === "zh" ? "购买" : "Buy"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {tab === "museum" && (
+            <div>
+              <p style={{ fontSize: 12.5, opacity: 0.75, marginTop: 0 }}>
+                {lang === "zh" ? `馆藏 ${(save?.museum?.ores ?? []).length + (save?.museum?.fish ?? []).length} 件 · 每件捐赠 +2 建设点，集满 8 件开馆成就。` : "Each donation +2 pts; 8 pieces open the museum."}
+              </p>
+              <h4 style={{ margin: "6px 0" }}>{lang === "zh" ? "🏛 展品墙" : "🏛 The wall"}</h4>
+              {[...(save?.museum?.ores ?? []).map((o) => `⛏ ${o}`), ...(save?.museum?.fish ?? []).map((f) => `🎣 ${f}`)].map((s, i) => (
+                <div key={i} className="book-card"><h4>{s}</h4></div>
+              ))}
+              <h4 style={{ margin: "10px 0 6px" }}>{lang === "zh" ? "可捐赠（来自图鉴）" : "Donatable (from collections)"}</h4>
+              {(save?.ores ?? []).map((o, i) => !(save?.museum?.ores ?? []).includes(o) && (
+                <div key={`o${i}`} className="book-card" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <h4 style={{ flex: 1, margin: 0 }}>⛏ {o}</h4>
+                  <button className="wood-btn" style={{ fontSize: 11 }} onClick={() => { bus.emit("museum:donate", { kind: "ore", index: i }); setTimeout(bump, 80); }}>
+                    {lang === "zh" ? "捐赠" : "Donate"}
+                  </button>
+                </div>
+              ))}
+              {(save?.fish ?? []).map((f, i) => !(save?.museum?.fish ?? []).includes(f) && (
+                <div key={`f${i}`} className="book-card" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <h4 style={{ flex: 1, margin: 0 }}>🎣 {f}</h4>
+                  <button className="wood-btn" style={{ fontSize: 11 }} onClick={() => { bus.emit("museum:donate", { kind: "fish", index: i }); setTimeout(bump, 80); }}>
+                    {lang === "zh" ? "捐赠" : "Donate"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           {tab === "ach" && (
             <div>
               {Object.entries(ACH_NAMES).map(([id, name]) => (
@@ -219,7 +309,7 @@ function Almanac() {
           )}
           {tab === "ore" && (
             <div>
-              {(save?.ores ?? []).length === 0 && <p style={{ opacity: 0.6 }}>{lang === "zh" ? "还没有矿石——去农场西边的矿洞看看。" : "No ore yet — try the mines west of the farm."}</p>}
+              {(save?.ores ?? []).length === 0 && <p style={{ opacity: 0.6 }}>{lang === "zh" ? "还没有矿石——去农场南边的矿洞看看。" : "No ore yet — try the mines south of the farm."}</p>}
               {(save?.ores ?? []).map((o, i) => (
                 <div key={i} className="book-card"><h4>⛏ {o}</h4></div>
               ))}
@@ -256,7 +346,7 @@ function Toast() {
 }
 
 export function GameUI() {
-  const { openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setFishing } = useUI();
+  const { openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setFishing, setAlmanac, setAlmanacTab, setStamina } = useUI();
 
   useEffect(() => {
     let toastTimer: number | undefined;
@@ -280,17 +370,24 @@ export function GameUI() {
         setPlantCell(cell);
       }),
       bus.on("fishing:start", () => setFishing(true)),
+      bus.on("stamina:changed", ({ value }) => setStamina(value)),
+      bus.on("almanac:tab", ({ tab }) => {
+        setAlmanacTab(tab);
+        setAlmanac(true);
+      }),
       bus.on("toast", ({ text }) => {
         setToast(text);
         window.clearTimeout(toastTimer);
         toastTimer = window.setTimeout(() => setToast(null), 2600);
       }),
     ];
+    // surface the saved stamina on boot
+    setStamina(loadSave()?.stamina ?? 100);
     return () => {
       offs.forEach((off) => off());
       window.clearTimeout(toastTimer);
     };
-  }, [openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast]);
+  }, [openDialogue, openBuilding, setClock, setLive, setPlantCell, setToast, setAlmanac, setAlmanacTab, setStamina]);
 
   return (
     <div className="pixel-font" style={{ position: "fixed", inset: 0, pointerEvents: "none" }}>

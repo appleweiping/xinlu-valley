@@ -170,6 +170,32 @@ PROPS["ore-node"] = {
     ],
 }
 
+# ---- shipping bin (farm-edge sales crate) -----------------------------------
+PROPS["shipping-bin"] = {
+    "pal": {
+        "W": _rgba((146, 102, 64)),   # plank light
+        "w": _rgba((118, 80, 48)),    # plank mid
+        "d": _rgba((86, 56, 34)),     # plank dark
+        "K": _rgba((40, 26, 18)),     # slot
+        "G": _rgba((196, 168, 96)),   # brass trim
+    },
+    "rows": [
+        "..############..",
+        ".#WWWWWWWWWWWW#.",
+        "#WwKKKKKKKKKKwW#",
+        "#WwKKKKKKKKKKwW#",
+        "#WWWWWWWWWWWWWW#",
+        "#wGwwwwwwwwwwGw#",
+        "#wWWWWWWWWWWWWw#",
+        "#wWwwdwwdwwdwWw#",
+        "#wWWWWWWWWWWWWw#",
+        "#wWwwdwwdwwdwWw#",
+        "#dWWWWWWWWWWWWd#",
+        "#dGddddddddddGd#",
+        ".##############.",
+    ],
+}
+
 # ---- cracked ore node (stage 2) --------------------------------------------
 PROPS["ore-node-cracked"] = {
     "pal": {

@@ -5,7 +5,7 @@ import { isTouchDevice } from "@/shared/touch";
 import { useUI } from "./store";
 
 export function Hud() {
-  const { clock, live, lang, setLang, setAlmanac } = useUI();
+  const { clock, live, lang, setLang, setAlmanac, setAlmanacTab, stamina } = useUI();
   const [muted, setMuted] = useState(audio.muted);
   const toggleMute = () => {
     const m = !muted;
@@ -49,9 +49,22 @@ export function Hud() {
             {muted ? "🔇" : "🔊"}
           </button>
           <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }}
-            onClick={() => setAlmanac(true)} title="山谷图鉴">
+            onClick={() => { setAlmanacTab("ach"); setAlmanac(true); }} title="山谷手册">
             📖
           </button>
+          <button className="wood-btn" style={{ fontSize: 11, padding: "1px 8px" }}
+            onClick={() => { setAlmanacTab("bag"); setAlmanac(true); }} title="背包">
+            🎒
+          </button>
+        </div>
+        <div style={{ marginTop: 6 }} title={`体力 ${stamina}/100`}>
+          <div style={{ height: 7, background: "var(--paper-dark)", border: "2px solid var(--wood)", borderRadius: 3, overflow: "hidden" }}>
+            <div style={{
+              width: `${stamina}%`, height: "100%",
+              background: stamina > 35 ? "linear-gradient(180deg,#9be564,#5cb83a)" : "linear-gradient(180deg,#f0b860,#d88a3a)",
+              transition: "width 0.3s",
+            }} />
+          </div>
         </div>
       </div>
       {!isTouchDevice() && (

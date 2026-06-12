@@ -356,6 +356,11 @@
     "type": "image"
   },
   {
+    "key": "prop-shipping-bin",
+    "url": "assets/core/props/shipping-bin.png",
+    "type": "image"
+  },
+  {
     "key": "prop-ore-node-cracked",
     "url": "assets/core/props/ore-node-cracked.png",
     "type": "image"

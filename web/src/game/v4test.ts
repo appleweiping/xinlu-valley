@@ -298,6 +298,48 @@ export async function maybeRunV4Test(): Promise<void> {
     ok: t.crops.size > cropsBefore,
   }, true);
 
+  // --- v8: the day's work filled the bag and drained stamina -------------------
+  const save8 = JSON.parse(localStorage.getItem("nrv-save-v1") ?? "{}") as {
+    inventory?: unknown[]; stamina?: number;
+  };
+  await report("inventory", {
+    count: save8.inventory?.length ?? 0,
+    stamina: save8.stamina ?? -1,
+    ok: (save8.inventory?.length ?? 0) >= 1 && (save8.stamina ?? 100) < 100,
+  });
+
+  // --- v8: ship everything, settle, points grow ---------------------------------
+  const t8 = t as unknown as {
+    points: number;
+    settleShipping(): void;
+    donate(k: "ore" | "fish", i: number): void;
+  };
+  const pointsBefore = t8.points;
+  bus.emit("ship:all", undefined);
+  await sleep(400);
+  t8.settleShipping();
+  await sleep(400);
+  await report("shipping", { before: pointsBefore, after: t8.points, ok: t8.points > pointsBefore }, true);
+
+  // --- v8: shop — watering can II + a plaza lamp ---------------------------------
+  t8.points += 50; // test budget
+  bus.emit("shop:buy", { itemId: "can2" });
+  await sleep(300);
+  bus.emit("shop:buy", { itemId: "lamp" });
+  await sleep(500);
+  const save8b = JSON.parse(localStorage.getItem("nrv-save-v1") ?? "{}") as { canLevel?: number; decor?: unknown[] };
+  await report("shop", {
+    canLevel: save8b.canLevel ?? 1,
+    decor: save8b.decor?.length ?? 0,
+    ok: (save8b.canLevel ?? 1) === 2 && (save8b.decor?.length ?? 0) >= 1,
+  }, true);
+
+  // --- v8: museum donation --------------------------------------------------------
+  t8.donate("ore", 0);
+  await sleep(400);
+  const save8c = JSON.parse(localStorage.getItem("nrv-save-v1") ?? "{}") as { museum?: { ores?: string[] } };
+  await report("museum", { ores: save8c.museum?.ores?.length ?? 0, ok: (save8c.museum?.ores?.length ?? 0) >= 1 });
+
   // --- dialogue bridge ------------------------------------------------------
   let reply = "";
   try {

@@ -24,6 +24,12 @@ export type BusEvents = {
   "touch:interact": undefined;
   "signal:received": { from: string; to: string; summary: string };
   "quest:take": { agentId: string };
+  "stamina:changed": { value: number };
+  "almanac:tab": { tab: string };
+  "shop:buy": { itemId: string };
+  "ship:add": { index: number };
+  "ship:all": undefined;
+  "museum:donate": { kind: "ore" | "fish"; index: number };
 };
 
 type Handler<T> = (payload: T) => void;

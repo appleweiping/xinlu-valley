@@ -3,6 +3,7 @@ import { bus } from "@/shared/bus";
 import { getData } from "@/shared/api";
 import { audio } from "@/game/audio";
 import { touchState } from "@/shared/touch";
+import { spendStamina } from "@/shared/save";
 
 const T = 16;
 const W = 15;
@@ -294,6 +295,7 @@ export class MineScene extends Phaser.Scene {
   }
 
   private hitNode(n: OreNode): void {
+    if (!spendStamina(3)) return;
     n.hits += 1;
     audio.plant();
     this.cameras.main.shake(70, 0.004);
